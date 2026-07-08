@@ -1,6 +1,11 @@
 import { Snowflake } from "~/libs/Snowflake";
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
 import type { AppException, ApiResponse, IHrefTarget, IMenuPageItem, ISortModeType, LabelValue, ResponseMessage, ServerException } from "~/types/common";
 const snowflakeIdGenerator = new Snowflake(1, 1);
+export function cssMerge(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 export const isAppException = (obj: any): obj is AppException => {
     return (
         obj.status !== undefined &&
@@ -43,9 +48,9 @@ export const validateEmail = (email: string) => {
         );
 };
 /**
-* 
-* @param name 
-* @returns 
+*
+* @param name
+* @returns
 * ^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$
   └─────┬────┘└───┬──┘└─────┬─────┘└─────┬─────┘ └───┬───┘
      │         │         │            │           no _ or . at the end

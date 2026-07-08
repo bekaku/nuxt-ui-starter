@@ -40,6 +40,9 @@ export default defineNuxtConfig({
         'date-fns/locale',
         'zod',
         'dompurify',
+        'clsx',
+        'tailwind-merge',
+        'vue3-apexcharts'
       ]
     }
   },

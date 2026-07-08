@@ -34,7 +34,7 @@ export const useMenu = () => {
       },
       {
         label: t("nav.forAdmin"),
-        icon: "lucide:cog",
+        icon: "lucide:folder-cog",
         slot: 'admin-label' as const,
         defaultOpen: true,
         children: [
@@ -155,7 +155,8 @@ export const useMenu = () => {
             // ปรับ format ไอคอนให้ตรงกับของใหม่ที่เป็น string (หรือจะใช้ object แบบเดิมถ้า components รองรับ)
             icon: 'lucide:star',
             slot: 'favorite-label' as const,
-            defaultOpen: true,
+            defaultOpen: false,
+            badge: items.length,
             children: items
 
           }

@@ -38,3 +38,61 @@ export interface ISimpleChartSeries {
   categories: string[]
   colors?: string[]
 }
+export interface GridPadding {
+  top: number
+  right: number
+  bottom: number
+  left: number
+}
+export interface SparkLineChartProps {
+  chartId?: string
+  height?: string
+  width?: string
+  labelunit?: string
+  mode?: ChartMode
+  palette?: ChartThemePalete
+  series: IChartSeries[]
+  colors?: string[]
+  tooltipEnable?: boolean
+  categories: string[]
+  gridPadding?: GridPadding
+  strokeWidth?: number
+  strokestyle?: Strokestyle
+  opacity?: number
+  dark?: boolean
+  type?: 'area' | 'line' | 'bar'
+}
+export interface AreaChartProps {
+  chartId?: string
+  height?: string
+  width?: string
+  labelunit?: string
+  showLegend?: boolean
+  legendUseSeriesColors?: boolean
+  legendPosition?: ChartPosition
+  type?: 'area' | 'bar' | 'line'
+  mode?: ChartMode
+  palette?: ChartThemePalete
+  series?: IChartSeries[]
+  colors?: string[]
+  dark?: boolean
+  showDataLabels?: boolean
+  labelRotate?: number
+  yaxisShow?: boolean
+  yaxisTickamount?: number
+  xaxisTickamount?: number
+  xaxisDecimalsInFloat?: number
+  yaxisDecimalsInFloat?: number
+  categories: string[]
+  strokestyle?: Strokestyle
+  strokeWidth?: number
+  sparkline?: boolean
+  annotationsYaxis?: any[]
+  annotationsXaxis?: any[]
+  minYVal?: number
+  maxYVal?: number
+  showToolbar?: boolean
+  zoom?: boolean
+  horizontal?: boolean
+  opacity?: number
+}
