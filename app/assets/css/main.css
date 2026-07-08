@@ -1,0 +1,57 @@
+/* @import "tailwindcss" theme(static); */
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme static {
+  /* --font-sans: "Public Sans", sans-serif; */
+  /* --font-sans: 'Kanit', sans-serif; */
+  --font-sans: 'Prompt', sans-serif;
+
+  --color-blue-50: #f0f9fe;
+  --color-blue-100: #ddf0fc;
+  --color-blue-200: #c3e5fa;
+  --color-blue-300: #9ad6f6;
+  --color-blue-400: #6abff0;
+  --color-blue-500: #47a3ea;
+  --color-blue-600: #2e86de;
+  --color-blue-700: #2972cc;
+  --color-blue-800: #275da6;
+  --color-blue-900: #254f83;
+  --color-blue-950: #1b3150;
+
+  --color-emerald-50: #f0fdf4;
+  --color-emerald-100: #dcfce6;
+  --color-emerald-200: #bbf7cf;
+  --color-emerald-300: #85f0aa;
+  --color-emerald-400: #49df7d;
+  --color-emerald-500: #23d160;
+  --color-emerald-600: #15a447;
+  --color-emerald-700: #14813b;
+  --color-emerald-800: #166533;
+  --color-emerald-900: #14532c;
+  --color-emerald-950: #052e15;
+
+  --color-rose-50: #fff0f1;
+  --color-rose-100: #ffe2e6;
+  --color-rose-200: #ffcad3;
+  --color-rose-300: #ff9fae;
+  --color-rose-400: #ff6983;
+  --color-rose-500: #ff3860;
+  --color-rose-600: #ed1148;
+  --color-rose-700: #c8083d;
+  --color-rose-800: #a8093a;
+  --color-rose-900: #8f0c38;
+  --color-rose-950: #500119;
+
+  --color-amber-50: #fff8ed;
+  --color-amber-100: #ffefd4;
+  --color-amber-200: #ffdaa8;
+  --color-amber-300: #ffc071;
+  --color-amber-400: #ff9f43;
+  --color-amber-500: #fe7b11;
+  --color-amber-600: #ef6007;
+  --color-amber-700: #c64608;
+  --color-amber-800: #9d390f;
+  --color-amber-900: #7e3010;
+  --color-amber-950: #441506;
+}
