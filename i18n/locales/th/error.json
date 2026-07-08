@@ -57,6 +57,7 @@
     "emailOrUsernameNotFound": "ไม่พบชื่อผู้ใช้หรืออีเมล์ในระบบ",
     "userNameDuplicateInDevice": "มีผู้ใช้งานนี้แล้วในอุปกรณ์นี้ กรุณาเปลี่ยนผู้ใช้งานใหม่",
     "passwordRequired": "ต้องใส่รหัสผ่าน",
+    "menuAlreadyInFavorite": "เมนูนี้อยู่ในรายการเมนูโปรดแล้ว",
     "requiredAmountCharacters": "ต้องมีอย่างน้อย {0} ตัวอักษร"
   }
 }

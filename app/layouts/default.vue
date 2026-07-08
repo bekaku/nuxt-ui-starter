@@ -12,7 +12,6 @@ const { addFavoriteMenus } = appStore;
 const { appNavigations, favoriteMenus } = storeToRefs(appStore);
 const { getFavoriteNavigations, findByUrl, getFaveroteIndex, isFaveroteExist } =
   useMenu();
-
 const open = ref(false);
 const groups = computed(() => [
   {
@@ -83,6 +82,12 @@ const onFav = async (e: any, item: AppNavigationMenuItem) => {
         url: to,
       });
     }
+  } else {
+    toast.add({
+      description: t("error.menuAlreadyInFavorite"),
+      icon: "lucide:info",
+      color: "warning",
+    });
   }
 };
 const onUnFav = async (e: any, item: AppNavigationMenuItem) => {
@@ -96,6 +101,11 @@ const onUnFav = async (e: any, item: AppNavigationMenuItem) => {
     favoriteMenus.value.splice(existIndex, 1);
     await deleteFavorite({
       url: to,
+    });
+    toast.add({
+      description: t("success.success"),
+      icon: "lucide:check",
+      color: "success",
     });
   }
 };

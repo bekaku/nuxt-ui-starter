@@ -57,6 +57,7 @@
     "emailOrUsernameNotFound": "Username or email not found in the system.",
     "userNameDuplicateInDevice": "This user already exists on this device. Please change the user.",
     "passwordRequired": "Password is required.",
+    "menuAlreadyInFavorite": "This item is now on my favorites list.",
     "requiredAmountCharacters": "Must be at least {0} characters."
   }
 }
