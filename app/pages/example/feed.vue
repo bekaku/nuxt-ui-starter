@@ -84,6 +84,8 @@ const links: NavigationMenuItem[][] = [
 const storyItems = [
   {
     you: true,
+    image:
+      "https://images.unsplash.com/photo-1783095593983-7936ec02f205?q=80&w=830&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
   {
     image:
@@ -109,18 +111,51 @@ const storyItems = [
     avatar: "https://i.pravatar.cc/150?img=60",
     name: "Roger Miller",
   },
+  {
+    image:
+      "https://plus.unsplash.com/premium_photo-1747851393136-5423d8cb248f?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    avatar: "https://i.pravatar.cc/150?img=1",
+    name: "Roger Miller",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1782519143849-c86633a0a9ab?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    avatar: "https://i.pravatar.cc/150?img=2",
+    name: "Roger Miller",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1783494403679-1c791dc71d7b?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    avatar: "https://i.pravatar.cc/150?img=6",
+    name: "Roger Miller",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1783093905430-712b0a88b115?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    avatar: "https://i.pravatar.cc/150?img=3",
+    name: "Roger Miller",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1783420373423-4f0c6b5ca471?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    avatar: "https://i.pravatar.cc/150?img=4",
+    name: "Roger Miller",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1782925766439-0ad60593e946?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    avatar: "https://i.pravatar.cc/150?img=5",
+    name: "Roger Miller",
+  },
 ];
 </script>
 
 <template>
   <main
-    class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 flex flex-col lg:flex-row gap-8 items-start"
+    class="max-w-[1440px] mx-auto px-4 lg:px-8 pt-8 grid grid-cols-1 lg:grid-cols-[16rem_minmax(0,1fr)_20rem] gap-8"
   >
     <!-- Left  -->
-    <div
-      v-if="!isMobile"
-      class="hidden md:block w-full lg:w-64 shrink-0 lg:sticky lg:top-[6rem] lg:h-[calc(100vh-7rem)] flex flex-col gap-6"
-    >
+    <div v-if="!isMobile" class="hidden lg:block sticky top-24">
       <UserCard
         v-if="authenStore.auth"
         :avatar="{
@@ -150,27 +185,31 @@ const storyItems = [
 
     <div class="flex-1 flex flex-col gap-6 min-w-0">
       <!-- Story  -->
-      <div class="pb-2 w-full">
+      <div class="pb-2 w-full overflow-hidden">
         <UCarousel
           class="w-full"
           v-slot="{ item }"
           arrows
-          :prev="{ variant: 'solid' }"
-          :next="{ variant: 'solid' }"
+          :prev="{
+            color: 'neutral',
+          }"
+          :next="{
+            color: 'neutral',
+          }"
           :items="storyItems"
           :ui="{
-            item: 'basis-1/4 md:basis-1/5 ps-0',
+            item: 'basis-[130px] md:basis-[135px] lg:basis-[140px]',
             prev: 'sm:start-8',
             next: 'sm:end-8',
-            container: 'ms-0',
+            container: 'gap-3 ms-0',
           }"
         >
           <template v-if="item.you">
             <div
-              class="w-28 h-44 shrink-0 rounded-2xl bg-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-300 transition relative overflow-hidden bg-cover"
-              style="
-                background-image: url(https://images.unsplash.com/photo-1782064230154-ba47c8714d9e?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
-              "
+              class="w-full aspect-[9/16] shrink-0 rounded-xl bg-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-300 transition relative overflow-hidden bg-cover"
+              :style="`
+              background-image: url(${item.image});
+            `"
             >
               <div class="absolute inset-0 bg-white/40"></div>
               <div
@@ -185,7 +224,7 @@ const storyItems = [
           </template>
           <div
             v-else
-            class="w-28 h-44 shrink-0 rounded-2xl bg-cover bg-center relative cursor-pointer group"
+            class="w-full aspect-[9/16] shrink-0 rounded-xl bg-cover bg-center relative cursor-pointer group shadow-md"
             :style="`
               background-image: url(${item.image});
             `"
@@ -277,7 +316,7 @@ const storyItems = [
               involved in. Maybe one of the most memorizable in my entire life!
             </div>
 
-            <div class="w-full  grid grid-cols-2 gap-4 h-[400px]">
+            <div class="w-full grid grid-cols-2 gap-4 h-[400px]">
               <img
                 src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=800&auto=format&fit=crop"
                 class="w-full h-full object-cover rounded-2xl row-span-2"
@@ -297,10 +336,6 @@ const storyItems = [
     </div>
 
     <!-- Right  -->
-    <aside
-      class="w-full lg:w-80 shrink-0 lg:sticky lg:top-[6rem] lg:h-[calc(100vh-7rem)] overflow-y-auto scrollbar-hide flex flex-col gap-8"
-    >
-      Right
-    </aside>
+    <aside class="hidden xl:block sticky top-24">Right</aside>
   </main>
 </template>

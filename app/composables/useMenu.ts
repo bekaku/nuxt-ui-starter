@@ -127,6 +127,11 @@ export const useMenu = () => {
             icon: 'lucide:copy',
             to: "/example/modal",
           },
+           {
+            label: "Social",
+            icon: "lucide:panel-right",
+            to: "/example/feed",
+          },
 
         ]
       },

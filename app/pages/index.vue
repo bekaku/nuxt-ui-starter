@@ -72,6 +72,7 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
       title="Dashboard"
       description="Top picks for you. Updated daily."
       :separator="false"
+      class="mb-4"
     >
       <template #start>
         <UIcon name="lucide:layout-dashboard" class="w-8 h-8" />
@@ -102,7 +103,7 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
           class="w-fit"
         />
       </div>
-      <div class="w-full flex justify-end gap-2">
+      <div class="w-full flex justify-end gap-2 mb-4">
         <UPopover :content="{ align: 'center' }">
           <UButton color="neutral" variant="soft" icon="i-lucide-calendar">
             {{ label }}
@@ -128,7 +129,7 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
     </div>
 
     <!-- Hero Item -->
-    <div class="grid grid-cols-1 md:grid-cols-3 sm:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 sm:grid-cols-2 gap-4 mb-4">
       <UCard
         v-for="(item, index) in dashboardHeroItems"
         :key="index"
@@ -155,7 +156,7 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
     </div>
 
     <!-- Statistic section -->
-    <div class="grid grid-cols-1 md:grid-cols-4 sm:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 sm:grid-cols-2 gap-4 mb-4">
       <UCard
         v-for="(item, index) in dashBaordStatisticItems"
         :key="index"
@@ -179,7 +180,7 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
       </UCard>
     </div>
     <!-- Sparklines charts  -->
-    <div class="grid grid-cols-1 md:grid-cols-4 sm:grid-cols-2 gap-0">
+    <div class="grid grid-cols-1 md:grid-cols-4 sm:grid-cols-2 gap-0 mb-4">
       <UCard
         v-for="(item, index) in dashboardSparkLineItems"
         :key="index"
@@ -221,7 +222,7 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
     </div>
 
     <!-- Overview & Resent sales -->
-    <div class="grid grid-cols-12 gap-4 mt-8">
+    <div class="grid grid-cols-12 gap-4 mt-8 mb-8">
       <div class="col-span-12 md:col-span-8 p-4">
         <UCard class="w-full">
           <template #header>

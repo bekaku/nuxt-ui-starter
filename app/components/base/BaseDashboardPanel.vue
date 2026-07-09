@@ -90,7 +90,9 @@ const items = [
     </template>
 
     <template #body>
+      <div class="max-w-[1440px] mx-auto">
       <slot />
+      </div>
     </template>
   </UDashboardPanel>
 </template>

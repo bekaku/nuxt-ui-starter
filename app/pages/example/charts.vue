@@ -31,7 +31,7 @@ const { data: simpleSeries } = await useFetch<number[]>(
 <template>
   <BaseDashboardPanel id="example-charts" title="Charts page">
     <!-- Radar  -->
-    <UCard title="Radar">
+    <UCard title="Radar" class="mb-5">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div class="p-4 w-full">
           <ChartRadar
@@ -65,7 +65,7 @@ const { data: simpleSeries } = await useFetch<number[]>(
       </div>
     </UCard>
     <!-- Area  -->
-    <UCard title="Area">
+    <UCard title="Area" class="mb-5">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div class="p-4 w-full">
           <ChartArea
@@ -104,7 +104,7 @@ const { data: simpleSeries } = await useFetch<number[]>(
       </div>
     </UCard>
     <!-- Line  -->
-    <UCard title="Line">
+    <UCard title="Line" class="mb-5">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div class="p-4 w-full">
           <ChartArea
@@ -141,7 +141,7 @@ const { data: simpleSeries } = await useFetch<number[]>(
     </UCard>
 
     <!-- Bar  -->
-    <UCard title="Bar">
+    <UCard title="Bar" class="mb-5">
       <div class="flex flex-col gap-2">
         <div class="p-4 w-full">
           <ChartArea
@@ -194,7 +194,7 @@ const { data: simpleSeries } = await useFetch<number[]>(
     </UCard>
 
     <!-- Radial -->
-    <UCard title="Radial">
+    <UCard title="Radial" class="mb-5">
       <div
         class="relative grid grid-cols-1 md:grid-cols-4 sm:grid-cols-2 gap-2"
       >
@@ -258,7 +258,7 @@ const { data: simpleSeries } = await useFetch<number[]>(
     </UCard>
 
     <!-- Sparklines  -->
-    <UCard title="Sparklines">
+    <UCard title="Sparklines" class="mb-5">
       <div class="grid grid-cols-1 md:grid-cols-4 sm:grid-cols-2 gap-2">
         <div class="p-4 w-full">
           <ChartSparklines
@@ -318,7 +318,7 @@ const { data: simpleSeries } = await useFetch<number[]>(
     </UCard>
 
     <!-- Pie/Donuts  -->
-    <UCard title="Pie/Donuts">
+    <UCard title="Pie/Donuts" class="mb-5">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div class="p-4 w-full">
           <ChartPie
