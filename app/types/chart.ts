@@ -39,10 +39,10 @@ export interface ISimpleChartSeries {
   colors?: string[]
 }
 export interface GridPadding {
-  top: number
-  right: number
-  bottom: number
-  left: number
+  top?: number
+  right?: number
+  bottom?: number
+  left?: number
 }
 export interface SparkLineChartProps {
   chartId?: string
@@ -95,4 +95,86 @@ export interface AreaChartProps {
   zoom?: boolean
   horizontal?: boolean
   opacity?: number
+}
+export interface RadialChartProps {
+  chartId?: string
+  height?: string
+  width?: string
+  showLegend?: boolean
+  legendUseSeriesColors?: boolean
+  legendOffsetX?: number
+  legendOffsetY?: number
+  legendFloating?: boolean
+  showDataLabels?: boolean
+  showDataLabelsName?: boolean
+  showDataLabelsValue?: boolean
+  dataLabelsSize?: string
+  dataValueSize?: string
+  dataLabelsValueOfsetY?: number
+  legendPosition?: ChartPosition
+  labelunit?: string
+  stokeLineCap?: 'round' | 'square' | 'butt'
+  fillType?: 'fill' | 'gradient'
+  endAngle?: number
+  startAngle?: number
+  mode?: ChartMode
+  palette?: ChartThemePalete
+  series: number[]
+  colors?: string[]
+  categories: string[]
+  gridPadding?: GridPadding
+  semi?: boolean
+  hollowBg?: boolean
+  hollowSize?: string
+  valUnit?: string
+  trackBackgroud?: string
+  trackBackgroudDark?: string
+  dark?: boolean
+}
+export interface RadarChartProps {
+  chartId?: string;
+  height?: string;
+  width?: string;
+  labelunit?: string;
+  showLegend?: boolean;
+  legendUseSeriesColors?: boolean;
+  legendPosition?: ChartPosition;
+  mode?: ChartMode;
+  palette?: ChartThemePalete;
+  series: IChartSeries[];
+  colors?: string[];
+  showDataLabels?: boolean;
+  labelRotate?: number;
+  categories: string[];
+  yaxisShow?: boolean;
+  yaxisTickamount?: number;
+  xaxisTickamount?: number;
+  gridPadding?: GridPadding;
+  yaxisMax?: number;
+  yaxisMin?: number;
+  markers?: number;
+  strokeWidth?: number;
+  gridColors?: string[];
+  opacity?: number;
+  dark?: boolean;
+}
+export interface PieCharProps {
+  chartId?: string
+  height?: string
+  width?: string
+  labelunit?: string
+  showLegend?: boolean
+  legendUseSeriesColors?: boolean
+  legendPosition?: ChartPosition
+  type?: 'pie' | 'donut'
+  mode?: ChartMode
+  palette?: ChartThemePalete
+  series: number[]
+  colors?: string[]
+  dark?: boolean
+  showDataLabels?: boolean
+  labelRotate?: number
+  categories: string[]
+  strokestyle?: Strokestyle
+  strokeWidth?: number
 }

@@ -134,7 +134,6 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
         :key="index"
         class="w-full"
         variant="subtle"
-        :ui="{ body: '!p-2 sm:!p-4' }"
       >
         <BaseItem
           :title="item.label"
@@ -161,7 +160,6 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
         v-for="(item, index) in dashBaordStatisticItems"
         :key="index"
         class="w-full"
-        :ui="{ body: '!p-2 sm:!p-4' }"
       >
         <BaseItem :separator="false" top>
           <div class="flex flex-col gap-1">
@@ -190,7 +188,6 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
           'border-r border-muted': index !== dashboardSparkLineItems.length - 1,
         }"
         variant="soft"
-        :ui="{ body: '!p-2 sm:!p-4' }"
       >
         <div class="flex justify-around items-end">
           <div class="w-full">
@@ -226,7 +223,7 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
     <!-- Overview & Resent sales -->
     <div class="grid grid-cols-12 gap-4 mt-8">
       <div class="col-span-12 md:col-span-8 p-4">
-        <UCard class="w-full" :ui="{ body: '!p-2 sm:!p-4' }">
+        <UCard class="w-full">
           <template #header>
             <h1 class="text-2xl font-bold">Overview</h1>
           </template>
@@ -249,7 +246,7 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
       </div>
 
       <div class="col-span-12 md:col-span-4 p-4">
-        <UCard class="w-full" :ui="{ body: '!p-2 sm:!p-4' }">
+        <UCard class="w-full">
           <template #header>
             <h1 class="text-2xl font-bold">Recent Sales</h1>
             <p class="text-muted text-sm">You made 265 sales this month.</p>

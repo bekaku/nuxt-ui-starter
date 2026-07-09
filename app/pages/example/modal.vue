@@ -32,6 +32,26 @@ const handleCustomClick = async () => {
   console.log(result);
 };
 
+const dismissConfirm = async () => {
+  const result = await confirm({
+    title: "Are you sure?",
+    description: "You won't be able to revert this!",
+    confirmButton: {
+      label: "Exit!",
+      color: "neutral",
+      icon: "lucide:log-out",
+    },
+    cancelButton: {
+      label: "Stay!",
+      variant: "soft",
+      icon: "lucide:pencil-line",
+    },
+  });
+  if (result) {
+    dismissableModal.value = false;
+  }
+};
+
 const handleLoader = () => {
   loader.open({
     description: "Please wait...",
@@ -137,7 +157,41 @@ const handleLoader = () => {
     title="Dismissable"
     :dismissible="false"
   >
-    <div class="text-base">Dismissable Modal</div>
+    <template #content>
+      <div class="p-4">
+        <div class="text-lg font-bold">Dismissable</div>
+        <div class="text-sm text-muted">Dismissable Modal</div>
+        <USeparator class="my-3" />
+
+        <div class="w-full overflow-auto max-h-[125px]">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+          aliquip ex ea commodo consequat. Duis aute irure dolor in
+          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+          culpa qui officia deserunt mollit anim id est laborum.
+        </div>
+
+        <div class="flex w-full justify-end gap-4">
+          <UButton
+            label="Cancel"
+            color="neutral"
+            variant="outline"
+            @click="dismissConfirm"
+          />
+          <UButton
+            label="Submit"
+            color="neutral"
+            @click="
+              () => {
+                dismissableModal = false;
+              }
+            "
+          />
+        </div>
+      </div>
+    </template>
   </LazyBaseModal>
   <LazyBaseModal
     v-if="footerModal"

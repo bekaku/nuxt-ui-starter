@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import type { SparkLineChartProps } from "~/types/chart";
-defineProps<SparkLineChartProps>();
+import type {
+  PieCharProps
+} from "~/types/chart";
+
+defineProps<PieCharProps>();
 </script>
 <template>
   <USkeleton v-bind="$attrs" class="h-10 w-full" />

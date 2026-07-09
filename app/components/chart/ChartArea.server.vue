@@ -6,5 +6,5 @@ import type {
 defineProps<AreaChartProps>();
 </script>
 <template>
-  <USkeleton v-bind="$attrs" class="h-full w-full" />
+  <USkeleton v-bind="$attrs" class="h-10 w-full" />
 </template>

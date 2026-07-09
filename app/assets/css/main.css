@@ -3,11 +3,11 @@
 @import "@nuxt/ui";
 
 @theme static {
-  /* --font-sans: "Public Sans", sans-serif; */
+  --font-sans: "Public Sans", sans-serif;
   /* --font-sans: 'Kanit', sans-serif; */
-  --font-sans: 'Prompt', sans-serif;
+  /* --font-sans: 'Prompt', sans-serif; */
 
-  --color-blue-50: #f0f9fe;
+  /* --color-blue-50: #f0f9fe;
   --color-blue-100: #ddf0fc;
   --color-blue-200: #c3e5fa;
   --color-blue-300: #9ad6f6;
@@ -17,9 +17,9 @@
   --color-blue-700: #2972cc;
   --color-blue-800: #275da6;
   --color-blue-900: #254f83;
-  --color-blue-950: #1b3150;
+  --color-blue-950: #1b3150; */
 
-  --color-emerald-50: #f0fdf4;
+  /* --color-emerald-50: #f0fdf4;
   --color-emerald-100: #dcfce6;
   --color-emerald-200: #bbf7cf;
   --color-emerald-300: #85f0aa;
@@ -53,5 +53,9 @@
   --color-amber-700: #c64608;
   --color-amber-800: #9d390f;
   --color-amber-900: #7e3010;
-  --color-amber-950: #441506;
+  --color-amber-950: #441506; */
+}
+
+:root {
+  --ui-radius: 0.375rem;
 }

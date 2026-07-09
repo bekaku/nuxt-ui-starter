@@ -162,9 +162,10 @@ const onUnFav = async (e: any, item: AppNavigationMenuItem) => {
           :collapsed="collapsed"
           :items="appNavigations"
           orientation="vertical"
+          highlight
           tooltip
           popover
-          class="overflow-hidden"
+          class="overflow-x-hidden"
         >
           <template #item-trailing="{ item }">
             <div
