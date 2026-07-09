@@ -13,7 +13,7 @@ export default defineAppConfig({
       slots: {
         root: 'overflow-visible',
         header: 'p-4 sm:px-4',
-        body: 'p-2! sm:p-2!',
+        body: 'p-4! sm:p-4!',
       }
     },
     prose: {

@@ -64,7 +64,8 @@ const handleLoader = () => {
 </script>
 <template>
   <BaseDashboardPanel id="example-modal" title="Modal page">
-    <div class="flex flex-col p-4">
+
+    <div class="w-full flex flex-col p-4">
       <h1 class="text-2xl font-bold">Confirm Dialog</h1>
 
       <div class="flex gap-2 py-4">

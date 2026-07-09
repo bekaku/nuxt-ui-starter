@@ -177,6 +177,7 @@ const storyItems = [
           orientation="vertical"
           tooltip
           popover
+          :ui="{item: 'py-0.5', linkLeadingIcon:'size-6',label:'text-md font-bold'}"
         />
       </div>
     </div>
@@ -188,7 +189,7 @@ const storyItems = [
       <div class="pb-2 w-full overflow-hidden">
         <UCarousel
           class="w-full"
-          v-slot="{ item }"
+          v-slot="{ item,index }"
           arrows
           :prev="{
             color: 'neutral',
@@ -206,7 +207,7 @@ const storyItems = [
         >
           <template v-if="item.you">
             <div
-              class="w-full aspect-[9/16] shrink-0 rounded-xl bg-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-300 transition relative overflow-hidden bg-cover"
+              class="w-full aspect-9/16 shrink-0 rounded-xl bg-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-300 transition relative bg-cover "
               :style="`
               background-image: url(${item.image});
             `"
@@ -224,17 +225,17 @@ const storyItems = [
           </template>
           <div
             v-else
-            class="w-full aspect-[9/16] shrink-0 rounded-xl bg-cover bg-center relative cursor-pointer group shadow-md"
+            class="w-full aspect-9/16 shrink-0 rounded-xl bg-cover bg-center relative cursor-pointer group shadow-md"
             :style="`
               background-image: url(${item.image});
             `"
           >
             <div
-              class="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60 rounded-2xl"
+              class="absolute inset-0 bg-linear-to-b from-black/20 to-black/60 rounded-2xl"
             ></div>
             <UAvatar
               class="absolute top-3 left-1/2 -translate-x-1/2 rounded-full border-2 border-blue-500"
-              :src="item.avatar"
+              :src="`https://i.pravatar.cc/150?img=${(index % 70) + 1}`"
               :alt="item.name"
               size="3xl"
               loading="lazy"
@@ -247,6 +248,8 @@ const storyItems = [
         </UCarousel>
       </div>
 
+
+
       <!-- Post area -->
       <div class="w-full">
         <UCard variant="outline">
@@ -256,7 +259,7 @@ const storyItems = [
               loading="lazy"
               size="xl"
             />
-            <div class="flex-1 bg-muted p-3 rounded-md text-sm cursor-pointer">
+            <div class="flex-1 bg-muted p-2 rounded-md text-sm cursor-pointer">
               What's new, Alexandra?
             </div>
 
