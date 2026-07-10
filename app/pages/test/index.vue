@@ -1,65 +1,103 @@
 <script setup lang="ts">
+import { avatar } from "#build/ui";
+import type { LabelValue } from "~/types/common";
+
 definePageMeta({
   layout: false,
 });
 useSeoMeta({
   title: "Test page",
 });
-const { getFavoriteNavigations } = useMenu();
-const appStore = useAppStore();
+const scrollContainer = ref<HTMLElement | null>(null);
+const items = ref<LabelValue<any>[]>([]);
+const page = ref(1);
+const limit = 25;
+const hasMore = ref(true);
+const isFetching = ref(false);
+
+const fetchMoreData = async () => {
+  console.log("Fetching more data...");
+  if (isFetching.value || !hasMore.value) return;
+
+  isFetching.value = true;
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const newItems = Array.from({ length: limit }, (_, i) => {
+    return {
+      label: `Item ${items.value.length + i + 1}`,
+      avatar: {
+        src: getMockAvatarByIndex(i),
+      },
+    };
+  });
+
+  items.value.push(...newItems);
+  page.value++;
+
+  if (items.value.length >= 100) {
+    hasMore.value = false;
+  }
+
+  isFetching.value = false;
+};
+
+fetchMoreData();
 </script>
 <template>
-  <div>
-    <div class="flex flex-col p-4">
-      <UButton
-        label="Home"
-        icon="lucide:arrow-left"
-        to="/"
-        color="warning"
-        class="w-fit"
-      />
+  <div class="flex flex-col gap-4 p-4">
+    <UButton
+      label="Home"
+      icon="lucide:arrow-left"
+      to="/"
+      class="w-fit"
+      variant="ghost"
+    />
 
-      <div class="flex items-end gap-3 p-4">
-        <div>
-          <NuxtImg
-            preset="avatar"
-            src="/images/user.png"
-            width="50"
-            class="rounded-md"
-          />
-        </div>
-
-        <div>
-          <NuxtImg
-            src="https://plus.unsplash.com/premium_photo-1781034652016-aab63ad73af5?q=80&w=800"
-            width="150"
-            class="rounded-md"
-          />
-        </div>
-      </div>
-
-      <h1 class="text-2xl font-bold">Favorite Navigation</h1>
-      <div class="p-4">
-        <UNavigationMenu
-          v-if="getFavoriteNavigations && getFavoriteNavigations.length > 0"
-          :highlight="true"
-          highlight-color="primary"
-          orientation="vertical"
-          :items="getFavoriteNavigations"
-          class="data-[orientation=vertical]:w-48"
+    <!-- Nuxt UI Card wrapping the scroll container
+        height-class="max-h-[calc(100vh-150px)]"
+    -->
+    <BaseInfiniteScroll
+      :is-fetching="isFetching"
+      :has-more="hasMore"
+      height-class="h-80"
+      @load-more="fetchMoreData"
+    >
+      <div class="flex flex-col gap-2">
+        <!-- <div
+          v-for="item in items"
+          :key="item"
+          class="p-8 bg-gray-100 dark:bg-gray-800 rounded text-sm"
+        >
+          {{ item }}
+        </div> -->
+        <UUser
+          v-for="(item, index) in items"
+          :key="index"
+          :name="item.label"
+          :avatar="item.avatar"
+          size="xl"
         />
       </div>
-      <h1 class="text-2xl font-bold">Filter Navigation</h1>
-      <div class="p-4">
-        <UNavigationMenu
-          v-if="appStore.appNavigations && appStore.appNavigations.length > 0"
-          :highlight="true"
-          highlight-color="primary"
-          orientation="vertical"
-          :items="appStore.appNavigations"
-          class="data-[orientation=vertical]:w-48"
-        />
+    </BaseInfiniteScroll>
+
+    <!-- <BaseInfiniteScroll
+      v-if="scrollContainer"
+      :is-fetching="isFetching"
+      :has-more="hasMore"
+      :scroll-ref="scrollContainer"
+      @load-more="fetchMoreData"
+    />
+
+    <div ref="scrollContainer" class="h-80 w-full p-4 border overflow-y-auto">
+      <div class="flex flex-col gap-2">
+        <div
+          v-for="item in items"
+          :key="item"
+          class="p-8 bg-gray-100 dark:bg-gray-800 rounded text-sm"
+        >
+          {{ item }}
+        </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>

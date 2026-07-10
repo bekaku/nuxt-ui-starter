@@ -7,45 +7,45 @@ export function cssMerge(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 export const isAppException = (obj: any): obj is AppException => {
-    return (
-        obj.status !== undefined &&
-        obj.message !== undefined &&
-        obj.errors !== undefined
-    );
+  return (
+    obj.status !== undefined &&
+    obj.message !== undefined &&
+    obj.errors !== undefined
+  );
 };
 export const isServerException = (obj: any): obj is ServerException => {
-    return (
-        obj.status !== undefined &&
-        obj.message !== undefined &&
-        obj.error !== undefined &&
-        obj.timestamp !== undefined &&
-        obj.path !== undefined
-    );
+  return (
+    obj.status !== undefined &&
+    obj.message !== undefined &&
+    obj.error !== undefined &&
+    obj.timestamp !== undefined &&
+    obj.path !== undefined
+  );
 };
 export const isServerResponseMessage = (obj: any): obj is ResponseMessage => {
-    return obj.status !== undefined && obj.message !== undefined;
+  return obj.status !== undefined && obj.message !== undefined;
 };
 export const isListResponse = (obj: any): obj is ApiResponse<any> => {
-    return (
-        obj.dataList !== undefined &&
-        obj.last !== undefined &&
-        obj.totalElements !== undefined &&
-        obj.totalPages !== undefined
-    );
+  return (
+    obj.dataList !== undefined &&
+    obj.last !== undefined &&
+    obj.totalElements !== undefined &&
+    obj.totalPages !== undefined
+  );
 };
 
 export const isNumber = (value: string | number): boolean => {
-    return value != null && value !== '' && !isNaN(Number(value.toString()));
+  return value != null && value !== '' && !isNaN(Number(value.toString()));
 };
 export const capitalizeFirstLetter = (str: string) => {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+  return str.charAt(0).toUpperCase() + str.slice(1);
 };
 export const validateEmail = (email: string) => {
-    return String(email)
-        .toLowerCase()
-        .match(
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        );
+  return String(email)
+    .toLowerCase()
+    .match(
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    );
 };
 /**
 *
@@ -64,186 +64,186 @@ export const validateEmail = (email: string) => {
      username is 4-20 characters long
 */
 export const validateUsername = (name: string) => {
-    return String(name)
-        .toLowerCase()
-        .match(/^(?=[a-zA-Z0-9._]{4,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/);
-    // .match(/^[a-zA-Z0-9]([._-](?![._-])|[a-zA-Z0-9]){3,20}[a-zA-Z0-9]$/);
+  return String(name)
+    .toLowerCase()
+    .match(/^(?=[a-zA-Z0-9._]{4,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/);
+  // .match(/^[a-zA-Z0-9]([._-](?![._-])|[a-zA-Z0-9]){3,20}[a-zA-Z0-9]$/);
 };
 export const openUrlInNewTab = (
-    href: string,
-    iTarget: IHrefTarget = '_blank',
-    ev: Event | undefined = undefined
+  href: string,
+  iTarget: IHrefTarget = '_blank',
+  ev: Event | undefined = undefined
 ) => {
-    Object.assign(document.createElement('a'), {
-        target: iTarget,
-        href,
-    }).click();
-    if (ev) {
-        ev.stopImmediatePropagation();
-    }
+  Object.assign(document.createElement('a'), {
+    target: iTarget,
+    href,
+  }).click();
+  if (ev) {
+    ev.stopImmediatePropagation();
+  }
 };
 
 export const checkExpansionChildActive = (
-    currentUrlPath: string,
-    items: IMenuPageItem[]
+  currentUrlPath: string,
+  items: IMenuPageItem[]
 ) => {
-    let active = false;
-    for (const page of items) {
-        if (page.to == currentUrlPath) {
-            active = true;
-            break;
-        }
+  let active = false;
+  for (const page of items) {
+    if (page.to == currentUrlPath) {
+      active = true;
+      break;
     }
+  }
 
-    return active;
+  return active;
 };
 export const checkExpansionChildActiveAlt = (
-    currentUrlPath: string,
-    items: LabelValue<any>[]
+  currentUrlPath: string,
+  items: LabelValue<any>[]
 ) => {
-    let active = false;
-    for (const page of items) {
-        if (page.to == currentUrlPath) {
-            active = true;
-            break;
-        }
+  let active = false;
+  for (const page of items) {
+    if (page.to == currentUrlPath) {
+      active = true;
+      break;
     }
+  }
 
-    return active;
+  return active;
 };
 export const isEmptyVal = (val: any) => {
-    return !val || val == 'null' || val == null || val == '' || val == undefined || val == 'undefined';
+  return !val || val == 'null' || val == null || val == '' || val == undefined || val == 'undefined';
 };
 export const isEmpty = (value: any) => {
-    if (typeof value === 'number') {
-        return false;
-    } else if (typeof value === 'string') {
-        return value.trim().length === 0;
-    } else if (Array.isArray(value)) {
-        return value.length === 0;
-    } else if (typeof value === 'object') {
-        return value == null || Object.keys(value).length === 0;
-    } else if (typeof value === 'boolean') {
-        return false;
-    } else {
-        return !value;
-    }
+  if (typeof value === 'number') {
+    return false;
+  } else if (typeof value === 'string') {
+    return value.trim().length === 0;
+  } else if (Array.isArray(value)) {
+    return value.length === 0;
+  } else if (typeof value === 'object') {
+    return value == null || Object.keys(value).length === 0;
+  } else if (typeof value === 'boolean') {
+    return false;
+  } else {
+    return !value;
+  }
 };
 export const isObjectEmpty = (obj: any) => {
-    return Object.keys(obj).length === 0;
+  return Object.keys(obj).length === 0;
 };
 export const convertStringToNumber = (n: string | undefined): number => {
-    return n ? +n : 0;
+  return n ? +n : 0;
 };
 export const snakeToCamel = (str: string) => str ? str.toLowerCase().replace(/([-_][a-z])/g, (group) => group.toUpperCase().replace('-', '').replace('_', '')) : '';
 export const pascalToCamelCase = (str: string) => str ? str.charAt(0).toLowerCase() + str.slice(1) : '';
 export const pascalToSnake = (str: string) => str ? str.replace(/([a-z0-9])([A-Z])/g, '$1_$2').replace(/([A-Z])([A-Z][a-z])/g, '$1_$2').toLowerCase() : '';
 export const pascalToKebab = (str: string) => str ? str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').replace(/([A-Z])([A-Z][a-z])/g, '$1-$2').toLowerCase() : '';
 export const catchUrlFromText = (inputText: string) => {
-    return inputText.match(/\bhttps?:\/\/\S+/gi);
+  return inputText.match(/\bhttps?:\/\/\S+/gi);
 };
 export const urlify = (
-    inputText: string,
-    linkColor: string | undefined = undefined
+  inputText: string,
+  linkColor: string | undefined = undefined
 ) => {
-    const urlRegex = /(https?:\/\/[^\s<]+)/g;
-    return inputText.replace(urlRegex, (url) => {
-        return `<a class="app-text-link ${linkColor ? linkColor : ''
-            }" href="${url}" target="_blank">${url}</a>`;
-    });
+  const urlRegex = /(https?:\/\/[^\s<]+)/g;
+  return inputText.replace(urlRegex, (url) => {
+    return `<a class="app-text-link ${linkColor ? linkColor : ''
+      }" href="${url}" target="_blank">${url}</a>`;
+  });
 };
 export const roundDecimal = (value: number, precision: number) => {
-    const multiplier = Math.pow(10, precision);
-    return Math.round(value * multiplier) / multiplier;
+  const multiplier = Math.pow(10, precision);
+  return Math.round(value * multiplier) / multiplier;
 };
 export const formatBytes = (bytes: any, decimals = 2) => {
-    if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return '0 Bytes';
 
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
 
 const formatBytesAlt = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 export const readableNumber = (num: number, digits: number = 1) => {
-    if (num < 1000) {
-        return num;
-    }
-    const lookup = [
-        { value: 1, symbol: '' },
-        { value: 1e3, symbol: 'k' },
-        { value: 1e6, symbol: 'M' },
-        { value: 1e9, symbol: 'G' },
-        { value: 1e12, symbol: 'T' },
-        { value: 1e15, symbol: 'P' },
-        { value: 1e18, symbol: 'E' },
-    ];
-    const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
-    const item = lookup
-        .slice()
-        .reverse()
-        .find(function (item) {
-            return num >= item.value;
-        });
-    // return item
-    //     ? (num / item.value).toFixed(digits).replace(rx, '$1') + item.symbol
-    //     : '0';
-    return item
-        ? (Math.floor((num / item.value) * 10 ** digits) / 10 ** digits) + item.symbol
-        : '0';
+  if (num < 1000) {
+    return num;
+  }
+  const lookup = [
+    { value: 1, symbol: '' },
+    { value: 1e3, symbol: 'k' },
+    { value: 1e6, symbol: 'M' },
+    { value: 1e9, symbol: 'G' },
+    { value: 1e12, symbol: 'T' },
+    { value: 1e15, symbol: 'P' },
+    { value: 1e18, symbol: 'E' },
+  ];
+  const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
+  const item = lookup
+    .slice()
+    .reverse()
+    .find(function (item) {
+      return num >= item.value;
+    });
+  // return item
+  //     ? (num / item.value).toFixed(digits).replace(rx, '$1') + item.symbol
+  //     : '0';
+  return item
+    ? (Math.floor((num / item.value) * 10 ** digits) / 10 ** digits) + item.symbol
+    : '0';
 };
 export const percentage = (val: number, total: number, decimal = 2): number => {
-    if (total === 0) {
-        return 0;
-    }
-    return +((val * 100) / total).toFixed(decimal);
+  if (total === 0) {
+    return 0;
+  }
+  return +((val * 100) / total).toFixed(decimal);
 };
 export const percentageReturnOne = (
-    val: number,
-    total: number,
-    decimal = 2
+  val: number,
+  total: number,
+  decimal = 2
 ): number => {
-    const p = percentage(val, total, decimal);
-    return p > 0 ? p / 100 : 0;
+  const p = percentage(val, total, decimal);
+  return p > 0 ? p / 100 : 0;
 };
 export const removeDecimal = (val: number) => {
-    if (val === 0) {
-        return 0;
-    }
-    return Math.trunc(val);
+  if (val === 0) {
+    return 0;
+  }
+  return Math.trunc(val);
 };
 export const roundCeilDecimal = (val: number) => {
-    if (val === 0) {
-        return 0;
-    }
-    return Math.ceil(val);
+  if (val === 0) {
+    return 0;
+  }
+  return Math.ceil(val);
 };
 export const extractHashtagsFromString = (val: string): string[] => {
-    if (!val) {
-        return [];
+  if (!val) {
+    return [];
+  }
+  // return val.split(/[\s\n\r]/gim).filter((v) => v.startsWith('#'));
+  // return extractHashtagsStartingWithLetter(val)
+  return val.split(/[\s\n\r]/gim).filter((v) => {
+    if (v.startsWith('#')) {
+      // Check if the character following '#' is not a digit (0-9)
+      return !(/^\#\d/.test(v));
     }
-    // return val.split(/[\s\n\r]/gim).filter((v) => v.startsWith('#'));
-    // return extractHashtagsStartingWithLetter(val)
-    return val.split(/[\s\n\r]/gim).filter((v) => {
-        if (v.startsWith('#')) {
-            // Check if the character following '#' is not a digit (0-9)
-            return !(/^\#\d/.test(v));
-        }
-        return false;
-    });
+    return false;
+  });
 };
 export const randomNumber = (min: number, max: number) => {
-    return Math.floor(Math.random() * max) + min;;
+  return Math.floor(Math.random() * max) + min;;
 }
 // export const numberFormat = (no: number | string | null | undefined) => {
 //     if (no == undefined || no == null) {
@@ -252,119 +252,133 @@ export const randomNumber = (min: number, max: number) => {
 //     return no.toLocaleString();
 // }
 export const numberFormat = (no: number | string | null | undefined) => {
-    if (no == undefined || no == null) {
-        return '';
-    }
-    let number = no;
-    if (typeof number !== 'number') {
-        number = parseFloat(number);
-    }
-    return new Intl.NumberFormat().format(number);
+  if (no == undefined || no == null) {
+    return '';
+  }
+  let number = no;
+  if (typeof number !== 'number') {
+    number = parseFloat(number);
+  }
+  return new Intl.NumberFormat().format(number);
 }
 export const isArray = (value: any): boolean => {
-    return Array.isArray(value);
+  return Array.isArray(value);
 };
 export const sortArray = <T extends Record<string, any>>(
-    array: T[],
-    field: keyof T,
-    mode: 'asc' | 'desc' = 'asc'
+  array: T[],
+  field: keyof T,
+  mode: 'asc' | 'desc' = 'asc'
 ): Promise<T[]> => {
-    return new Promise((resolve) => {
-        const sortedArray = [...array].sort((a, b) => {
-            const valA = a[field];
-            const valB = b[field];
+  return new Promise((resolve) => {
+    const sortedArray = [...array].sort((a, b) => {
+      const valA = a[field];
+      const valB = b[field];
 
-            // Handle string comparison (case-insensitive)
-            if (typeof valA === 'string' && typeof valB === 'string') {
-                return mode === 'asc'
-                    ? valA.localeCompare(valB)
-                    : valB.localeCompare(valA);
-            }
+      // Handle string comparison (case-insensitive)
+      if (typeof valA === 'string' && typeof valB === 'string') {
+        return mode === 'asc'
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA);
+      }
 
-            // Handle number and boolean comparison
-            if (valA < valB)
-                return mode === 'asc' ? -1 : 1;
-            if (valA > valB)
-                return mode === 'asc' ? 1 : -1;
-            return 0;
-        });
-
-        resolve(sortedArray);
+      // Handle number and boolean comparison
+      if (valA < valB)
+        return mode === 'asc' ? -1 : 1;
+      if (valA > valB)
+        return mode === 'asc' ? 1 : -1;
+      return 0;
     });
+
+    resolve(sortedArray);
+  });
 }
 export const escapeHtml = (unsafe: string | undefined) => {
-    if (!unsafe) {
-        return '';
-    }
-    const map: { [key: string]: string } = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        '\'': '&#039;'
-    };
+  if (!unsafe) {
+    return '';
+  }
+  const map: { [key: string]: string } = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    '\'': '&#039;'
+  };
 
-    return unsafe.replace(/[&<>"']/g, (char) => map[char] || '');
+  return unsafe.replace(/[&<>"']/g, (char) => map[char] || '');
 };
 export const unescapeHtml = (safe: string | undefined) => {
-    if (!safe) {
-        return '';
-    }
-    const map: { [key: string]: string } = {
-        '&amp;': '&',
-        '&lt;': '<',
-        '&gt;': '>',
-        '&quot;': '"',
-        '&#039;': '\''
-    };
-    return safe.replace(/&(amp|lt|gt|quot|#039);/g, (entity) => map[entity] || '');
+  if (!safe) {
+    return '';
+  }
+  const map: { [key: string]: string } = {
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#039;': '\''
+  };
+  return safe.replace(/&(amp|lt|gt|quot|#039);/g, (entity) => map[entity] || '');
 };
 
 export const getValFromObjectByPath = (obj: any, path: string) => {
-    // getValFromObjectByPath({item:{name:'chanavee'}}, 'item.name')
-    const parts = path.split('.');
-    if (Array.isArray(parts)) {
-        const last: any = parts.pop();
-        const l = parts.length;
-        let i = 1;
-        let current: any = parts[0];
-        while ((obj = obj[current]) && i < l) {
-            current = parts[i];
-            i++;
-        }
-
-        if (!isEmpty(obj)) {
-            return obj[last];
-        }
+  // getValFromObjectByPath({item:{name:'chanavee'}}, 'item.name')
+  const parts = path.split('.');
+  if (Array.isArray(parts)) {
+    const last: any = parts.pop();
+    const l = parts.length;
+    let i = 1;
+    let current: any = parts[0];
+    while ((obj = obj[current]) && i < l) {
+      current = parts[i];
+      i++;
     }
 
-    return undefined;
+    if (!isEmpty(obj)) {
+      return obj[last];
+    }
+  }
+
+  return undefined;
 };
 export const cloneObject = <T>(obj: T | undefined) => {
-    if (!obj) {
-        return undefined;
-    }
-    // return Object.assign({}, obj) as T;
-    return JSON.parse(JSON.stringify(obj)) as T
+  if (!obj) {
+    return undefined;
+  }
+  // return Object.assign({}, obj) as T;
+  return JSON.parse(JSON.stringify(obj)) as T
 };
 
 export const appPreventDefult = async (event: any) => {
-    if (event) {
-        event.stopPropagation();
-        event.preventDefault();
-        event.stopImmediatePropagation();
-    }
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
 };
 export const isNumeric = (str: string): boolean => {
-    return /^\d+$/.test(str);
+  return /^\d+$/.test(str);
 }
 
 export const generateUniqueFilename = (originalName: string): string => {
-    const ext = originalName.substring(originalName.lastIndexOf('.')) || ''
-    const uuid = crypto.randomUUID()
-    const timestamp = Date.now()
-    return `${timestamp}_${uuid}${ext}`
+  const ext = originalName.substring(originalName.lastIndexOf('.')) || ''
+  const uuid = crypto.randomUUID()
+  const timestamp = Date.now()
+  return `${timestamp}_${uuid}${ext}`
 }
 export const generateSnowflakeID = (): string => {
   return snowflakeIdGenerator.nextId();
 };
+export const getMockAvatarByIndex = (index: number = 0, size: number = 150) => {
+  return getMockAvatarById(((index % 70) + 1), size);
+
+}
+
+/**
+ *
+ * @param id max to 70
+ * @param size max to 1000
+ * @returns
+ */
+export const getMockAvatarById = (id: number, size: number = 150): string => {
+  return `https://i.pravatar.cc/${size}?img=${id}`
+}

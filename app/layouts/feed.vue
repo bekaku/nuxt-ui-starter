@@ -30,7 +30,7 @@ const items: NavigationMenuItem[][] = [
 
 <template>
   <div>
-    <UHeader class="w-full" to="#">
+    <UHeader class="w-full" to="#" :ui="{container:'max-w-[1440px]'}">
       <template #title>
         <div class="flex gap-2 items-center">
           <ULink to="/">

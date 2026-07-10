@@ -123,11 +123,21 @@ export const useMenu = () => {
             badge: "4",
           },
           {
+            label: "Infinite scroll",
+            icon: "lucide:mouse-left",
+            to: "/example/infinite-scroll",
+          },
+          {
+            label: "Infinite page",
+            icon: "lucide:mouse-left",
+            to: "/example/infinite-scroll-page",
+          },
+          {
             label: "Modal",
             icon: 'lucide:copy',
             to: "/example/modal",
           },
-           {
+          {
             label: "Social",
             icon: "lucide:panel-right",
             to: "/example/feed",

@@ -308,7 +308,7 @@ const pagination = ref({
       :pagination-options="{
         getPaginationRowModel: getPaginationRowModel(),
       }"
-      class="shrink-0"
+      class="shrink-0 mt-4"
       :data="data"
       :columns="columns"
       :loading="status === 'pending'"

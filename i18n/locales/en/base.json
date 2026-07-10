@@ -525,7 +525,25 @@
     "sort": "Sort order",
     "asc": "Ascending",
     "desc": "Descending",
-    "by": "Sort by"
+    "by": "Sort by",
+    "post": {
+      "NEW_POST": "New posts",
+      "NEW_POST_DESC": "Show recent posts first",
+      "NEW_ACTIVITY": "New activity",
+      "NEW_ACTIVITY_DESC": "Show the most recently active posts first.",
+      "TOP_POST": "Top posts",
+      "TOP_POST_DESC": "Show the posts with the highest prizes first",
+      "HOT_POST": "Hot posts",
+      "HOT_POST_DESC": "Show the most engaging posts first"
+    },
+    "comment": {
+      "ALL_COMMENT": "Oldest",
+      "ALL_COMMENT_DESC": "Show the oldest comments first",
+      "NEW_COMMENT": "Newest",
+      "NEW_COMMENT_DESC": "Show the newest comments first",
+      "TOP_COMMENT": "Top comments",
+      "TOP_COMMENT_DESC": "Show the most engaging comments first"
+    }
   },
   "topPost": {
     "today": "Past 24 hours",

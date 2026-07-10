@@ -29,6 +29,7 @@ const items = [
 </script>
 <template>
   <UDashboardPanel
+    v-bind="$attrs"
     :id="id"
     :resizable
     :min-size="minSize"
@@ -91,7 +92,7 @@ const items = [
 
     <template #body>
       <div class="w-full max-w-[1440px] mx-auto">
-      <slot />
+        <slot />
       </div>
     </template>
   </UDashboardPanel>

@@ -1,6 +1,6 @@
-import type { IconProps, NavigationMenuItem } from "@nuxt/ui";
+import type { AvatarProps, IconProps, NavigationMenuItem } from "@nuxt/ui";
 import type { AppUser } from "./models";
-import type { AvatarProps, RBACProps } from "./props";
+import type { RBACProps } from "./props";
 
 /* eslint-disable no-unused-vars */
 export enum HttpMethod {
@@ -373,7 +373,6 @@ export interface IFile {
 }
 export interface LabelValue<Type> {
   avatar?: AvatarProps;
-  avatarSize?: string;
   border?: boolean;
   children?: LabelValue<Type>[]
   color?: AppColor | string;
