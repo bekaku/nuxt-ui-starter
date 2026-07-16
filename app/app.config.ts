@@ -1,13 +1,29 @@
 export default defineAppConfig({
+  icon: {
+    size: '18px', // e.g., '1.5em', '24px', '1.5rem'
+  },
   ui: {
     colors: {
       primary: 'blue',
       neutral: 'neutral',
       info: 'sky',
       secondary: 'slate',
-      success: 'emerald',
-      warning: 'amber',
-      error: 'rose'
+      success: 'success',
+      warning: 'warning',
+      error: 'error'
+    },
+    button: {
+      variants: {
+        size: {
+          md: {
+            base: 'px-4 py-2 text-sm'
+          }
+        }
+      },
+      defaultVariants: {
+        variant: 'subtle',
+        color: 'neutral'
+      }
     },
     card: {
       slots: {
@@ -16,10 +32,5 @@ export default defineAppConfig({
         body: 'p-4! sm:p-4!',
       }
     },
-    prose: {
-      icon: {
-        base: 'size-4 shrink-0 align-sub'
-      }
-    }
   }
 })

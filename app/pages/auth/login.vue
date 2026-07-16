@@ -204,7 +204,7 @@ onBeforeUnmount(() => {
             size="xl"
             block
             :loading="loading"
-            color="neutral"
+           color="neutral" variant="solid"
           >
             {{ $t("authen.login") }}
           </UButton>

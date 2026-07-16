@@ -73,7 +73,7 @@ const items: NavigationMenuItem[][] = [
         <UChip color="error" inset>
           <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
         </UChip>
-        <UserMenu class="w-fit" />
+        <UserMenu class="w-48" />
       </template>
 
       <template #body>

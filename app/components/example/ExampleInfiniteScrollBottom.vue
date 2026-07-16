@@ -41,24 +41,22 @@ const reload = () => {
   hasMore.value = true;
   fetchMoreData();
 };
-
 </script>
 <template>
   <UCard title="Usage scroll bottom">
     <template #description>
       <div class="flex gap-2 p-2">
-        <UButton variant="subtle" color="neutral" @click="reload"
-          >Reload</UButton
-        >
+        <UButton>
+          Default Btn
+        </UButton>
+        <UButton  @click="reload">
+          Reload
+        </UButton>
         <UButton
-          variant="subtle"
-          color="neutral"
           @click="infiniteRef?.scrollToTop()"
           >Scroll to top</UButton
         >
         <UButton
-          variant="subtle"
-          color="neutral"
           @click="infiniteRef?.scrollToBottom()"
           >Scroll to bottom</UButton
         >

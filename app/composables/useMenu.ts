@@ -112,6 +112,11 @@ export const useMenu = () => {
             to: "/example/charts",
           },
           {
+            label: "Content text",
+            icon: "lucide:file-text",
+            to: "/example/content-text",
+          },
+          {
             label: "Customers",
             icon: "i-lucide-users",
             to: "/example/customers",
@@ -141,6 +146,11 @@ export const useMenu = () => {
             label: "Social",
             icon: "lucide:panel-right",
             to: "/example/feed",
+          },
+          {
+            label: "Transitions",
+            icon: "lucide:layers",
+            to: "/example/transitions",
           },
 
         ]

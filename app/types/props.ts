@@ -1,4 +1,4 @@
-import type { AppColor, IconSet, IHrefTarget } from "./common";
+import type { AppColor, IconSet, IHrefTarget, OgMeta } from "./common";
 
 export interface AvatarProps {
   src?: string;
@@ -63,4 +63,27 @@ export interface ButtonProps {
 export interface RBACProps {
   permissions?: string[];
   condition?: 'any' | 'all' | 'not';
+}
+export interface TextEllipsisProps {
+  content?: string;
+  rows?: number | string;
+  expandText?: string;
+  collapseText?: string;
+  charsPerLine?: number | string;
+  showMore?: boolean;
+  class?: string;
+  textClass?: string;
+  lineHeight?: string;
+  isEscapeHtml?: boolean;
+  urlify?: boolean;
+}
+export interface OgProps {
+  item?: OgMeta;
+  content?: string;
+  short?: boolean;
+  showBg?: boolean;
+  textLines?: number;
+  descriptionLines?: number;
+  imageSize?: string;
+  imageMaxHeight?: string;
 }

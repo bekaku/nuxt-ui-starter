@@ -121,6 +121,7 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
 
         <UButton
           color="neutral"
+          variant="solid"
           icon="lucide:download"
           label="Export"
           class="ml-2 rounded-lg"
@@ -144,7 +145,6 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
           title-bold
         >
           <template #start>
-            <!-- <BaseIcon v-if="item.icon" v-bind="item.icon" size="32" /> -->
             <UAvatar v-if="item.icon" :icon="item.icon.name" size="3xl" />
           </template>
 
@@ -169,11 +169,11 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
             <p class="text-sm text-muted font-light">{{ item.description }}</p>
           </div>
           <template #end>
-            <BaseIcon
+            <UIcon
               v-if="item.icon"
               v-bind="item.icon"
               class="text-muted"
-              size="20"
+              size="20px"
             />
           </template>
         </BaseItem>

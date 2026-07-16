@@ -117,13 +117,13 @@ export const useBase = () => {
   };
   const inputSanitizeHtml = (str: string | undefined | null,
     allowTags: string[] = ['b', 'i', 'em', 'strong', 'a'],
-    allowAttrs: string[] = ['href', 'class']) => {
+    allowAttrs: string[] = ['href', 'class', 'target', 'rel']) => {
     if (!str) {
       return '';
     }
-    if (isServer()) {
-      return str;
-    }
+    // if (isServer()) {
+    //   return str;
+    // }
     // return $domPurify.sanitize(str,
     return DOMPurify.sanitize(str,
       {

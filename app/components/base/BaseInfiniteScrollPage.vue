@@ -9,7 +9,7 @@ const {
   isFetching?: boolean;
   hasMore?: boolean;
   distance?: number;
-  heightClass?: string;
+  scrollClass?: string;
 }>();
 
 const emit = defineEmits<{

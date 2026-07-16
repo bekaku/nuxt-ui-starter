@@ -58,3 +58,15 @@ export interface Range {
   start: Date
   end: Date
 }
+
+export interface FeedItem {
+  id: number;
+  title: string;
+  url: string;
+  user: string;
+  domain: string;
+  points: number;
+  time_ago: string;
+  comments_count: number;
+  type: string;
+}

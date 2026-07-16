@@ -53,6 +53,13 @@ fetchMoreData();
       variant="ghost"
     />
 
+    <div class="flex gap-4">
+      <UButton label="error" color="error" />
+      <UButton label="warning" color="warning" />
+      <UButton label="success" color="success" />
+      <UButton label="primary" color="primary" />
+    </div>
+
     <!-- Nuxt UI Card wrapping the scroll container
         height-class="max-h-[calc(100vh-150px)]"
     -->

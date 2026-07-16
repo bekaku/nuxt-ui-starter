@@ -9,6 +9,8 @@ const limit = 20;
 const hasMore = ref(true);
 const isFetching = ref(false);
 
+const isScrollingoToTop = ref(false);
+
 const fetchMoreData = async () => {
   console.log("Fetching older messages...");
   if (isFetching.value || !hasMore.value) return;
@@ -74,24 +76,17 @@ const reload = () => {
   hasMore.value = true;
   initData();
 };
+const scrollingTop = (state: boolean) => {
+  isScrollingoToTop.value = state;
+};
 </script>
 <template>
   <UCard title="Usage scroll top">
     <template #description>
       <div class="flex gap-2 p-2">
-        <UButton variant="subtle" color="neutral" @click="reload"
-          >Reload</UButton
-        >
-        <UButton
-          variant="subtle"
-          color="neutral"
-          @click="infiniteRef?.scrollToTop()"
-          >Scroll to top</UButton
-        >
-        <UButton
-          variant="subtle"
-          color="neutral"
-          @click="infiniteRef?.scrollToBottom()"
+        <UButton @click="reload">Reload</UButton>
+        <UButton @click="infiniteRef?.scrollToTop()">Scroll to top</UButton>
+        <UButton @click="infiniteRef?.scrollToBottom()"
           >Scroll to bottom</UButton
         >
       </div>
@@ -100,11 +95,12 @@ const reload = () => {
       ref="infiniteRef"
       :is-fetching="isFetching"
       :has-more="hasMore"
-      height-class="h-80"
+      scroll-class="h-80"
       direction="top"
       @load-more="fetchMoreData"
+      @scrolling-top="scrollingTop"
     >
-      <div class="flex flex-col gap-3">
+      <div class="relative flex flex-col gap-3">
         <UUser
           v-for="(item, index) in items"
           :key="index"
@@ -112,6 +108,10 @@ const reload = () => {
           :avatar="item.avatar"
           size="xl"
         />
+
+        <div v-if="isScrollingoToTop" class="sticky bottom-4 self-center z-10">
+          <UButton icon="lucide:arrow-down" class="rounded-full shadow-md" @click="infiniteRef?.scrollToBottom()" />
+        </div>
       </div>
     </BaseInfiniteScroll>
   </UCard>

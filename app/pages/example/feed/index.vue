@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { NavigationMenuItem, SelectItem, SelectMenuItem } from "@nuxt/ui";
+import type { FeedItem } from "~/types";
 
 useSeoMeta({
   title: "Feed page",
@@ -7,6 +8,7 @@ useSeoMeta({
 const authenStore = useAuthenStore();
 const { isMobile } = useDevice();
 const { t } = useLang();
+const api = useApi();
 const links: NavigationMenuItem[][] = [
   [
     {
@@ -176,48 +178,106 @@ const sortItems = ref<SelectItem[]>([
     label: t("sort.post.NEW_POST"),
     id: "NEW_POST",
     icon: "lucide:clock",
+    description: t("sort.post.NEW_POST_DESC"),
   },
   {
     label: t("sort.post.NEW_ACTIVITY"),
     id: "NEW_ACTIVITY",
     icon: "lucide:rocket",
+    description: t("sort.post.NEW_ACTIVITY_DESC"),
   },
   {
     label: t("sort.post.TOP_POST"),
     id: "TOP_POST",
     icon: "lucide:flame",
+    description: t("sort.post.TOP_POST_DESC"),
   },
 ]);
 const sortModel = ref("NEW_POST");
 
-const filterItems = ref<SelectMenuItem[]>([
+const filterItems = shallowRef<SelectMenuItem[]>([
   {
     label: "News",
-    id: "NEWS",
+    id: "news",
     icon: "lucide:newspaper",
   },
   {
     label: "Newest",
-    id: "NEWEST",
+    id: "newest",
     icon: "lucide:file-clock",
   },
   {
     label: "Ask",
-    id: "ASK",
+    id: "ask",
     icon: "lucide:file-question-mark",
   },
   {
     label: "Show",
-    id: "SHOW",
+    id: "show",
     icon: "lucide:spotlight",
   },
   {
     label: "Jobs",
-    id: "JOBS",
+    id: "jobs",
     icon: "lucide:briefcase-business",
   },
 ]);
-const filterModel = ref("NEWS");
+const page = ref(1);
+const maxPage = 10;
+const hasPrev = computed(() => page.value > 1);
+const hasNext = computed(() => page.value < maxPage);
+const firstLoad = ref(false);
+const data = ref<FeedItem[]>([]);
+const currentFeed = ref("news");
+
+const getCurrentTabText = computed<SelectMenuItem | undefined>(() => {
+  const selectedItem = filterItems.value.find(
+    (item: any) => item && item.id === currentFeed.value,
+  );
+
+  if (!selectedItem) return undefined;
+
+  if (
+    typeof selectedItem === "object" &&
+    selectedItem !== null &&
+    "label" in selectedItem
+  ) {
+    return selectedItem.label;
+  }
+  return undefined;
+});
+const onLoadData = async (): Promise<void> => {
+  if (!data.value) {
+    data.value = [];
+  }
+  try {
+    const response = await api<FeedItem[]>(`/${currentFeed.value}`, {
+      method: "GET",
+      baseURL: "https://api.hackerwebapp.com",
+      params: {
+        page: page.value,
+      },
+    });
+    data.value.push(...response);
+    console.log("response", response);
+    return;
+  } catch (err) {
+    console.error("Error:", err);
+    return;
+  } finally {
+    if (!firstLoad.value) {
+      firstLoad.value = true;
+    }
+  }
+};
+const handleFilter = (ev: any) => {
+  console.log("handleFilter", ev);
+  page.value = 1;
+  data.value = [];
+  firstLoad.value = false;
+  onLoadData();
+};
+onLoadData();
 </script>
 
 <template>
@@ -265,73 +325,74 @@ const filterModel = ref("NEWS");
 
     <div class="flex-1 flex flex-col gap-6 min-w-0">
       <!-- <BaseInfiniteScrollPage class="flex-1 flex flex-col gap-6 min-w-0"> -->
-        <!-- Story  -->
-        <div class="pb-2 w-full overflow-hidden">
-          <UCarousel
-            class="w-full"
-            v-slot="{ item, index }"
-            arrows
-            :prev="{
-              color: 'neutral',
-            }"
-            :next="{
-              color: 'neutral',
-            }"
-            :items="storyItems"
-            :ui="{
-              item: 'basis-[130px] md:basis-[135px] lg:basis-[140px]',
-              prev: 'sm:start-8',
-              next: 'sm:end-8',
-              container: 'gap-3 ms-0',
-            }"
-          >
-            <template v-if="item.you">
-              <div
-                class="w-full aspect-9/16 shrink-0 rounded-xl bg-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-300 transition relative bg-cover"
-                :style="`
-              background-image: url(${item.image});
-            `"
-              >
-                <div class="absolute inset-0 bg-white/40"></div>
-                <div
-                  class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-blue-600 font-bold z-10 shadow-sm mb-2"
-                >
-                  +
-                </div>
-                <span class="text-sm font-bold text-white z-10 drop-shadow-md"
-                  >Add Story</span
-                >
-              </div>
-            </template>
+      <!-- Story  -->
+      <div class="pb-2 w-full overflow-hidden">
+        <UCarousel
+          class="w-full"
+          v-slot="{ item, index }"
+          arrows
+          :prev="{
+            color: 'neutral',
+          }"
+          :next="{
+            color: 'neutral',
+          }"
+          :items="storyItems"
+          :ui="{
+            item: 'basis-[130px] md:basis-[135px] lg:basis-[140px]',
+            prev: 'sm:start-8',
+            next: 'sm:end-8',
+            container: 'gap-3 ms-0',
+          }"
+        >
+          <template v-if="item.you">
             <div
-              v-else
-              class="w-full aspect-9/16 shrink-0 rounded-xl bg-cover bg-center relative cursor-pointer group shadow-md"
+              class="w-full aspect-9/16 shrink-0 rounded-xl bg-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-300 transition relative bg-cover"
               :style="`
               background-image: url(${item.image});
             `"
             >
+              <div class="absolute inset-0 bg-white/40"></div>
               <div
-                class="absolute inset-0 bg-linear-to-b from-black/20 to-black/60 rounded-2xl"
-              ></div>
-              <UAvatar
-                class="absolute top-3 left-1/2 -translate-x-1/2 rounded-full border-2 border-blue-500"
-                :src="getMockAvatarByIndex(index)"
-                :alt="item.name"
-                size="3xl"
-                loading="lazy"
-              />
-              <span
-                class="absolute bottom-3 left-0 w-full text-center text-white text-xs font-bold px-1"
-                >{{ item.name }}</span
+                class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-blue-600 font-bold z-10 shadow-sm mb-2"
+              >
+                +
+              </div>
+              <span class="text-sm font-bold text-white z-10 drop-shadow-md"
+                >Add Story</span
               >
             </div>
-          </UCarousel>
-        </div>
+          </template>
+          <div
+            v-else
+            class="w-full aspect-9/16 shrink-0 rounded-xl bg-cover bg-center relative cursor-pointer group shadow-md"
+            :style="`
+              background-image: url(${item.image});
+            `"
+          >
+            <div
+              class="absolute inset-0 bg-linear-to-b from-black/20 to-black/60 rounded-2xl"
+            ></div>
+            <UAvatar
+              class="absolute top-3 left-1/2 -translate-x-1/2 rounded-full border-2 border-blue-500"
+              :src="getMockAvatarByIndex(index)"
+              :alt="item.name"
+              size="3xl"
+              loading="lazy"
+            />
+            <span
+              class="absolute bottom-3 left-0 w-full text-center text-white text-xs font-bold px-1"
+              >{{ item.name }}</span
+            >
+          </div>
+        </UCarousel>
+      </div>
 
-        <!-- Post area -->
-        <div class="w-full">
-          <UCard variant="outline">
-            <div class="flex items-center gap-4">
+      <!-- Post area -->
+      <div class="w-full">
+        <UCard variant="outline">
+          <div class="w-full flex flex-col gap-2">
+            <div class="w-full flex gap-2">
               <UAvatar
                 :src="authenStore.auth?.avatar?.image"
                 loading="lazy"
@@ -339,117 +400,90 @@ const filterModel = ref("NEWS");
                 class="shadow-sm"
               />
               <div
-                class="flex-1 bg-neutral-100 dark:bg-neutral-800 p-3 text-muted rounded-md cursor-pointer"
+                class="flex-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg cursor-pointer hover:bg-neutral-200/60 dark:hover:bg-neutral-800/80"
               >
-                What's new, Alexandra?
-              </div>
+                <div class="py-4 px-3 text-muted">What's new, Petro?</div>
 
-              <div class="flex items-center gap-1">
-                <UTooltip text="Photo">
-                  <UButton
-                    variant="ghost"
-                    color="neutral"
-                    icon="lucide:image"
-                  />
-                </UTooltip>
-                <UTooltip text="Video">
-                  <UButton
-                    variant="ghost"
-                    color="neutral"
-                    icon="lucide:square-play"
-                  />
-                </UTooltip>
-                <UTooltip text="Files">
-                  <UButton
-                    variant="ghost"
-                    color="neutral"
-                    icon="lucide:paperclip"
-                  />
-                </UTooltip>
-                <UTooltip text="Feeling">
-                  <UButton
-                    variant="ghost"
-                    color="neutral"
-                    icon="lucide:smile"
-                  />
-                </UTooltip>
-              </div>
-            </div>
-          </UCard>
-        </div>
-        <!-- Sort section -->
-        <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-2 px-4">
-          <div class="flex gap-2 items-center">
-            <span class="text-muted text-sm">{{ t("sort.sort") }}</span>
-            <USelect
-              v-model="sortModel"
-              variant="soft"
-              value-key="id"
-              :items="sortItems"
-              class="w-48"
-            />
-          </div>
-          <div class="flex gap-2 items-center md:justify-end">
-            <span class="text-muted text-sm">Filter</span>
-            <USelect
-              v-model="filterModel"
-              variant="soft"
-              value-key="id"
-              :items="filterItems"
-              class="w-48"
-            />
-          </div>
-        </div>
-        <!-- Post section -->
-
-        <div class="w-full pb-10">
-          <UCard>
-            <div class="w-full flex flex-col gap-4 px-4">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <img
-                    src="https://i.pravatar.cc/150?img=20"
-                    class="w-10 h-10 rounded-full"
-                  />
-                  <div>
-                    <h4 class="font-bold text-sm text-slate-800">
-                      Laura Fisher
-                    </h4>
-                    <p class="text-xs text-gray-500">12 hours ago</p>
-                  </div>
+                <div class="flex items-center gap-1 px-2 pb-2">
+                  <UTooltip text="Photo">
+                    <UButton
+                      variant="ghost"
+                      color="neutral"
+                      icon="lucide:image"
+                    />
+                  </UTooltip>
+                  <UTooltip text="Video">
+                    <UButton
+                      variant="ghost"
+                      color="neutral"
+                      icon="lucide:square-play"
+                    />
+                  </UTooltip>
+                  <UTooltip text="Files">
+                    <UButton
+                      variant="ghost"
+                      color="neutral"
+                      icon="lucide:paperclip"
+                    />
+                  </UTooltip>
+                  <UTooltip text="Feeling">
+                    <UButton
+                      variant="ghost"
+                      color="neutral"
+                      icon="lucide:smile"
+                    />
+                  </UTooltip>
                 </div>
-                <button class="text-gray-400 hover:text-gray-600">
-                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"
-                    ></path>
-                  </svg>
-                </button>
-              </div>
-
-              <div class="text-gray-700 leading-relaxed">
-                This was one of the most epic journeys, that i've got myself
-                involved in. Maybe one of the most memorizable in my entire
-                life!
-              </div>
-
-              <div class="w-full grid grid-cols-2 gap-4 h-[400px]">
-                <img
-                  src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=800&auto=format&fit=crop"
-                  class="w-full h-full object-cover rounded-2xl row-span-2"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=400&auto=format&fit=crop"
-                  class="w-full h-[192px] object-cover rounded-2xl"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=400&auto=format&fit=crop"
-                  class="w-full h-[192px] object-cover rounded-2xl"
-                />
               </div>
             </div>
-          </UCard>
+          </div>
+        </UCard>
+      </div>
+      <!-- Sort section -->
+      <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-2 px-4">
+        <div class="flex gap-2 items-center">
+          <span class="text-muted text-sm">{{ t("sort.sort") }}</span>
+          <USelect
+            v-model="sortModel"
+            variant="ghost"
+            value-key="id"
+            :items="sortItems"
+            class="w-48"
+          />
         </div>
+        <div class="flex gap-2 items-center md:justify-end">
+          <span class="text-muted text-sm">Filter</span>
+          <USelect
+            v-model="currentFeed"
+            @update:modelValue="handleFilter"
+            variant="ghost"
+            value-key="id"
+            :items="filterItems"
+            class="w-48"
+          >
+          </USelect>
+        </div>
+      </div>
+      <!-- Post section -->
+
+      <div v-if="getCurrentTabText" class="text-2xl font-bold px-4">
+        {{ getCurrentTabText }}
+      </div>
+
+      <div class="w-full pb-10">
+        <SkeletonPost v-if="!firstLoad" :items="3" />
+        <template v-else-if="data.length > 0">
+          <div v-for="(item, index) in data" :key="item.id">
+            <ExampleFeedItem :item="item" :index="index" />
+          </div>
+        </template>
+        <UEmpty
+          v-else
+          icon="lucide:pencil-line"
+          title="No posts found"
+          description="It looks like you haven't added any posts. Create one to get started."
+        />
+      </div>
       <!-- </BaseInfiniteScrollPage> -->
     </div>
 
@@ -490,7 +524,12 @@ const filterModel = ref("NEWS");
               />
             </div>
             <div class="flex gap-2">
-              <UButton class="flex-1 justify-center">Accept Invitation</UButton>
+              <UButton
+                class="flex-1 justify-center"
+                color="primary"
+                variant="solid"
+                >Accept Invitation</UButton
+              >
               <UButton
                 class="text-sm rounded-full"
                 variant="soft"
@@ -531,7 +570,12 @@ const filterModel = ref("NEWS");
                 </p>
               </div>
               <div class="flex gap-3">
-                <UButton class="flex-1 justify-center">Accept</UButton>
+                <UButton
+                  class="flex-1 justify-center"
+                  color="primary"
+                  variant="solid"
+                  >Accept</UButton
+                >
                 <UButton
                   class="flex-1 justify-center"
                   variant="soft"
@@ -559,7 +603,12 @@ const filterModel = ref("NEWS");
                 </p>
               </div>
               <div class="flex gap-3">
-                <UButton class="flex-1 justify-center">Accept</UButton>
+                <UButton
+                  class="flex-1 justify-center"
+                  color="primary"
+                  variant="solid"
+                  >Accept</UButton
+                >
                 <UButton
                   class="flex-1 justify-center"
                   variant="soft"
