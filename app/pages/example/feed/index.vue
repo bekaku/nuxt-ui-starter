@@ -259,7 +259,6 @@ const onLoadData = async (): Promise<void> => {
       },
     });
     data.value.push(...response);
-    console.log("response", response);
     return;
   } catch (err) {
     console.error("Error:", err);
@@ -400,33 +399,33 @@ onLoadData();
                 class="shadow-sm"
               />
               <div
-                class="flex-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg cursor-pointer hover:bg-neutral-200/60 dark:hover:bg-neutral-800/80"
+                class="flex-1 bg-neutral-100/60 dark:bg-neutral-800 rounded-lg cursor-pointer hover:bg-neutral-200/60 dark:hover:bg-neutral-800/80"
               >
                 <div class="py-4 px-3 text-muted">What's new, Petro?</div>
 
                 <div class="flex items-center gap-1 px-2 pb-2">
-                  <UTooltip text="Photo">
+                  <UTooltip text="Photo" arrow>
                     <UButton
                       variant="ghost"
                       color="neutral"
                       icon="lucide:image"
                     />
                   </UTooltip>
-                  <UTooltip text="Video">
+                  <UTooltip text="Video" arrow>
                     <UButton
                       variant="ghost"
                       color="neutral"
                       icon="lucide:square-play"
                     />
                   </UTooltip>
-                  <UTooltip text="Files">
+                  <UTooltip text="Files" arrow>
                     <UButton
                       variant="ghost"
                       color="neutral"
                       icon="lucide:paperclip"
                     />
                   </UTooltip>
-                  <UTooltip text="Feeling">
+                  <UTooltip text="Feeling" arrow>
                     <UButton
                       variant="ghost"
                       color="neutral"
@@ -490,7 +489,7 @@ onLoadData();
     <!-- Right  -->
     <aside
       v-if="!isMobile"
-      class="w-full lg:w-80 shrink-0 lg:sticky lg:top-[6rem] lg:h-[calc(100vh-7rem)] overflow-y-auto scrollbar-hide hidden lg:flex flex-col gap-8"
+      class="w-full lg:w-80 shrink-0 lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)] overflow-y-auto scrollbar-hide hidden lg:flex flex-col gap-8"
     >
       <!-- INVITATIONS -->
       <div>

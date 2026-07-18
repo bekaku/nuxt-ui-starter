@@ -93,7 +93,7 @@ const onLeave = (e: any) => {
   opacity: 0;
 }
 .slide-up-leave-to {
-  transform: translateY(-20px);
+  transform: translateY(20px);
   opacity: 0;
 }
 
@@ -108,7 +108,7 @@ const onLeave = (e: any) => {
   opacity: 0;
 }
 .slide-down-leave-to {
-  transform: translateY(20px);
+  transform: translateY(-20px);
   opacity: 0;
 }
 

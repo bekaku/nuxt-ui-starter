@@ -27,7 +27,7 @@ const showCommentTool = ref(false);
       >
         <div class="md:col-span-2">
           <div class="flex items-center gap-1">
-            <UTooltip text="Photo">
+            <UTooltip text="Photo" arrow>
               <UButton
                 variant="ghost"
                 size="sm"
@@ -35,7 +35,7 @@ const showCommentTool = ref(false);
                 icon="lucide:image"
               />
             </UTooltip>
-            <UTooltip text="Video">
+            <UTooltip text="Video" arrow>
               <UButton
                 variant="ghost"
                 color="neutral"
@@ -43,7 +43,7 @@ const showCommentTool = ref(false);
                 size="sm"
               />
             </UTooltip>
-            <UTooltip text="Files">
+            <UTooltip text="Files" arrow>
               <UButton
                 size="sm"
                 variant="ghost"
@@ -51,7 +51,7 @@ const showCommentTool = ref(false);
                 icon="lucide:paperclip"
               />
             </UTooltip>
-            <UTooltip text="Feeling">
+            <UTooltip text="Feeling" arrow>
               <UButton
                 size="sm"
                 variant="ghost"
