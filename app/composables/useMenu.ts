@@ -2,21 +2,16 @@ import type { AppNavigationMenuItem } from "~/types/common";
 import type { FavoriteMenu } from "~/types/models";
 
 export const useMenu = () => {
-
-  // const { t } = useLang();
   const nuxtApp = useNuxtApp();
   const t = nuxtApp.$i18n.t;
   const { hasPermissionLazy } = useRbac();
-  const appStore = useAppStore();
-  const { setAppNavigations } = appStore;
-  const { favoriteMenus, appNavigations } = storeToRefs(appStore)
+  const { auth, appNavigations, setAppNavigations } = useAuth();
   const appNavs: AppNavigationMenuItem[][] = [
     [
       {
         label: t("nav.dashboard"),
         icon: "lucide:home",
         to: "/",
-        permissions: ['login'],
       },
       {
         label: t("nav.developers"),
@@ -69,7 +64,7 @@ export const useMenu = () => {
     ],
     [
       {
-        label: "Settings",
+        label: t("base.setting"),
         to: "/settings",
         icon: "i-lucide-settings",
         defaultOpen: true,
@@ -77,7 +72,7 @@ export const useMenu = () => {
         slot: 'settings-label' as const,
         children: [
           {
-            label: "General",
+            label: t('base.general'),
             to: "/settings",
             exact: true,
           },
@@ -86,11 +81,11 @@ export const useMenu = () => {
             to: "/settings/members",
           },
           {
-            label: "Notifications",
+            label: t('base.notification'),
             to: "/settings/notifications",
           },
           {
-            label: "Security",
+            label: t('base.security'),
             to: "/settings/security",
           },
         ],
@@ -107,6 +102,11 @@ export const useMenu = () => {
             to: "/example/blank",
           },
           {
+            label: "Chats",
+            icon: "lucide:message-circle",
+            to: "/example/chats",
+          },
+          {
             label: "Charts",
             icon: "lucide:chart-line",
             to: "/example/charts",
@@ -120,6 +120,11 @@ export const useMenu = () => {
             label: "Customers",
             icon: "i-lucide-users",
             to: "/example/customers",
+          },
+          {
+            label: "Forms",
+            icon: "i-lucide-card-sim",
+            to: "/example/form",
           },
           {
             label: "Inbox",
@@ -143,6 +148,11 @@ export const useMenu = () => {
             to: "/example/modal",
           },
           {
+            label: "RBAC",
+            icon: 'lucide:user-key',
+            to: "/example/rbac",
+          },
+          {
             label: "Social",
             icon: "lucide:panel-right",
             to: "/example/feed",
@@ -151,6 +161,16 @@ export const useMenu = () => {
             label: "Transitions",
             icon: "lucide:layers",
             to: "/example/transitions",
+          },
+          {
+            label: "Upload files",
+            icon: "lucide:cloud-upload",
+            to: "/example/upload-files",
+          },
+          {
+            label: "Websocket",
+            icon: "lucide:unplug",
+            to: "/example/websocket",
           },
 
         ]
@@ -168,12 +188,18 @@ export const useMenu = () => {
     return await hasPermissionLazy({ permissions });
   }
   const getFavoriteNavigations = computed<AppNavigationMenuItem[][]>(() => {
+
+    if (!auth.value || !auth.value.favoriteMenus || auth.value.favoriteMenus.length == 0) {
+      return []
+    }
     const items: AppNavigationMenuItem[] = [];
 
-    for (const menu of favoriteMenus.value) {
-      const result = findByUrl(appNavigations.value as AppNavigationMenuItem[][], menu.url);
-      if (result) {
-        items.push({ ...result });
+    for (const menu of auth.value.favoriteMenus) {
+      if (menu.url) {
+        const result = findByUrl(appNavigations.value as AppNavigationMenuItem[][], menu.url);
+        if (result) {
+          items.push({ ...result });
+        }
       }
     }
 
@@ -235,10 +261,16 @@ export const useMenu = () => {
   }
 
   const isFaveroteExist = (url: string) => {
-    return favoriteMenus.value.some((item: FavoriteMenu) => item.url === url);
+    if (!auth.value || !auth.value.favoriteMenus || auth.value.favoriteMenus.length == 0) {
+      return false
+    }
+    return auth.value.favoriteMenus.some((item: FavoriteMenu) => item.url === url);
   }
   const getFaveroteIndex = (url: string) => {
-    return favoriteMenus.value.findIndex((item: FavoriteMenu) => item.url === url);
+    if (!auth.value || !auth.value.favoriteMenus || auth.value.favoriteMenus.length == 0) {
+      return
+    }
+    return auth.value.favoriteMenus.findIndex((item: FavoriteMenu) => item.url === url);
   }
   const findByUrl = (groups: AppNavigationMenuItem[][], to: string): AppNavigationMenuItem | null => {
     const searchRecursive = (items: AppNavigationMenuItem[]): AppNavigationMenuItem | null => {

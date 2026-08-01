@@ -1,25 +1,23 @@
 import { AuthNoFilterPage } from '~/libs/constants';
-export default defineNuxtRouteMiddleware((to) => {
-    if (to.name == undefined || (typeof to.name !== 'string')) return
-    const baseRouteName = to?.name?.replace(/___[a-z]{2}$/, '');
-    if (typeof to.name == 'string' && AuthNoFilterPage.includes(baseRouteName)) return
-    // console.log('middleware > auth.global > Pagename: ', to.name, ', path: ', to.path, ',meta: ', to.meta?.layout);
+export default defineNuxtRouteMiddleware(async (to) => {
 
-    // const { $config } = useNuxtApp()
-    const { currentUserId } = useAppCookie();
-    // console.log('middleware > auth.global > JWT currentUserId (SSR):', currentUserId.value)
-    // const token = useCookie($config.public.jwtKeyName); // get token from cookies
-    if (currentUserId.value && to.path === '/auth/login') {
-        return navigateTo('/');
-    }
+  // 1.Filter routes that do not require authentication.
+  if (typeof to.name !== 'string') return;
+  const baseRouteName = to.name.replace(/___[a-z]{2}$/, '');
+  if (AuthNoFilterPage.includes(baseRouteName)) return;
 
-    if (!currentUserId.value && to.path !== '/auth/login') { // if token doesn't exist redirect to log in
-        abortNavigation();
-        // return navigateTo('/auth/login?continue=' + to.fullPath ? to.fullPath : '');
-        // return navigateTo('/auth/login?continue=' + (to.fullPath ? encodeURIComponent(to.fullPath):''));
-        const continueQuery = to.fullPath
-            ? `?continue=${!import.meta.server ? encodeURIComponent(to.fullPath) : to.fullPath}`
-            : ''
-        return navigateTo(`/auth/login${continueQuery}`)
-    }
+  const { auth } = useAuth();
+
+  // 3. Prevent users from logging in and then returning to the login page.
+  if (auth.value && to.path === '/auth/login') {
+    return navigateTo('/');
+  }
+
+  // 4. Handling Redirects for Protected Pages
+  // If there is no cookie, it means you are not actually logged in (checking cookies is the primary method for accuracy).
+  if (!auth.value && to.path !== '/auth/login') {
+    // encodeURIComponent here for URL verification.
+    const continueQuery = encodeURIComponent(to.fullPath);
+    return navigateTo(`/auth/login?continue=${continueQuery}`);
+  }
 })

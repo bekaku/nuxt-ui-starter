@@ -35,14 +35,16 @@ export default defineNuxtConfig({
         '@capacitor/device',
         '@internationalized/date',
         '@tanstack/table-core',
-        '@unovis/vue',
+        'browser-image-compression',
+        'clsx',
         'date-fns',
         'date-fns/locale',
-        'zod',
         'dompurify',
-        'clsx',
+        'isomorphic-dompurify',
+        'jszip',
         'tailwind-merge',
-        'vue3-apexcharts'
+        'vue3-apexcharts',
+        'zod',
       ]
     }
   },
@@ -69,23 +71,6 @@ export default defineNuxtConfig({
   //     ]
   //   }
   // },
-  routeRules: {
-    '/api/**': {
-      cors: true
-    }
-  },
-  experimental: { nitroAutoImports: true },
-  devServer: {
-    port: 3005
-  },
-  imports: {
-    dirs: [
-      'api',
-    ]
-  },
-  future: {
-    compatibilityVersion: 5
-  },
   i18n: {
     strategy: 'no_prefix',
     locales: [
@@ -136,29 +121,41 @@ export default defineNuxtConfig({
     families: [
       // { name: 'Kanit', weights: [100, 200, 300, 400, 500, 600, 700, 800, 900], global: true },
       {
-        name: 'Kanit',
-        src: '/fonts/Kanit-Regular.ttf',
+        name: 'NotoSansThaiLooped',
+        src: '/fonts/NotoSansThaiLooped-Light.ttf',
+        weight: 300,
+        global: true
+      },
+      {
+        name: 'NotoSansThaiLooped',
+        src: '/fonts/NotoSansThaiLooped-Regular.ttf',
         weight: 400,
         global: true
       },
       {
-        name: 'Kanit',
-        src: '/fonts/Kanit-Bold.ttf',
-        weight: 700,
+        name: 'NotoSansThaiLooped',
+        src: '/fonts/NotoSansThaiLooped-Medium.ttf',
+        weight: 500,
         global: true
       },
       {
-        name: 'Prompt',
-        src: '/fonts/Prompt-Regular.ttf',
+        name: 'GoogleSans',
+        src: '/fonts/GoogleSans-Regular.ttf',
         weight: 400,
         global: true
       },
       {
-        name: 'Prompt',
-        src: '/fonts/Prompt-Bold.ttf',
+        name: 'GoogleSans',
+        src: '/fonts/GoogleSans-Medium.ttf',
+        weight: 500,
+        global: true
+      },
+      {
+        name: 'GoogleSans',
+        src: '/fonts/GoogleSans-Bold.ttf',
         weight: 700,
         global: true
-      }
+      },
     ],
   },
   runtimeConfig: {
@@ -180,6 +177,56 @@ export default defineNuxtConfig({
       currentUserKeyName: '_current_user',
       jwtAges: 7,//days
       jwtAgesSecond: 604800,//7 days = 7 * 24 * 60 * 60 = 604800 seconds
+      limitFileUploadSize: 52428800,//byte LimitFileSizeMB * 1024 * 1024;
+      maxImageToResize: 1776,
+      maxImageToResizeMb: 10,
+      defaultMaxItemsPerPage: 50,
+      defultItemsPerPage: 10,
+      acceptFiles: [
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/pdf',
+        'application/vnd.rar',
+        'application/zip',
+        'application/x-zip-compressed',
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'text/plain',
+        'text/csv',
+        'video/mpeg',
+        'video/mp4',
+        'video/quicktime',
+        'video/x-msvideo',
+        'video/webm',
+        'audio/mpeg',
+        'audio/wav',
+        'audio/ogg',
+        'audio/flac',
+        'audio/mp4'
+      ]
     }
+  },
+  routeRules: {
+    '/api/**': {
+      cors: true
+    }
+  },
+  experimental: { nitroAutoImports: true },
+  devServer: {
+    port: 3003
+  },
+  imports: {
+    dirs: [
+      'api',
+    ]
+  },
+  future: {
+    compatibilityVersion: 5
   },
 })

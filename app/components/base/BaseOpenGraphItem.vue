@@ -1,21 +1,29 @@
 <script setup lang="ts">
-import type { he } from "date-fns/locale";
 import type { OgMeta } from "~/types/common";
-import type { OgProps } from "~/types/props";
 
 const {
   short = false,
-  showBg = true,
   textLines = 1,
   descriptionLines = 2,
   imageSize = "125px",
   imageMaxHeight = "250px",
-} = defineProps<OgProps>();
+} = defineProps<{
+  item?: OgMeta;
+  content?: string;
+  short?: boolean;
+  textLines?: number;
+  descriptionLines?: number;
+  imageSize?: string;
+  imageMaxHeight?: string;
+}>();
 </script>
 <template>
   <div v-if="item" class="flex flex-col bg-neutral-50 dark:bg-neutral-800">
-    <ULink :to="item.url" target="_blank">
-      <div v-if="!short && item.image" :style="{ maxHeight: imageMaxHeight, overflow: 'hidden' }">
+    <ULink :to="item.url" target="_blank" class="hover:no-underline">
+      <div
+        v-if="!short && item.image"
+        :style="{ maxHeight: imageMaxHeight, overflow: 'hidden' }"
+      >
         <NuxtImg
           v-if="item.image"
           :src="item.image"
@@ -39,14 +47,14 @@ const {
           </p>
           <BaseContentText
             v-if="item.title"
-            :rows="1"
+            :rows="textLines"
             :content="item.title"
             text-class="text-neutral-900 dark:text-neutral-50"
           />
           <BaseContentText
             v-if="item.desc"
             text-class="text-sm text-muted font-light"
-            :rows="2"
+            :rows="descriptionLines"
             :content="item.desc"
           />
         </div>

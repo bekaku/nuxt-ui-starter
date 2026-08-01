@@ -185,7 +185,7 @@ export const useAppCookie = () => {
         currentUserId.value = firstCookie.userId;
       }
     } else {
-      currentUserId.value = null
+      // currentUserId.value = null
     }
     return new Promise((resolve) => {
       resolve(true);

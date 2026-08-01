@@ -1,17 +1,50 @@
 import type { AppException, RefreshTokenResponse, ResponseMessage } from '~/types/common'
 import type { FetchResponse } from 'ofetch';
+import { parse, parseSetCookie } from 'cookie-es';
+// let refreshPromise: Promise<RefreshTokenResponse> | null = null
 
-let refreshPromise: Promise<RefreshTokenResponse> | null = null
+/*
+   const response = await api.raw<AppUser>('/api/appUser/currentUserData', {
+        method: 'GET'
+      })
+      if (response && response?.status == 200 && response._data && !isAppException(response._data)) {
+        setAuth(response._data);
+      }
+ try {
+      const response = await api<ResponseEntity<AppUser>>('/api/auth/login', {
+        method: 'POST',
+        body: {
+          emailOrUsername: req.emailOrUsername,
+          password: req.password,
+          loginFrom: 'WEB',
+          deviceId: deviceId,
+        }
+      });
 
+      if (response && response.status == 200 && response.data) {
+        setAuth(response.data);
+      }
+
+      return response.data || null;
+    } catch (error) {
+      console.error('Failed to fetch profile', error);
+      return null;
+    } finally {
+      loading.value = false;
+    }
+*/
 export const useApi = () => {
   const { apiBase, cdnBase, apiClient, isDevMode, isServer } = useConfiguration()
   const { setRefreshAuthenToken, currentUserId, getCurrentUserToken, removeAuthToken } = useAppCookie();
   const localeCookie = useCookie('locale');
-  const toast = useToast()
-
+  const toast = import.meta.client ? useToast() : null;
+  const nuxtApp = useNuxtApp();
+  const requestHeaders = import.meta.server ? useRequestHeaders(['cookie']) : {};
+  const event = import.meta.server ? useRequestEvent() : null;
+  const responseCookies = new Map<string, string>();
   const getBaseHeaders = () => {
     return {
-      'X-User-ID': currentUserId.value + '',
+      'X-User-ID': currentUserId.value ? currentUserId.value + '' :'',
       'Accept-Apiclient': apiClient,
       'Accept-Language': localeCookie.value || 'en'
     }
@@ -19,8 +52,7 @@ export const useApi = () => {
 
   const handleLogout = async () => {
     await removeAuthToken();
-    refreshPromise = null
-
+    nuxtApp._refreshPromise = null;
     if (import.meta.client) {
       await navigateTo('/auth/login')
     }
@@ -37,8 +69,16 @@ export const useApi = () => {
         options.headers.set(key, value);
       }
 
-      if (currentToken) {
-        options.headers.set('Authorization', `Bearer ${currentToken.authenticationToken}`)
+      // if (currentToken) {
+      //   options.headers.set('Authorization', `Bearer ${currentToken.authenticationToken}`)
+      // }
+      options.credentials = options.credentials || 'include';
+      if (import.meta.server && options.credentials === 'include') {
+        if (!options.headers.has('cookie')) {
+          if (requestHeaders.cookie) {
+            options.headers.set('cookie', requestHeaders.cookie as string);
+          }
+        }
       }
     },
     async onResponse({ request, response, options }) {
@@ -46,7 +86,8 @@ export const useApi = () => {
         console.log("[fetch response]", { request, options, response });
       }
       if (response.status != 401 && response.status != 403) {
-        exeptionNotify(response);
+        // exeptionNotify(response);
+        nuxtApp.runWithContext(() => exeptionNotify(response));
       }
     },
   })
@@ -62,82 +103,131 @@ export const useApi = () => {
   };
 
   const notifyMessage = (response: AppException | null): void => {
-    if (import.meta.server || response == null) {
-      return;
+    if (import.meta.client && toast && response && (response.message || response.errors?.length)) {
+      toast.add({
+        title: h('span', { class: 'text-red-500 font-bold' }, response.message),
+        description: response.errors?.length
+          ? h(
+            'ul',
+            { class: 'list-disc list-inside space-y-1 mt-1 text-gray-600 dark:text-gray-300' },
+            response.errors.map(errorText => h('li', errorText))
+          )
+          : undefined,
+        icon: 'lucide:octagon-alert',
+        color: 'error',
+      })
     }
-
-    toast.add({
-      title: h('span', { class: 'text-red-500 font-bold' }, response.message),
-      description: response.errors?.length
-        ? h(
-          'ul',
-          { class: 'list-disc list-inside space-y-1 mt-1 text-gray-600 dark:text-gray-300' },
-          response.errors.map(errorText => h('li', errorText))
-        )
-        : undefined,
-      icon: 'lucide:octagon-alert',
-      color: 'error',
-    })
   };
 
   const notifyServerMessage = (response: ResponseMessage): void => {
-    if (import.meta.server || !response.message) {
-      return;
+    if (import.meta.client && toast && response && response.message) {
+      toast.add({
+        description: response.message,
+        icon: response.status == '200 OK' || response.status == '201 Created' ? 'lucide:circle-check' : 'i-lucide-alert-circle',
+        color: response.status == '200 OK' || response.status == '201 Created' ? 'success' : 'error',
+      })
     }
-
-    toast.add({
-      description: response.message,
-      icon: response.status == '200 OK' || response.status == '201 Created' ? 'lucide:circle-check' : 'i-lucide-alert-circle',
-      color: response.status == '200 OK' || response.status == '201 Created' ? 'success' : 'error',
-    })
   }
 
-  // ฟังก์ชันกลางสำหรับจัดการ Request ทั้งแบบปกติและแบบ raw
+  // A central function for handling both normal and raw requests.
   const executeFetch = async <T = any, R extends boolean = false>(
     request: Parameters<typeof $fetch>[0],
     options: Parameters<typeof $fetch>[1] | undefined,
     isRaw: R
   ): Promise<R extends true ? FetchResponse<T> : T> => {
 
-    // กำหนดวิธีเรียก Fetch
+    // Define the method for calling Fetch.
     const callApi = (opts: any) => isRaw ? baseFetch.raw<T>(request, opts) : baseFetch<T>(request, opts);
 
     try {
       return (await callApi(options)) as any;
     } catch (error: any) {
       if (error.response?.status === 401) {
-        const currentToken = await getCurrentUserToken();
+        // const currentToken = await getCurrentUserToken();
+        // if (currentToken && currentToken.refreshToken) {
+        if (currentUserId.value) {
+          if (!nuxtApp._refreshPromise) {
 
-        if (currentToken && currentToken.refreshToken) {
+            const refreshHeaders = new Headers();
 
-          if (!refreshPromise) {
-            refreshPromise = $fetch<RefreshTokenResponse>('/api/auth/refreshToken', {
+            Object.entries(getBaseHeaders()).forEach(([k, v]) => {
+              refreshHeaders.set(k, v);
+            });
+
+            if (import.meta.server && requestHeaders.cookie) {
+              refreshHeaders.set('cookie', requestHeaders.cookie as string);
+            }
+
+            nuxtApp._refreshPromise = $fetch<RefreshTokenResponse>('/api/auth/refreshToken', {
               baseURL: apiBase as string,
               method: 'POST',
-              headers: getBaseHeaders(),
+              headers: refreshHeaders,
+              credentials: 'include',
               body: {
-                data: {
-                  refreshToken: currentToken.refreshToken
+                // data: {
+                //   refreshToken: currentToken.refreshToken
+                // }
+              },
+              onResponse({ response }) {
+
+                if (!import.meta.server) {
+                  return;
+                }
+                if (!event) {
+                  return;
+                }
+                const cookies =
+                  (response.headers as any).getSetCookie?.() ??
+                  (response.headers.get('set-cookie')
+                    ? [response.headers.get('set-cookie')!]
+                    : []);
+
+                if (cookies.length) {
+                  event.node.res.setHeader('set-cookie', cookies);
+
+                  for (const cookie of cookies) {
+                    const parsed = parseSetCookie(cookie);
+                    if (parsed) {
+
+                      responseCookies.set(parsed.name, parsed.value);
+                    }
+                  }
                 }
               }
             }).then(async (res) => {
-              await setRefreshAuthenToken(res);
+              if (isDevMode() && !isServer()) {
+                console.warn("[refresh token] res", res);
+              }
+              // await setRefreshAuthenToken(res);
               return res;
             }).catch(async (err) => {
               await handleLogout();
               throw err;
             }).finally(() => {
-              refreshPromise = null;
+              nuxtApp._refreshPromise = null;
             });
           }
 
           try {
-            const newAccessToken = await refreshPromise;
+            const newAccessToken = await nuxtApp._refreshPromise as RefreshTokenResponse;
 
-            // คัดลอก options เพื่อป้องกันผลกระทบกับ object ต้นทาง
             const retryOptions = { ...options };
             retryOptions.headers = new Headers(retryOptions.headers);
-            retryOptions.headers.set('Authorization', `Bearer ${newAccessToken.authenticationToken}`);
+
+            // retryOptions.headers.set('Authorization', `Bearer ${newAccessToken.authenticationToken}`);
+            if (import.meta.server) {
+              const cookies = parse((requestHeaders.cookie as string) || '');
+
+              for (const [name, value] of responseCookies) {
+                cookies[name] = value;
+              }
+              retryOptions.headers.set(
+                'cookie',
+                Object.entries(cookies)
+                  .map(([k, v]) => `${k}=${v}`)
+                  .join('; ')
+              );
+            }
 
             return (await callApi(retryOptions)) as any;
           } catch (retryError) {
@@ -152,7 +242,7 @@ export const useApi = () => {
     }
   };
 
-  // การเรียกใช้รูปแบบปกติ
+  // Calling the normal pattern.
   const customApiFetch = async <T = any>(
     request: Parameters<typeof $fetch>[0],
     options?: Parameters<typeof $fetch>[1]
@@ -160,7 +250,7 @@ export const useApi = () => {
     return executeFetch<T, false>(request, options, false);
   }
 
-  // การเรียกใช้รูปแบบ raw เพื่อดึงข้อมูล Response แบบเต็ม
+  // Using the raw format to extract the full response data.
   customApiFetch.raw = async <T = any>(
     request: Parameters<typeof $fetch>[0],
     options?: Parameters<typeof $fetch>[1]

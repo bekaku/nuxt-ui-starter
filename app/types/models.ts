@@ -1,8 +1,9 @@
 import type { ChatMessageType, ChatType, EmojiType, FileMimeType, ILanguge, LoginLogType, UploadStatus, VideoSrc, VideoTrack } from "./common";
 export type IPermissionOperationType = 1 | 2 | 3; // 1=crud, 2=report, 3=other
 export type PermissionType = "CRUD" | "REPORT" | "OTHER" | "FEATURE";
+export type IdType = bigint | string | null | undefined;
 export interface Id {
-  id?: number | string | null;
+  id?: IdType
 }
 export interface AccessToken extends Id {
   ipAddredd: string;
@@ -28,13 +29,10 @@ export interface FileManager extends FileManagerMetaData {
   fileMime: string;
   fileName: string;
   filePath: string;
-  streamPath?: string;
-  fileThumbnailPath: string;
-  fileSize: string;
-  fileSizeNo?: number;
+  fileThumbnailPath?: string;
+  fileSize: number;
   fileCount?: number;
   functionId?: number;
-  uniqueId?: string | null
   createdDate?: string;
   updatedDate?: string;
   file?: any;
@@ -42,6 +40,7 @@ export interface FileManager extends FileManagerMetaData {
   videoSources?: VideoSrc[]
   videoTracks?: VideoTrack[]
   deleteFlag?: boolean | undefined
+  uniqueId?: string | null
   uploadProgress?: {
     uploading: boolean;
     progress: number;
@@ -80,42 +79,39 @@ export interface ImageDto {
   index?: number;
   id?: number;
   image: string;
-  thumbnail: string;
+  thumbnail?: string;
 }
 export interface Permission extends Id {
   code: string;
   remark?: string | null;
   description?: string | null;
-  operationType: PermissionType;
+  module?: string | null;
+  operationType?: PermissionType | null;
 }
 export interface AppRole extends Id {
   name: string;
-  nameEn?: string | null;
   active: boolean;
-  frontEnd: boolean;
-  selectdPermissions: (number | string)[];
+  selectdPermissions: string[];
 }
 export interface AppUser extends Id {
   email: string;
-  uuid?: string;
   username?: string | null;
   password?: string | null;
   token?: string | null;
   fcmToken?: string | null;
-  avatarFileId?: number | null;
-  coverFileId?: number | null;
-  accessTokenId?: number | null;
+  avatarFileId?: IdType;
+  coverFileId?: IdType;
+  accessTokenId?: IdType;
   avatar?: ImageDto | null;
   cover?: ImageDto | null;
-  active: boolean;
+  active?: boolean;
   selectedRoles?: (number | string)[];
   defaultLocale?: ILanguge;
-  ownerProfile?: boolean;
   permissions?: string[]
+  createdDate?: string
   favoriteMenus?: FavoriteMenu[]
 }
 export interface UserProfile extends Id {
-  id: number;
   username: string;
   fullName: string;
   avatar: ImageDto | null;
@@ -205,6 +201,7 @@ export interface GroupChatMsgRequest {
   shareMessageIds?: number[]
   replyToId?: number | null
 }
-export interface FavoriteMenu {
-  url: string
+export interface FavoriteMenu extends Id {
+  url: string | null
+  appUser?: IdType
 }

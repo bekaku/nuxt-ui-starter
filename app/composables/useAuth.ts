@@ -1,20 +1,50 @@
-import type { LoginRequest, RefreshTokenResponse, ResponseMessage } from '~/types/common';
+import type { AppNavigationMenuItem, LoginRequest, RefreshTokenResponse, ResponseMessage } from '~/types/common';
+import type { AppUser, FavoriteMenu } from '~/types/models';
 import { useAppBroadcastChannels } from './useAppBroadcastChannels';
 import { useBase } from './useBase';
-import { useAuthenStore } from '~/stores/authenStore';
 export const useAuth = () => {
+  const nuxtApp = useNuxtApp();
   const api = useApi();
   const { sendBroradcastChanelReload } = useAppBroadcastChannels()
-  const { setAuthenToken, removeAuthToken, getCurrentUserToken, switchUser } = useAppCookie();
+  const { currentUserId, setAuthenToken, removeAuthToken, getCurrentUserToken, switchUser } = useAppCookie();
   const { getDeviceId } = useAppDevice()
   const { isServer } = useConfiguration()
-  const authenStore = useAuthenStore();
   const loading = ref<boolean>(false);
-  const { appNavigateTo } = useBase();
-  const { t } = useLang();
+  const t = nuxtApp.$i18n.t;
   const confirm = useConfirmDialog();
-  const loader = useLoader();
   const { inputSanitizeHtml } = useBase()
+
+  const auth = useState<AppUser | null>('auth:user', () => null);
+  const appNavigations = useState<AppNavigationMenuItem[]>('auth:navigations', () => []);
+  const isLoggedIn = computed(() => !!auth.value);
+  const loginedAvatar = computed(() => auth.value?.avatar ? auth.value?.avatar.image : '/images/user.png');
+  const loginedDisplay = computed(() => auth.value?.email || auth.value?.username || 'Unkonwn');
+
+  const setAuth = (payload: AppUser) => {
+    auth.value = payload;
+  };
+
+  const clearAuth = () => {
+    auth.value = null;
+  };
+
+  const setAppNavigations = (items: AppNavigationMenuItem[]) => {
+    appNavigations.value = items;
+  };
+
+  const addFavoriteMenus = (item: FavoriteMenu) => {
+    if (!auth.value || !auth.value.favoriteMenus) {
+      return
+    }
+    auth.value.favoriteMenus.push(item);
+  };
+  const removeFavoriteMenus = (index: number) => {
+    if (!auth.value || !auth.value.favoriteMenus) {
+      return
+    }
+    auth.value.favoriteMenus.splice(index, 1);;
+  };
+
   const signin = async (req: LoginRequest): Promise<RefreshTokenResponse | null> => {
 
     loading.value = true
@@ -33,7 +63,8 @@ export const useAuth = () => {
       })
 
       if (response && response.authenticationToken) {
-        await setAuthenToken(response);
+        // await setAuthenToken(response);
+        currentUserId.value= response.userId
       }
       return new Promise((resolve) => {
         resolve(response);
@@ -53,24 +84,49 @@ export const useAuth = () => {
       description: t("helper.logoutConfirm"),
     });
     if (conf) {
-      loader.open();
-      const currentToken = await getCurrentUserToken();
-      await api<ResponseMessage>('/api/auth/logout', {
-        method: 'POST',
-        body: {
-          data: {
-            refreshToken: currentToken?.refreshToken,
-          }
-        }
-      })
+      await signoutProcess()
+    }
+  };
 
+  const signoutProcess = async (): Promise<void> => {
+    console.log('signoutProcess');
+    const loader = useLoader();
+    loader.open();
+    const currentToken = await getCurrentUserToken();
+    const response = await api.raw<ResponseMessage>('/api/auth/logout', {
+      method: 'POST',
+      body: {
+        data: {
+          refreshToken: currentToken?.refreshToken,
+        }
+      }
+    })
+    console.log('signoutProcess > response', response);
+
+    if (response && response.status == 200) {
+      clearAuth();
       await removeAuthToken();
-      await authenStore.onLogout();
       await sendBroradcastChanelReload();
       loader.close();
-      appNavigateTo('/auth/login', { replace: true })
+      navigateTo('/auth/login', { replace: true })
+
     }
-    return new Promise((resolve) => resolve(true));
+
+  }
+
+  const fetchMe = async (): Promise<AppUser | null> => {
+    try {
+      const response = await api.raw<AppUser>('/api/appUser/currentUserData', {
+        method: 'GET'
+      })
+      if (response && response?.status == 200 && response._data && !isAppException(response._data)) {
+        setAuth(response._data);
+      }
+
+      return response._data || null;
+    } catch (e) {
+      return null;
+    }
   };
 
   const onSwithUser = async (userId: number | string) => {
@@ -84,9 +140,21 @@ export const useAuth = () => {
     }, 100)
   }
   return {
+    auth,
+    isLoggedIn,
     loading,
     signin,
     signout,
+    signoutProcess,
+    fetchMe,
+    setAuth,
+    clearAuth,
+    appNavigations,
+    setAppNavigations,
+    addFavoriteMenus,
+    removeFavoriteMenus,
+    loginedAvatar,
+    loginedDisplay,
     onSwithUser
   }
 

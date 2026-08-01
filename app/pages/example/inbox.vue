@@ -15,7 +15,7 @@ const tabItems = [
 ];
 const selectedTab = ref("all");
 
-const { data: mails } = await useFetch<Mail[]>("/api/mails", {
+const { data: mails } = await useFetch<Mail[]>("/api/mock/mails", {
   default: () => [],
 });
 

@@ -1,36 +1,39 @@
 <script setup lang="ts">
-const {
-  button = false,
-  disabled = false,
-  separator = true,
-  titleBold = true,
-  whitespaceNowrap = false,
-  dense = false,
-  to,
-} = defineProps<{
-  title?: string;
-  description?: string;
-  button?: boolean;
-  separator?: boolean;
-  disabled?: boolean;
-  whitespaceNowrap?: boolean;
-  titleBold?: boolean;
-  titleClass?: string;
-  to?: string;
-  id?: string;
-  index?: number;
-  top?: boolean;
-  dense?: boolean;
-}>();
+
+const props = withDefaults(
+  defineProps<{
+    title?: string;
+    description?: string;
+    button?: boolean;
+    separator?: boolean;
+    disabled?: boolean;
+    whitespaceNowrap?: boolean;
+    titleBold?: boolean;
+    titleClass?: string;
+    to?: string;
+    id?: string;
+    index?: number;
+    top?: boolean;
+    dense?: boolean;
+  }>(),
+  {
+    button: false,
+    disabled: false,
+    separator: true,
+    titleBold: true,
+    whitespaceNowrap: false,
+    dense: false,
+  },
+);
 const { appNavigateTo } = useBase();
 
 const emit = defineEmits<{
   "on-click": [payload: any];
 }>();
 const handleClick = (e: any) => {
-  if (!disabled) {
-    if (to) {
-      appNavigateTo(to);
+  if (!props.disabled) {
+    if (props.to) {
+      appNavigateTo(props.to);
     }
     emit("on-click", e);
   }
@@ -39,7 +42,7 @@ const handleClick = (e: any) => {
 <template>
   <div
     v-bind="$attrs"
-    class="flex flex-row items-center justify-between pl-2.5 pr-2.5"
+    class="flex flex-row items-center justify-between pl-2.5 pr-2.5 overflow-hidden"
     :class="{
       'active:bg-muted cursor-pointer hover:bg-muted': button && !disabled,
       'opacity-50': disabled,
@@ -96,7 +99,7 @@ const handleClick = (e: any) => {
 
     <div
       v-if="$slots.end"
-      class="flex flex-row justify-end"
+      class="flex flex-row justify-end "
       :class="{
         'items-center': !top,
         'items-start': top,

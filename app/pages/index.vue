@@ -65,9 +65,6 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
 
 <template>
   <BaseDashboardPanel id="home" title="Home">
-    <!-- <HomeStats :period="period" :range="range" />
-    <HomeChart :period="period" :range="range" />
-    <HomeSales :period="period" :range="range" /> -->
     <BaseItem
       title="Dashboard"
       description="Top picks for you. Updated daily."
@@ -145,11 +142,15 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
           title-bold
         >
           <template #start>
-            <UAvatar v-if="item.icon" :icon="item.icon.name" size="3xl" />
+            <UAvatar
+              v-if="item.icon"
+              :icon="typeof item.icon === 'string' ? item.icon : item.icon.name"
+              size="3xl"
+            />
           </template>
 
           <template #end>
-            <BaseLink :to="item.to || ''"> Explore </BaseLink>
+            <ULink :to="item.to || ''">Explore</ULink>
           </template>
         </BaseItem>
       </UCard>
@@ -171,7 +172,7 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
           <template #end>
             <UIcon
               v-if="item.icon"
-              v-bind="item.icon"
+              v-bind="item.icon as any"
               class="text-muted"
               size="20px"
             />
@@ -206,6 +207,7 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
           </div>
           <div class="w-full">
             <ChartSparklines
+              v-if="item"
               style="width: 155px"
               height="75"
               :chart-id="`sparkline-area-${index}`"
@@ -228,9 +230,14 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
           <template #header>
             <h1 class="text-2xl font-bold">Overview</h1>
           </template>
-          <template v-if="dashboardChartData">
+          <template
+            v-if="
+              dashboardChartData &&
+              dashboardChartData.series &&
+              dashboardChartData.categories
+            "
+          >
             <ChartArea
-              class="q-my-sm"
               chart-id="chart-bar"
               height="350"
               type="bar"

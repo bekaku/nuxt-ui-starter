@@ -1,15 +1,23 @@
 <script setup lang="ts">
 import type { DropdownMenuItem, DashboardPanelProps } from "@nuxt/ui";
+const props = withDefaults(
+  defineProps<{
+    title?: string;
+    id: string;
+    minSize?: number;
+    maxSize?: number;
+    defaultSize?: number;
+    resizable?: boolean;
+    ui?: DashboardPanelProps["ui"];
+  }>(),
+  {
+    resizable: false,
+    ui: () => ({
+      root: "gap-1",
+    }),
+  },
+);
 
-const { resizable = false, ui = { right: "gap-1" } } = defineProps<{
-  title?: string;
-  id: string;
-  minSize?: number;
-  maxSize?: number;
-  defaultSize?: number;
-  resizable?: boolean;
-  ui?: DashboardPanelProps["ui"];
-}>();
 const { isNotificationsSlideoverOpen } = useDashboard();
 
 const items = [
@@ -38,7 +46,8 @@ const items = [
   >
     <template #header>
       <slot name="header">
-        <UDashboardNavbar :title="title" :ui>
+        <!-- class="bg-default" -->
+        <UDashboardNavbar :title="title" :ui >
           <template #leading>
             <slot name="leading">
               <UDashboardSidebarCollapse />
@@ -68,9 +77,9 @@ const items = [
                 </UButton>
               </UTooltip>
 
-              <UDropdownMenu :items="items">
+              <!-- <UDropdownMenu :items="items">
                 <UButton icon="i-lucide-plus" size="md" class="rounded-full" />
-              </UDropdownMenu>
+              </UDropdownMenu> -->
             </slot>
           </template>
         </UDashboardNavbar>
