@@ -143,6 +143,7 @@ export const useApi = () => {
       return (await callApi(options)) as any;
     } catch (error: any) {
       if (error.response?.status === 401) {
+
         // const currentToken = await getCurrentUserToken();
         // if (currentToken && currentToken.refreshToken) {
         if (currentUserId.value) {
