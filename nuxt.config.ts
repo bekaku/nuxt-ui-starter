@@ -14,11 +14,9 @@ function getFileList(locale: string) {
 
 export default defineNuxtConfig({
   modules: [
-    '@pinia/nuxt',
     '@nuxt/eslint',
     '@nuxt/ui',
     '@vueuse/nuxt',
-    '@pinia/nuxt',
     '@nuxtjs/i18n',
     '@nuxt/icon',
     '@nuxtjs/device',
