@@ -69,8 +69,6 @@ const {
 } = useCrudForm<AppRole>(
   {
     crudName: "AppRole",
-    methodPutIncludeId: false,
-    methodPut: "POST",
     fectchDataOnLoad: true,
   },
   state,
@@ -79,10 +77,10 @@ const {
 const { data: permissions, pending } = await useAsyncData<Permission[]>(
   "permission-all",
   async () => {
-    const response = await api<ResponseEntity<Permission[]>>(
+    const response = await api<Permission[]>(
       "/api/permission/findAllPermission",
     );
-    return response.data || [];
+    return response || [];
   },
 );
 

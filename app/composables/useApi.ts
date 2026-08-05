@@ -35,7 +35,6 @@ import { parse, parseSetCookie } from 'cookie-es';
 */
 export const useApi = () => {
   const { apiBase, cdnBase, apiClient, isDevMode, isServer } = useConfiguration()
-  const { setRefreshAuthenToken, currentUserId, getCurrentUserToken, removeAuthToken } = useAppCookie();
   const localeCookie = useCookie('locale');
   const toast = import.meta.client ? useToast() : null;
   const nuxtApp = useNuxtApp();
@@ -44,14 +43,12 @@ export const useApi = () => {
   const responseCookies = new Map<string, string>();
   const getBaseHeaders = () => {
     return {
-      'X-User-ID': currentUserId.value ? currentUserId.value + '' :'',
       'Accept-Apiclient': apiClient,
       'Accept-Language': localeCookie.value || 'en'
     }
   }
 
   const handleLogout = async () => {
-    await removeAuthToken();
     nuxtApp._refreshPromise = null;
     if (import.meta.client) {
       await navigateTo('/auth/login')
@@ -61,7 +58,6 @@ export const useApi = () => {
   const baseFetch = $fetch.create({
     baseURL: apiBase as string,
     async onRequest({ options }) {
-      const currentToken = await getCurrentUserToken();
       options.headers = new Headers(options.headers)
 
       const baseHeaders = getBaseHeaders();
@@ -146,96 +142,92 @@ export const useApi = () => {
 
         // const currentToken = await getCurrentUserToken();
         // if (currentToken && currentToken.refreshToken) {
-        if (currentUserId.value) {
-          if (!nuxtApp._refreshPromise) {
+        if (!nuxtApp._refreshPromise) {
 
-            const refreshHeaders = new Headers();
+          const refreshHeaders = new Headers();
 
-            Object.entries(getBaseHeaders()).forEach(([k, v]) => {
-              refreshHeaders.set(k, v);
-            });
+          Object.entries(getBaseHeaders()).forEach(([k, v]) => {
+            refreshHeaders.set(k, v);
+          });
 
-            if (import.meta.server && requestHeaders.cookie) {
-              refreshHeaders.set('cookie', requestHeaders.cookie as string);
-            }
+          if (import.meta.server && requestHeaders.cookie) {
+            refreshHeaders.set('cookie', requestHeaders.cookie as string);
+          }
 
-            nuxtApp._refreshPromise = $fetch<RefreshTokenResponse>('/api/auth/refreshToken', {
-              baseURL: apiBase as string,
-              method: 'POST',
-              headers: refreshHeaders,
-              credentials: 'include',
-              body: {
-                // data: {
-                //   refreshToken: currentToken.refreshToken
-                // }
-              },
-              onResponse({ response }) {
+          nuxtApp._refreshPromise = $fetch<RefreshTokenResponse>('/api/auth/refreshToken', {
+            baseURL: apiBase as string,
+            method: 'POST',
+            headers: refreshHeaders,
+            credentials: 'include',
+            body: {
+              // data: {
+              //   refreshToken: currentToken.refreshToken
+              // }
+            },
+            onResponse({ response }) {
 
-                if (!import.meta.server) {
-                  return;
-                }
-                if (!event) {
-                  return;
-                }
-                const cookies =
-                  (response.headers as any).getSetCookie?.() ??
-                  (response.headers.get('set-cookie')
-                    ? [response.headers.get('set-cookie')!]
-                    : []);
+              if (!import.meta.server) {
+                return;
+              }
+              if (!event) {
+                return;
+              }
+              const cookies =
+                (response.headers as any).getSetCookie?.() ??
+                (response.headers.get('set-cookie')
+                  ? [response.headers.get('set-cookie')!]
+                  : []);
 
-                if (cookies.length) {
-                  event.node.res.setHeader('set-cookie', cookies);
+              if (cookies.length) {
+                event.node.res.setHeader('set-cookie', cookies);
 
-                  for (const cookie of cookies) {
-                    const parsed = parseSetCookie(cookie);
-                    if (parsed) {
+                for (const cookie of cookies) {
+                  const parsed = parseSetCookie(cookie);
+                  if (parsed) {
 
-                      responseCookies.set(parsed.name, parsed.value);
-                    }
+                    responseCookies.set(parsed.name, parsed.value);
                   }
                 }
               }
-            }).then(async (res) => {
-              if (isDevMode() && !isServer()) {
-                console.warn("[refresh token] res", res);
-              }
-              // await setRefreshAuthenToken(res);
-              return res;
-            }).catch(async (err) => {
-              await handleLogout();
-              throw err;
-            }).finally(() => {
-              nuxtApp._refreshPromise = null;
-            });
-          }
-
-          try {
-            const newAccessToken = await nuxtApp._refreshPromise as RefreshTokenResponse;
-
-            const retryOptions = { ...options };
-            retryOptions.headers = new Headers(retryOptions.headers);
-
-            // retryOptions.headers.set('Authorization', `Bearer ${newAccessToken.authenticationToken}`);
-            if (import.meta.server) {
-              const cookies = parse((requestHeaders.cookie as string) || '');
-
-              for (const [name, value] of responseCookies) {
-                cookies[name] = value;
-              }
-              retryOptions.headers.set(
-                'cookie',
-                Object.entries(cookies)
-                  .map(([k, v]) => `${k}=${v}`)
-                  .join('; ')
-              );
             }
+          }).then(async (res) => {
+            if (isDevMode() && !isServer()) {
+              console.warn("[refresh token] res", res);
+            }
+            // await setRefreshAuthenToken(res);
+            return res;
+          }).catch(async (err) => {
+            await handleLogout();
+            throw err;
+          }).finally(() => {
+            nuxtApp._refreshPromise = null;
+          });
+        }
 
-            return (await callApi(retryOptions)) as any;
-          } catch (retryError) {
-            return Promise.reject(retryError);
+        try {
+          const newAccessToken = await nuxtApp._refreshPromise as RefreshTokenResponse;
+
+          const retryOptions = { ...options };
+          retryOptions.headers = new Headers(retryOptions.headers);
+
+          // retryOptions.headers.set('Authorization', `Bearer ${newAccessToken.authenticationToken}`);
+          if (import.meta.server) {
+            const cookies = parse((requestHeaders.cookie as string) || '');
+
+            for (const [name, value] of responseCookies) {
+              cookies[name] = value;
+            }
+            retryOptions.headers.set(
+              'cookie',
+              Object.entries(cookies)
+                .map(([k, v]) => `${k}=${v}`)
+                .join('; ')
+            );
           }
-        } else {
-          await handleLogout();
+
+          return (await callApi(retryOptions)) as any;
+        } catch (retryError) {
+          return Promise.reject(retryError);
         }
       }
 

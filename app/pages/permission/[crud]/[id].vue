@@ -91,8 +91,6 @@ const {
 } = useCrudForm<Permission>(
   {
     crudName: "Permission",
-    methodPutIncludeId: false,
-    methodPut: "POST",
   },
   state,
 );

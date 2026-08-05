@@ -151,8 +151,6 @@ const {
 } = useCrudForm<AppUser>(
   {
     crudName: "AppUser",
-    methodPutIncludeId: false,
-    methodPut: "POST",
   },
   state,
 );

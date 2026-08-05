@@ -6,7 +6,6 @@ export const useAuth = () => {
   const nuxtApp = useNuxtApp();
   const api = useApi();
   const { sendBroradcastChanelReload } = useAppBroadcastChannels()
-  const { currentUserId, setAuthenToken, removeAuthToken, getCurrentUserToken, switchUser } = useAppCookie();
   const { getDeviceId } = useAppDevice()
   const { isServer } = useConfiguration()
   const loading = ref<boolean>(false);
@@ -64,7 +63,7 @@ export const useAuth = () => {
 
       if (response && response.authenticationToken) {
         // await setAuthenToken(response);
-        currentUserId.value= response.userId
+        // currentUserId.value= response.userId
       }
       return new Promise((resolve) => {
         resolve(response);
@@ -92,20 +91,13 @@ export const useAuth = () => {
     console.log('signoutProcess');
     const loader = useLoader();
     loader.open();
-    const currentToken = await getCurrentUserToken();
     const response = await api.raw<ResponseMessage>('/api/auth/logout', {
       method: 'POST',
-      body: {
-        data: {
-          refreshToken: currentToken?.refreshToken,
-        }
-      }
     })
     console.log('signoutProcess > response', response);
 
     if (response && response.status == 200) {
       clearAuth();
-      await removeAuthToken();
       await sendBroradcastChanelReload();
       loader.close();
       navigateTo('/auth/login', { replace: true })
@@ -133,7 +125,6 @@ export const useAuth = () => {
     if (!isServer() || !userId) {
       return;
     }
-    await switchUser(userId)
     await sendBroradcastChanelReload();
     setTimeout(() => {
       window.location.replace('/')

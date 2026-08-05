@@ -37,7 +37,6 @@ export default defineNuxtConfig({
         'clsx',
         'date-fns',
         'date-fns/locale',
-        'dompurify',
         'isomorphic-dompurify',
         'jszip',
         'tailwind-merge',
@@ -76,17 +75,17 @@ export default defineNuxtConfig({
         code: 'en',
         iso: 'en',
         // file: 'en/index.ts',
+        // file: 'en.json',
         files: getFileList('en'),
       },
       {
         code: 'th',
         iso: 'th',
+        // file: 'th.json',
         // file: 'th/index.ts',
         files: getFileList('th'),
       },
     ],
-    // vueI18n: 'i18n.config.ts',
-    // lazy: true,
     langDir: 'locales',
     defaultLocale: 'th',
     detectBrowserLanguage: {
@@ -95,7 +94,14 @@ export default defineNuxtConfig({
       fallbackLocale: 'th',
     },
   },
-  compatibilityDate: '2024-07-11',
+  // i18n: {
+  //   locales: [
+  //     { code: 'en', language: 'en-US', file: 'en.json', name: 'English' },
+  //     { code: 'ja', language: 'ja-JP', file: 'ja.json', name: 'Japanese' }
+  //   ],
+  //   defaultLocale: 'en'
+  // },
+  compatibilityDate: '2025-07-15',
   eslint: {
     config: {
       stylistic: {
@@ -170,9 +176,9 @@ export default defineNuxtConfig({
       codeVersion: 0,
       webUrl: '',
       defaultLocale: 'th',
-      jwtKeyName: '_token',
-      refreshJwtKeyName: '_refresh_token',
-      currentUserKeyName: '_current_user',
+      jwtKeyName: '_session_',
+      refreshJwtKeyName: '_slid_',
+      currentUserKeyName: '_sid',
       jwtAges: 7,//days
       jwtAgesSecond: 604800,//7 days = 7 * 24 * 60 * 60 = 604800 seconds
       limitFileUploadSize: 52428800,//byte LimitFileSizeMB * 1024 * 1024;
@@ -224,7 +230,7 @@ export default defineNuxtConfig({
       'api',
     ]
   },
-  future: {
-    compatibilityVersion: 5
-  },
+  // future: {
+  //   compatibilityVersion: 5
+  // },
 })
