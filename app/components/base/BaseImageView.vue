@@ -16,7 +16,7 @@ const props = defineProps<{
   showThumbnails?: boolean;
 }>();
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(["close"]);
 
 const items = ref<any[]>([]);
 const carousel = useTemplateRef("carousel");
@@ -50,7 +50,7 @@ const setList = async () => {
     }
   }
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     resolve(true);
   });
 };
@@ -79,34 +79,44 @@ function select(index: number) {
 // รองรับการกดปุ่มซ้าย-ขวา และ ESC บนคีย์บอร์ด
 onMounted(() => {
   if (props.allowKeyboard) {
-    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener("keydown", handleKeydown);
   }
 });
 
 onBeforeUnmount(() => {
   if (props.allowKeyboard) {
-    window.removeEventListener('keydown', handleKeydown);
+    window.removeEventListener("keydown", handleKeydown);
   }
 });
 
 const handleKeydown = (e: KeyboardEvent) => {
-  if (e.key === 'ArrowRight') onClickNext();
-  if (e.key === 'ArrowLeft') onClickPrev();
-  if (e.key === 'Escape' && props.closeable) emit('close');
+  if (e.key === "ArrowRight") onClickNext();
+  if (e.key === "ArrowLeft") onClickPrev();
+  if (e.key === "Escape" && props.closeable) emit("close");
 };
 </script>
 <template>
-  <!-- <div class="flex flex-col w-full h-full overflow-hidden bg-gray-50/50 dark:bg-gray-900/30 rounded-md">
-    <div class="flex items-center justify-between px-4 py-3 shrink-0 border-b border-gray-200 dark:border-gray-800">
+  <div
+    class="flex flex-col w-full h-full overflow-hidden bg-gray-50/50 dark:bg-gray-900/30 rounded-md"
+  >
+    <div
+      class="flex items-center justify-between px-4 py-3 shrink-0 border-b border-gray-200 dark:border-gray-800"
+    >
       <div class="text-sm font-medium w-24 text-gray-700 dark:text-gray-300">
         Photo {{ activeIndex + 1 }}/{{ items.length }}
       </div>
 
-      <div class="flex items-center justify-center gap-4 text-gray-500 dark:text-gray-400">
-        <button class="hover:text-gray-900 dark:hover:text-white transition-colors focus:outline-none">
+      <div
+        class="flex items-center justify-center gap-4 text-gray-500 dark:text-gray-400"
+      >
+        <button
+          class="hover:text-gray-900 dark:hover:text-white transition-colors focus:outline-none"
+        >
           <Icon name="lucide:plus" class="w-5 h-5" />
         </button>
-        <button class="hover:text-gray-900 dark:hover:text-white transition-colors focus:outline-none">
+        <button
+          class="hover:text-gray-900 dark:hover:text-white transition-colors focus:outline-none"
+        >
           <Icon name="lucide:minus" class="w-5 h-5" />
         </button>
         <button
@@ -125,39 +135,64 @@ const handleKeydown = (e: KeyboardEvent) => {
         </button>
       </div>
 
-      <div class="flex items-center justify-end w-24 text-gray-500 dark:text-gray-400">
-        <button class="hover:text-gray-900 dark:hover:text-white transition-colors focus:outline-none">
+      <div
+        class="flex items-center justify-end w-24 text-gray-500 dark:text-gray-400"
+      >
+        <button
+          class="hover:text-gray-900 dark:hover:text-white transition-colors focus:outline-none"
+        >
           <Icon name="lucide:more-horizontal" class="w-5 h-5" />
         </button>
       </div>
     </div>
-
-  </div> -->
-<div class="flex flex-col w-full h-full">
-
-    <!-- ... แถบ Header (ถ้ามี) ... -->
-
-    <div class="flex-1 min-h-0 w-full p-2">
-      <UCarousel
-        ref="carousel"
-        v-slot="{ item }"
-        :items="items"
-        class="w-full h-full"
-        :ui="{
-          container: 'h-full',
-          item: 'basis-full h-full flex items-center justify-center'
-        }"
-        @select="onSelect"
-      >
-        <!-- 🌟 จุดที่ 2: เปลี่ยน h-full เป็น max-w-full max-h-full object-contain -->
-        <img
-          :src="item"
-          class="max-w-full max-h-full object-contain"
-          draggable="false"
-          loading="lazy"
-        />
-      </UCarousel>
+    <div class="flex flex-col w-full h-full">
+      <div class="flex-1 min-h-0 w-full p-2">
+        <UCarousel
+          ref="carousel"
+          v-slot="{ item }"
+          :items="items"
+          class="w-full h-full"
+          :ui="{
+            root: 'w-full h-full',
+            viewport: 'h-full',
+            container: 'h-full min-h-0',
+            item: 'basis-full h-full min-h-0 min-w-0 flex items-center justify-center overflow-hidden',
+          }"
+          @select="onSelect"
+        >
+          <img
+            :src="item"
+            class="max-w-full max-h-full w-auto h-auto object-contain block"
+            draggable="false"
+            loading="lazy"
+          />
+        </UCarousel>
+      </div>
     </div>
-
   </div>
+
+  <!-- <div class="flex flex-col w-full h-full">
+  <div class="flex-1 min-h-0 w-full p-2">
+    <UCarousel
+      ref="carousel"
+      v-slot="{ item }"
+      :items="items"
+      class="w-full h-full"
+      :ui="{
+        root: 'w-full h-full',
+        viewport: 'h-full',
+        container: 'h-full min-h-0',
+        item: 'basis-full h-full min-h-0 min-w-0 flex items-center justify-center overflow-hidden'
+      }"
+      @select="onSelect"
+    >
+      <img
+        :src="item"
+        class="max-w-full max-h-full w-auto h-auto object-contain block"
+        draggable="false"
+        loading="lazy"
+      />
+    </UCarousel>
+  </div>
+</div> -->
 </template>

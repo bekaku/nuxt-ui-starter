@@ -154,7 +154,7 @@ const onVideoClick = (event: any, index: number) => {
     </UCard>
 
     <UCard title="Image slide" class="mb-8">
-      <div class="h-[550px] border">
+      <div class="h-[550px]">
         <BaseImageView :files="imageItems" />
       </div>
     </UCard>
