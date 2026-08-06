@@ -11,7 +11,7 @@ import { parse, parseSetCookie } from 'cookie-es';
         setAuth(response._data);
       }
  try {
-      const response = await api<ResponseEntity<AppUser>>('/api/auth/login', {
+      const response = await api<AppUser>('/api/auth/login', {
         method: 'POST',
         body: {
           emailOrUsername: req.emailOrUsername,
@@ -36,8 +36,10 @@ import { parse, parseSetCookie } from 'cookie-es';
 export const useApi = () => {
   const { apiBase, cdnBase, apiClient, isDevMode, isServer } = useConfiguration()
   const localeCookie = useCookie('locale');
-  const toast = import.meta.client ? useToast() : null;
+  // const toast = import.meta.client ? useToast() : null;
   const nuxtApp = useNuxtApp();
+
+
   const requestHeaders = import.meta.server ? useRequestHeaders(['cookie']) : {};
   const event = import.meta.server ? useRequestEvent() : null;
   const responseCookies = new Map<string, string>();
@@ -99,8 +101,8 @@ export const useApi = () => {
   };
 
   const notifyMessage = (response: AppException | null): void => {
-    if (import.meta.client && toast && response && (response.message || response.errors?.length)) {
-      toast.add({
+    if (import.meta.client && response && nuxtApp.$toast && (response.message || response.errors?.length)) {
+      nuxtApp.$toast.add({
         title: h('span', { class: 'text-red-500 font-bold' }, response.message),
         description: response.errors?.length
           ? h(
@@ -116,8 +118,8 @@ export const useApi = () => {
   };
 
   const notifyServerMessage = (response: ResponseMessage): void => {
-    if (import.meta.client && toast && response && response.message) {
-      toast.add({
+    if (import.meta.client && nuxtApp.$toast && response && response.message) {
+      nuxtApp.$toast.add({
         description: response.message,
         icon: response.status == '200 OK' || response.status == '201 Created' ? 'lucide:circle-check' : 'i-lucide-alert-circle',
         color: response.status == '200 OK' || response.status == '201 Created' ? 'success' : 'error',

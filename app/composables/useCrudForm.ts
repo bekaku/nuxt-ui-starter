@@ -1,5 +1,5 @@
 import { BackendRootPath, CrudAction, PageActionParamiter, PageIdParamiter } from "~/libs/constants";
-import type { CrudFormApiOptions, ICrudAction, IMethod, RequestDto, ResponseEntity } from "~/types/common"
+import type { CrudFormApiOptions, ICrudAction, IMethod, RequestDto, } from "~/types/common"
 
 export const useCrudForm = <T>(options: CrudFormApiOptions, entity: Ref<Partial<any>>) => {
   const { appNavigateTo, getParam, getPreviousPath, appThrowError } = useBase();
@@ -68,21 +68,21 @@ export const useCrudForm = <T>(options: CrudFormApiOptions, entity: Ref<Partial<
     }
     return `${options.apiEndpoint || '/api'}/${pascalToCamelCase(options.crudName ? options.crudName : '')}/${crudId.value}`;
   });
-  const fetchDataById = async (): Promise<ResponseEntity<T> | null> => {
+  const fetchDataById = async (): Promise<T | null> => {
     if (!getFetchDataLink.value) {
       return null
     }
     loading.value = true;
     try {
-      const response = await api<ResponseEntity<T>>(getFetchDataLink.value, {
+      const response = await api.raw<T>(getFetchDataLink.value, {
         method: "GET",
       });
       loading.value = false;
-      if (response.status == 200 && response.data) {
-        entity.value = response.data;
+      if (response.status == 200 && response._data) {
+        entity.value = response._data;
         // Object.assign(entity, response.data);
       }
-      return response;
+      return response._data || null;
     } catch (error: any) {
       console.error('useCrudForm>fetchDataById', error);
     } finally {
@@ -163,24 +163,25 @@ export const useCrudForm = <T>(options: CrudFormApiOptions, entity: Ref<Partial<
     if (!apiEnpoint.value) {
       return
     }
-    // const requestItem: RequestDto = {};
-    // if (jsonRootName) {
-    //   requestItem[jsonRootName || 'data'] = data
-    // }else{
-    //   requestItem = data
-    // }
+    // const requestItem: { [k: string]: T } = {};
+    const requestItem: RequestDto = {};
+    // requestItem[requestEntityName.value
+    //     ? requestEntityName.value : `${pascalToCamelCase(options.crudName)}`] = crudEntity.value;
+
+    // requestItem.data = crudEntity.value;
+    requestItem[jsonRootName || 'data'] = data
 
     loading.value = true;
     try {
-      const response = await api<ResponseEntity<T>>(enpoint, {
+      const response = await api.raw<T>(enpoint, {
         method: methodType,
-        body: data
+        body: requestItem
       });
 
-      if (response.status != 200) {
+      if (response.status != 200 && response.status != 201) {
         return
       }
-      if (response && response.status == 200) {
+      if (response && (response.status == 200 || response.status == 201)) {
         if (
           crudAction.value === CrudAction.NEW ||
           crudAction.value === CrudAction.COPY
@@ -227,7 +228,7 @@ export const useCrudForm = <T>(options: CrudFormApiOptions, entity: Ref<Partial<
     }
     loading.value = true;
     try {
-      const response = await api<ResponseEntity<void>>(deleteApiEndpoint.value, {
+      const response = await api<void>(deleteApiEndpoint.value, {
         method: "DELETE",
       });
       if (import.meta.dev) {

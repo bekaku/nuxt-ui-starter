@@ -16,7 +16,7 @@ export const useAuth = () => {
   const auth = useState<AppUser | null>('auth:user', () => null);
   const appNavigations = useState<AppNavigationMenuItem[]>('auth:navigations', () => []);
   const isLoggedIn = computed(() => !!auth.value);
-  const loginedAvatar = computed(() => auth.value?.avatar ? auth.value?.avatar.image : '/images/user.png');
+  const loginedAvatar = computed(() => auth.value?.avatar ? auth.value?.avatar.thumbnail || auth.value?.avatar.image : '/images/user.png');
   const loginedDisplay = computed(() => auth.value?.email || auth.value?.username || 'Unkonwn');
 
   const setAuth = (payload: AppUser) => {

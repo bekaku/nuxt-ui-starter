@@ -12,11 +12,7 @@ definePageMeta({
 });
 const UAvatar = resolveComponent("UAvatar");
 const UButton = resolveComponent("UButton");
-const UBadge = resolveComponent("UBadge");
-const UDropdownMenu = resolveComponent("UDropdownMenu");
-const UCheckbox = resolveComponent("UCheckbox");
 const { t } = useLang();
-const toast = useToast();
 const {
   dataList,
   loading,
@@ -34,7 +30,6 @@ const {
   onItemCopy,
   crudName,
   onKeywordSearch,
-  headers,
 } = useCrudList<AppUser>({
   crudName: "AppUser", //PascalCase only eg: User, AppRole
   apiEndpoint: "/api/appUser",

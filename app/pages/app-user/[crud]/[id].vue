@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import z from "zod";
-import type { LabelValue, ResponseEntity } from "~/types/common";
 import type { AppRole, AppUser } from "~/types/models";
 
 definePageMeta({
@@ -158,10 +157,10 @@ const api = useApi();
 const { data: roles, pending } = await useAsyncData<AppRole[]>(
   "app-role-all",
   async () => {
-    const response = await api<ResponseEntity<AppRole[]>>(
+    const response = await api.raw<AppRole[]>(
       "/api/appRole/findAll",
     );
-    return response.data || [];
+    return response._data || [];
   },
 );
 

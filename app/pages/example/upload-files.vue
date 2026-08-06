@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ResponseEntity } from "~/types/common";
 import type { FileManager } from "~/types/models";
 
 definePageMeta({
@@ -34,7 +33,7 @@ const {
   onPerPageChange,
   sorts,
 } = usePagefecth<FileManager>({
-  apiEndpoint: "/api/fileManager",
+  apiEndpoint: "/api/fileManager/findAllByAdmin",
   defaultSorts: [{ column: "createdDate", mode: "desc" }],
   itemsPerPage: 8,
 });
@@ -68,9 +67,12 @@ const onDeleteFile = async (index: number) => {
   }
   try {
     loader.open();
-    const response = await api.raw<ResponseEntity<void>>(`/api/fileManager/deleteFileApi/${item.id}`, {
-      method: "DELETE",
-    });
+    const response = await api.raw<void>(
+      `/api/fileManager/deleteFileApi/${item.id}`,
+      {
+        method: "DELETE",
+      },
+    );
     if (response && response.status == 200) {
       dataList.value.splice(index, 1);
     }
@@ -78,7 +80,7 @@ const onDeleteFile = async (index: number) => {
     console.log("onDeleteFile:", response);
   } catch (error) {
     console.error("An error occurred while deleting the file.:", error);
-  }finally{
+  } finally {
     loader.close();
   }
 };
@@ -154,7 +156,7 @@ loadData();
                 class="absolute top-2 right-2 z-20 flex items-center justify-center w-7 h-7 rounded-full bg-black/60 text-white hover:bg-red-600 transition-colors shadow-md"
                 label="Remove image"
               >
-                <UIcon name="lucide:x" />
+                <Icon name="lucide:x" />
               </UButton>
             </BaseImage> -->
 
@@ -193,9 +195,88 @@ loadData();
         </UCard>
       </div>
       <div class="w-full">
+        <UCard title="Custom UI">
+          <UChatPrompt class="w-full">
+            <template #header>
+              <BaseFileItems
+                :items="files"
+                show-delete
+                grid-class="grid-cols-2 md:grid-cols-6 gap-2"
+                @on-remove="
+                  (index: number) => {
+                    files.splice(index, 1);
+                  }
+                "
+              />
+            </template>
+            <template #footer>
+              <div class="flex flex-col w-full">
+                <div class="flex w-full justify-between">
+                  <BaseFileUpload v-model="files" multiple>
+                    <template #default="{ open }">
+                      <UButton
+                        icon="lucide:image"
+                        variant="ghost"
+                        class="rounded-full"
+                        @click="open()"
+                      />
+                    </template>
+                  </BaseFileUpload>
+
+                  <div class="flex items-center justify-end gap-1.5">
+                    <UChatPromptSubmit size="sm" />
+                  </div>
+                </div>
+              </div>
+            </template>
+          </UChatPrompt>
+
+          <div class="flex items-center gap-1 rounded-md px-2 py-1 w-full my-8">
+            <UButton
+              icon="lucide:laugh"
+              variant="ghost"
+              class="rounded-full shrink-0 mb-1"
+            />
+
+            <BaseFileUpload v-model="files" multiple class="shrink-0 mb-1">
+              <template #default="{ open }">
+                <UButton
+                  icon="lucide:image"
+                  variant="ghost"
+                  class="rounded-full"
+                  @click="open()"
+                />
+              </template>
+            </BaseFileUpload>
+
+            <UTextarea
+              class="flex-1 mx-1"
+              :maxrows="4"
+              :rows="1"
+              autoresize
+              size="lg"
+              placeholder="type message"
+              variant="outline"
+              :ui="{ base: 'focus:ring-0 ' }"
+            />
+
+            <UButton
+              icon="lucide:send"
+              variant="ghost"
+              class="rounded-full shrink-0 mb-1"
+            />
+          </div>
+        </UCard>
+      </div>
+      <div class="w-full">
         <UCard title="Fetch files from server">
           <div class="flex p-2 gap-4">
-            <UButton class="w-fit" icon="lucide:refresh-cw" label="Reload data" @click="onReload" />
+            <UButton
+              class="w-fit"
+              icon="lucide:refresh-cw"
+              label="Reload data"
+              @click="onReload"
+            />
           </div>
           <UScrollArea :class="['w-full', 'h-86']">
             <template v-if="!firstLoaded">
@@ -207,27 +288,21 @@ loadData();
                 />
               </div>
             </template>
-            <div
-              v-else-if="dataList && dataList.length > 0"
-              class="grid grid-cols-2 md:grid-cols-4 gap-4"
-            >
-              <div
-                v-for="(item, index) in dataList"
-                :key="item.uniqueId || item.id + ''"
-                class="relative aspect-square w-full"
-              >
-                <BaseFileItem
-                  :index="index"
-                  :item="item"
-                  :clickable="true"
-                  layout="grid"
-                  show-delete
-                  @on-remove="onDeleteFile"
-                >
-                </BaseFileItem>
-              </div>
-            </div>
-            <template v-else> </template>
+            <template v-else-if="dataList && dataList.length > 0">
+              <BaseFileItems
+                :items="dataList"
+                show-delete
+                grid-class="grid-cols-2 md:grid-cols-6"
+                @on-remove="onDeleteFile"
+              />
+            </template>
+            <template v-else>
+              <UEmpty
+                icon="i-lucide-file"
+                title="No projects found"
+                description="It looks like you haven't added any projects. Create one to get started."
+              />
+            </template>
           </UScrollArea>
 
           <BasePaging

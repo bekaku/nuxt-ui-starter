@@ -1,5 +1,5 @@
 import { CrudAction, SearchOperation, SearchParamiter } from "~/libs/constants";
-import type { ApiResponse, CrudListApiOptions, ICrudAction, ICrudListHeader, ISortModeType, ResponseEntity } from "~/types/common";
+import type { ApiResponse, CrudListApiOptions, ICrudAction, ICrudListHeader, ISortModeType } from "~/types/common";
 
 export const useCrudList = <T>(options: CrudListApiOptions) => {
   const { inputSanitizeHtml, getPageQuery, getCurrentPath, appNavigateTo, onReplaceUrl } = useBase();
@@ -43,7 +43,7 @@ export const useCrudList = <T>(options: CrudListApiOptions) => {
     endpointDelete.value
       ? endpointDelete.value
       : crudName.value
-        ? `/api/${pascalToKebab(crudName.value)}`//springboot: pascalToCamelCase(crudName.value), pascalToKebab(crudName.value)
+        ? `/api/${pascalToCamelCase(crudName.value)}`//springboot: pascalToCamelCase(crudName.value), pascalToKebab(crudName.value)
         : ''
   );
 
@@ -183,7 +183,7 @@ export const useCrudList = <T>(options: CrudListApiOptions) => {
       return 400;
     }
     try {
-      const response = await api<ResponseEntity<ApiResponse<void>>>(`${deleteApiEndpoint.value}/${id}`, {
+      const response = await api.raw<ApiResponse<void>>(`${deleteApiEndpoint.value}/${id}`, {
         method: "DELETE",
       });
       return response.status;

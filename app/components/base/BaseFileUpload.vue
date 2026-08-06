@@ -312,45 +312,22 @@ onBeforeUnmount(() => {
             v-if="priview && modelValue.length > 0"
             class="w-full min-w-75 sm:min-w-100 flex flex-col overflow-hidden mt-4 text-left"
           >
-            <UScrollArea
-              v-if="priviewLayout == 'list'"
-              v-slot="{ item, index }"
-              :items="modelValue"
-              :class="['w-full', scrollClass]"
-            >
-              <BaseFileItem
-                :index="index"
-                :item="item"
-                :clickable="false"
+            <UScrollArea :class="['w-full', scrollClass]">
+              <BaseFileItems
+                :items="modelValue"
+                :layout="priviewLayout"
                 :soft-delete="softDelete"
                 :show-delete="showDelete"
-                @on-click="onClick"
+                :show-progress="false"
+                v-model="progress"
+                @on-click="
+                  () => {
+                    onClick;
+                  }
+                "
                 @on-remove="onRemove"
                 @on-soft-delete="onSoftDelete"
-              >
-              </BaseFileItem>
-            </UScrollArea>
-            <UScrollArea v-else :class="['w-full', scrollClass]">
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div
-                  v-for="(item, index) in modelValue"
-                  :key="item.uniqueId || item.id + ''"
-                  class="relative aspect-square w-full"
-                >
-                  <BaseFileItem
-                    :index="index"
-                    :item="item"
-                    :clickable="true"
-                    layout="grid"
-                    :soft-delete="softDelete"
-                    :show-delete="showDelete"
-                    @on-click="onClick"
-                    @on-remove="onRemove"
-                    @on-soft-delete="onSoftDelete"
-                  >
-                  </BaseFileItem>
-                </div>
-              </div>
+              />
             </UScrollArea>
             <UProgress v-if="showProgress" v-model="progress" status />
           </div>

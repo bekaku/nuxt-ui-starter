@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import z from "zod";
-import type { LabelValue, ResponseEntity } from "~/types/common";
+import type { LabelValue } from "~/types/common";
 import type { AppRole, Permission } from "~/types/models";
 
 definePageMeta({

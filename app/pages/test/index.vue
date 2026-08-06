@@ -7,6 +7,14 @@ useSeoMeta({
 });
 
 const { fetchMe } = useAuth();
+const api = useApi();
+
+const refreshToken = async () => {
+  const response = await api.raw<void>("/api/auth/refreshToken", {
+    method: "POST",
+  });
+  console.log("response", response);
+};
 </script>
 <template>
   <div class="flex flex-col gap-4 p-4">
@@ -28,6 +36,11 @@ const { fetchMe } = useAuth();
               icon="lucide:user"
               class="w-fit"
               @click="fetchMe"
+            />
+            <UButton
+              label="Refresh token"
+              class="w-fit"
+              @click="refreshToken"
             />
             <UButton
               label="ยืนยัน"

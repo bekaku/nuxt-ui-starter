@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import * as z from "zod";
 import type { FormSubmitEvent } from "@nuxt/ui";
-import type { ResponseEntity } from "~/types/common";
 import type { AppUser, FileManager } from "~/types/models";
 
 const { t } = useLang();
@@ -83,13 +82,12 @@ async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
 
     if (response && response.status == 200 && response._data) {
 
-      console.log('response', response._data);
-      // auth.value = {
-      //   ...auth.value,
-      //   email: response._data.email,
-      //   username: response._data.username,
-      //   avatar: response._data.avatar,
-      // };
+      auth.value = {
+        ...auth.value,
+        email: response._data.email,
+        username: response._data.username,
+        avatar: response._data.avatar,
+      };
       toast.add({
         description: t("success.updateSuccesfull"),
         icon: "i-lucide-check",

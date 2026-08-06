@@ -1,6 +1,6 @@
 import { ref, computed } from "vue";
 import { FileUploadKey } from "~/libs/constants";
-import type { ResponseEntity, UploadStatus } from "~/types/common";
+import type { UploadStatus } from "~/types/common";
 import type { FileManager, FileManagerMetaData, FileUploadChunkMergeRequest, FileUploadChunkResponse } from "~/types/models";
 
 export const useUpload = () => {

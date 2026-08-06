@@ -701,7 +701,7 @@ const onDelete = async (event: any) => {
               <template v-if="isHaveAddPermission || isHaveEditPermission">
                 <UButton
                   icon="lucide:save"
-                  :disabled="canSubmit"
+                  :disabled="!canSubmit"
                   :loading
                   :label="
                     crudAction == 'edit' ||

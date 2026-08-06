@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import * as z from "zod";
 import type { FormError, FormSubmitEvent } from "@nuxt/ui";
-import type { ResponseEntity } from "~/types/common";
 
 const { t } = useLang();
 const { signoutProcess } = useAuth();
@@ -38,9 +37,9 @@ const validate = (state: Partial<PasswordSchema>): FormError[] => {
 };
 async function onSubmit(event: FormSubmitEvent<PasswordSchema>) {
   try {
-    const response = await api<ResponseEntity<void>>("/api/appUser/password", {
-      method: "POST",
-      body: password,
+    const response = await api.raw<void>("/api/appUser/selfUpdatePassword", {
+      method: "PUT",
+      body: { data: password },
     });
 
     if (response && response.status == 200) {
@@ -54,7 +53,7 @@ async function onSubmit(event: FormSubmitEvent<PasswordSchema>) {
       }, 1000);
     }
 
-    return response.data || null;
+    return response._data || null;
   } catch (error) {
     console.error("Failed to fetch profile", error);
     return null;
@@ -88,16 +87,19 @@ async function onSubmit(event: FormSubmitEvent<PasswordSchema>) {
       </UFormField>
 
       <UFormField name="newPassword">
-        <UInput
+        <BaseInputPassword
           v-model="password.newPassword"
-          type="password"
           :placeholder="$t('authen.newPassword')"
           class="w-full"
-          :loading="loading"
         />
       </UFormField>
 
-      <UButton :loading="loading" :label="$t('updatePassword')" class="w-fit" type="submit" />
+      <UButton
+        :loading="loading"
+        :label="$t('updatePassword')"
+        class="w-fit"
+        type="submit"
+      />
     </UForm>
   </UPageCard>
 

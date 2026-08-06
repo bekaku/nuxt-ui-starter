@@ -7,7 +7,7 @@ export const useBase = () => {
 
   const { t } = useLang();
   const confirm = useConfirmDialog()
-  const toast = useToast();
+  const nuxtApp = useNuxtApp();
   const getCurrentPath = (fullPath = true) => {
     const route = useRoute();
     return fullPath ? route.fullPath : route.path;
@@ -146,9 +146,11 @@ export const useBase = () => {
       return;
     }
     navigator.clipboard.writeText(text);
-    toast.add({
-      description: t('success.copy')
-    })
+    if (nuxtApp.$toast) {
+      nuxtApp.$toast.add({
+        description: t('success.copy')
+      })
+    }
   }
   return {
     getPageMeta,
