@@ -384,7 +384,7 @@ const onSoftDelete = (event: any, index: number) => {
             class="absolute bottom-0 inset-x-0 max-h-[50%] min-h-10 bg-black/60 backdrop-blur-sm flex flex-col justify-center px-3 z-10"
           >
             <p
-              v-if="showSize"
+              v-if="showName"
               class="text-white text-xs sm:text-sm font-medium truncate"
             >
               {{ item.fileName || "untitled" }}

@@ -43,7 +43,8 @@ export default defineNuxtConfig({
         'vue3-apexcharts',
         'zod',
         '@tato30/vue-pdf',
-        'pdf-lib'
+        'pdf-lib',
+        'plyr'
       ]
     }
   },

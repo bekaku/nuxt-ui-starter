@@ -153,6 +153,11 @@ export const useMenu = () => {
             to: "/example/modal",
           },
           {
+            label: "Markdown editor",
+            icon: 'bi:markdown',
+            to: "/example/markdown-editor",
+          },
+          {
             label: "RBAC",
             icon: 'lucide:user-key',
             to: "/example/rbac",

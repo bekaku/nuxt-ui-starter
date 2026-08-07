@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FileManager } from "~/types/models";
-
+import { rgb } from "pdf-lib";
 definePageMeta({
   layout: "default",
 });
@@ -140,7 +140,15 @@ const onClosePefView = () => {
           </BaseFileItem>
         </div>
         <div>
-          <div class="text-sm font-bold text-muted">List</div>
+          <div class="text-sm font-bold text-muted">Inline</div>
+          <ClientOnly>
+            <BaseVideoPlayer
+              :options="{
+                autoSetSource: true,
+              }"
+              :file="videoItem"
+            />
+          </ClientOnly>
         </div>
       </div>
     </UCard>
@@ -202,8 +210,24 @@ const onClosePefView = () => {
         </BaseFileItem>
       </div>
 
-      <div class="text-sm font-bold text-muted">Inline display</div>
-      <USeparator/>
+      <div class="text-sm font-bold text-muted">Watermark</div>
+      <div class="flex gap-4 my-4">
+        <UButton
+          label="Defult watermark"
+          @click="showPdfViewWatermark1 = true"
+        />
+        <UButton
+          label="Custom watermark"
+          @click="showPdfViewWatermark2 = true"
+        />
+        <UButton
+          label="Custom position, text, image"
+          @click="showPdfViewWatermark3 = true"
+        />
+      </div>
+
+      <div class="text-sm font-bold text-muted my-4">Inline display</div>
+      <USeparator />
       <BasePdfView
         :src="dummyPdfUrl"
         :closeable="false"
@@ -214,7 +238,25 @@ const onClosePefView = () => {
         }"
       />
     </UCard>
+
+    <UCard title="Mix item View" class="mb-8">
+      <BaseFileItems
+        v-if="mixItems"
+        :items="mixItems"
+        grid-class="md:grid-cols-6"
+        image-class="h-32"
+        :show-size="false"
+        show-view-dialog
+      />
+    </UCard>
   </BaseDashboardPanel>
+
+  <LazyBaseVideoPlayerDialog
+    v-if="videoPlayerDialog"
+    v-model:show="videoPlayerDialog"
+    :file="videoItem"
+    :options="{ autoSetSource: true, autoplay: false }"
+  />
 
   <LazyBasePdfViewDialog
     v-if="showPdfView && pdfSrc"
@@ -222,5 +264,56 @@ const onClosePefView = () => {
     :src="pdfSrc"
     :title="pdfName"
     @on-close="() => onClosePefView"
+  />
+  <LazyBasePdfViewDialog
+    v-if="showPdfViewWatermark1"
+    v-model="showPdfViewWatermark1"
+    :src="dummyPdfUrl"
+    title="Defult watermark"
+    :watermark-options="{
+      text: 'Defult watermark',
+    }"
+  />
+  <LazyBasePdfViewDialog
+    v-if="showPdfViewWatermark2"
+    v-model="showPdfViewWatermark2"
+    :src="dummyPdfUrl"
+    title="Custom watermark"
+    :watermark-options="{
+      text: 'Watermark',
+      fontSize: 28,
+      rows: 3,
+      columns: 3,
+      rotation: 0,
+      opacity: 0.7,
+      color: rgb(0.1, 1, 0.1),
+    }"
+  />
+  <LazyBasePdfViewDialog
+    v-if="showPdfViewWatermark3"
+    v-model="showPdfViewWatermark3"
+    :src="dummyPdfUrl"
+    title="Custom position"
+    :watermark-options="{
+      image: '/logo/logo.png',
+      items: [
+        {
+          text: 'Top left',
+          position: 'top-left',
+        },
+        {
+          text: 'Top right',
+          position: 'top-right',
+        },
+        {
+          text: 'Bottom left',
+          position: 'bottom-left',
+        },
+        {
+          text: 'Bottom right',
+          position: 'bottom-right',
+        },
+      ],
+    }"
   />
 </template>

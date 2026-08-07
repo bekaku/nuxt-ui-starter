@@ -116,7 +116,7 @@ const setImagesFileView = (file: FileManager) => {
         <div
           v-for="(item, index) in items"
           :key="item.uniqueId || item.id + ''"
-          class="relative aspect-square w-full"
+          class="relative w-full"
         >
           <BaseFileItem
             :index="index"
