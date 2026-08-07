@@ -103,6 +103,23 @@ const onVideoClick = (event: any, index: number) => {
   console.log("onVideoClick", index);
   videoPlayerDialog.value = true;
 };
+
+const onPdfPreviewClick = async (event: any, index: number) => {
+  if (!pdfItems.value) {
+    return;
+  }
+  const item = pdfItems.value[index];
+  if (item) {
+    pdfSrc.value = item.filePath;
+    pdfName.value = item.fileName;
+    showPdfView.value = true;
+  }
+};
+const onClosePefView = () => {
+  pdfSrc.value = undefined;
+  pdfName.value = undefined;
+  showPdfView.value = false;
+};
 </script>
 
 <template>
@@ -136,6 +153,7 @@ const onVideoClick = (event: any, index: number) => {
             :items="imageItems"
             :format-size="false"
             image-class="h-32"
+            show-view-dialog
           />
         </div>
         <div>
@@ -147,6 +165,7 @@ const onVideoClick = (event: any, index: number) => {
               :format-size="false"
               :bordered="false"
               layout="list"
+              show-view-dialog
             />
           </UScrollArea>
         </div>
@@ -154,9 +173,54 @@ const onVideoClick = (event: any, index: number) => {
     </UCard>
 
     <UCard title="Image slide" class="mb-8">
-      <div class="h-[550px]">
-        <BaseImageView :files="imageItems" />
+      <div class="h-[350px]">
+        <ClientOnly>
+          <BaseImageView :files="imageItems" />
+        </ClientOnly>
       </div>
     </UCard>
+
+    <UCard title="Pdf" class="mb-8">
+      <div class="text-sm font-bold text-muted">Dialog</div>
+      <!-- <BaseFileItems
+        v-if="pdfItems"
+        grid-class="md:grid-cols-6 border"
+        :items="pdfItems"
+        :format-size="false"
+        :bordered="false"
+        layout="grid"
+        show-view-dialog
+      /> -->
+      <div class="w-36 my-4">
+        <BaseFileItem
+          v-if="pdfItems != undefined && pdfItems.length > 0 && pdfItems[0]"
+          :index="0"
+          :item="pdfItems[0]"
+          layout="grid"
+          @on-click="onPdfPreviewClick"
+        >
+        </BaseFileItem>
+      </div>
+
+      <div class="text-sm font-bold text-muted">Inline display</div>
+      <USeparator/>
+      <BasePdfView
+        :src="dummyPdfUrl"
+        :closeable="false"
+        title="compressed.tracemonkey-pldi-09.pdf"
+        :all-page="false"
+        :watermark-options="{
+          image: '/logo/logo.png',
+        }"
+      />
+    </UCard>
   </BaseDashboardPanel>
+
+  <LazyBasePdfViewDialog
+    v-if="showPdfView && pdfSrc"
+    v-model="showPdfView"
+    :src="pdfSrc"
+    :title="pdfName"
+    @on-close="() => onClosePefView"
+  />
 </template>

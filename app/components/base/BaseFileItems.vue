@@ -38,7 +38,7 @@ const showFileView = ref(false);
 const fileImageItemsForView = ref<FileManager[]>([]);
 const fileImageSelectIndex = ref<number>(0);
 const onClick = async (event: any, index: number) => {
-  console.log("onClick", { index, event });
+  console.log("onClick", { index, event, showViewDialog });
   if (!showViewDialog) {
     return;
   }
@@ -140,4 +140,13 @@ const setImagesFileView = (file: FileManager) => {
     </div>
     <UProgress v-if="showProgress" v-model="progress" status />
   </div>
+  <LazyBaseFileViewDialog
+    v-if="showFileView && fileForView"
+    v-model:show="showFileView"
+    :item="fileForView"
+    :image-list="fileImageItemsForView"
+    :select-index="fileImageSelectIndex"
+    :title="fileForView.fileName"
+    :show-arrow="true"
+  />
 </template>

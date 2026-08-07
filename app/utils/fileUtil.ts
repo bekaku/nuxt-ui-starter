@@ -181,7 +181,7 @@ export const getImgUrlFromFile = (f: any): Promise<string | undefined> => {
   });
 };
 export const generateimageFileName = (prefix: string | undefined = undefined) => {
-  return `${prefix ? prefix : 'gd5'}_${getCurrentTimestamp()}.jpg`;
+  return `${prefix ? prefix : 'file'}_${getCurrentTimestamp()}.jpg`;
 };
 export const downloadURI = async (url: string, fileName: string) => {
   const image = await fetch(url);

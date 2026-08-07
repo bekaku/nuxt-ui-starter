@@ -42,6 +42,8 @@ export default defineNuxtConfig({
         'tailwind-merge',
         'vue3-apexcharts',
         'zod',
+        '@tato30/vue-pdf',
+        'pdf-lib'
       ]
     }
   },
