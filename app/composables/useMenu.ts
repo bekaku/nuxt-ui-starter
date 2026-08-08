@@ -121,10 +121,20 @@ export const useMenu = () => {
             icon: "i-lucide-users",
             to: "/example/customers",
           },
+           {
+            label: "Darg and Drop",
+            icon: "lucide:move",
+            to: "/example/drag-drop",
+          },
           {
             label: "Forms",
             icon: "i-lucide-card-sim",
             to: "/example/form",
+          },
+          {
+            label: "Image cropper",
+            icon: "hugeicons:image-crop",
+            to: "/example/image-cropper",
           },
           {
             label: "Inbox",
