@@ -52,12 +52,10 @@ export const useAuth = () => {
       const response = await api<RefreshTokenResponse>('/api/auth/login', {
         method: 'POST',
         body: {
-          data: {
             emailOrUsername: inputSanitizeHtml(req.emailOrUsername),
             password: inputSanitizeHtml(req.password),
             loginFrom: 'WEB',
             deviceId: deviceId,
-          }
         }
       })
 

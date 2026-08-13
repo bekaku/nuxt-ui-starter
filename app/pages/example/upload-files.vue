@@ -167,7 +167,7 @@ loadData();
               icon="lucide:image"
               v-model="files"
               :priview-layout="previewLayout"
-              v-model:progress="uploadSuccessPercent"
+              :progress="uploadSuccessPercent"
             />
 
             <div class="flex gap-4">

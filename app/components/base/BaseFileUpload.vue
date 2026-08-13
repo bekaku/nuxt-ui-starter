@@ -47,6 +47,7 @@ const {
   softDelete?: boolean;
   showDelete?: boolean;
   showProgress?: boolean;
+  progress?:number
 }>();
 
 const emit = defineEmits<{
@@ -58,7 +59,6 @@ const emit = defineEmits<{
 const loader = useLoader();
 const { t } = useLang();
 const modelValue = defineModel<FileManager[]>({ default: () => [] });
-const progress = defineModel<number>("progress", { default: 0 });
 const modelFile = ref<File[] | File | null>(null);
 const toast = useToast();
 const config = useRuntimeConfig();
@@ -319,7 +319,7 @@ onBeforeUnmount(() => {
                 :soft-delete="softDelete"
                 :show-delete="showDelete"
                 :show-progress="false"
-                v-model="progress"
+                :progress="progress"
                 @on-click="
                   () => {
                     onClick;
@@ -329,7 +329,7 @@ onBeforeUnmount(() => {
                 @on-soft-delete="onSoftDelete"
               />
             </UScrollArea>
-            <UProgress v-if="showProgress" v-model="progress" status />
+            <UProgress v-if="showProgress && progress" :model-value="Math.min(Math.max(progress, 0), 100)" status />
           </div>
         </div>
       </slot>

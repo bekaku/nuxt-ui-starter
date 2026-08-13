@@ -33,6 +33,11 @@ export const useMenu = () => {
         slot: 'admin-label' as const,
         defaultOpen: true,
         children: [
+           {
+            label: t('model.ai_document_meta.table'),
+            icon: "lucide:brain-circuit",
+            to: "/ai-document-meta",
+          },
           {
             label: t("nav.userRole"),
             icon: "lucide:users",
@@ -102,6 +107,11 @@ export const useMenu = () => {
             to: "/example/blank",
           },
           {
+            label: "Ai Chats",
+            icon: "hugeicons:ai-magic",
+            to: "/example/ai-chats",
+          },
+          {
             label: "Chats",
             icon: "lucide:message-circle",
             to: "/example/chats",
@@ -125,6 +135,11 @@ export const useMenu = () => {
             label: "Darg and Drop",
             icon: "lucide:move",
             to: "/example/drag-drop",
+          },
+           {
+            label: "Download files",
+            icon: "lucide:cloud-download",
+            to: "/example/download-files",
           },
           {
             label: "Forms",

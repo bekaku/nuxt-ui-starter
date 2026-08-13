@@ -70,18 +70,15 @@ async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
     const response = await api.raw<AppUser>("/api/appUser/updateProfile", {
       method: "POST",
       body: {
-        data: {
-          name: profile.name,
-          email: profile.email,
-          username: profile.username,
-          avatarFileId: profile.avatarFileId,
-          bio: profile.bio,
-        },
+        name: profile.name,
+        email: profile.email,
+        username: profile.username,
+        avatarFileId: profile.avatarFileId,
+        bio: profile.bio,
       },
     });
 
     if (response && response.status == 200 && response._data) {
-
       auth.value = {
         ...auth.value,
         email: response._data.email,

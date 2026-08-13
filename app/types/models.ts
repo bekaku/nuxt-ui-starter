@@ -206,3 +206,16 @@ export interface FavoriteMenu extends Id {
   url: string | null
   appUser?: IdType
 }
+export interface AiDocumentMeta extends Id {
+  fileMime: string
+  fileName: string
+  active: boolean
+  metadata: {
+    [key: string]: string
+  }
+}
+export interface IngestionResponse extends Id {
+  fileName: string
+  fileMime: string
+  chunkCount: number
+}

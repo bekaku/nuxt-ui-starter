@@ -482,7 +482,7 @@ const handleSearch = () => {
     queryParts.push(`${col}${op}${val}`);
   });
 
-  const queryString = queryParts.join("&");
+  const queryString = queryParts.join(";");
 
   console.log("Generated Query:", queryString, queryParts);
 
@@ -652,7 +652,7 @@ watch(
       </div>
       <div v-if="showSearch" class="flex flex-col flex-wrap gap-2 pb-4">
         <div
-          class="p-4 bg-neutral-50 dark:bg-neutral-900 rounded-lg mb-4 border border-default/80"
+          class="p-4 rounded-lg mb-4 border border-default/80"
         >
           <div class="text-xl font-bold pb-2">{{ $t("base.search") }}</div>
           <slot name="search-inner-top" />
@@ -798,6 +798,7 @@ watch(
             :title="$t('base.pleaseWait')"
             :description="$t('base.pleaseWaitWhileLoading2')"
             loading
+            variant="naked"
           />
           <UEmpty
             v-else
@@ -805,6 +806,7 @@ watch(
             icon="lucide:inbox"
             :title="emptyTitle || $t('error.dataNotfound')"
             :description="emptyDescription || $t('helper.emptyDescription')"
+            variant="naked"
             :actions="
               isHaveAddPermission && showNewBtn
                 ? [

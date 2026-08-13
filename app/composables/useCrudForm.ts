@@ -121,7 +121,7 @@ export const useCrudForm = <T>(options: CrudFormApiOptions, entity: Ref<Partial<
         ? options.backLink
         : previousPath.value ? previousPath.value
           : options.crudName
-            ? `${basePath ? '/' + basePath : ''}/${options.crudName.replaceAll('_', '-')}`
+            ? `${basePath ? '/' + basePath : ''}/${pascalToKebab(options.crudName)}`
             : '';
     }
     if (backLink) {
@@ -164,18 +164,18 @@ export const useCrudForm = <T>(options: CrudFormApiOptions, entity: Ref<Partial<
       return
     }
     // const requestItem: { [k: string]: T } = {};
-    const requestItem: RequestDto = {};
+    // const requestItem: RequestDto = {};
     // requestItem[requestEntityName.value
     //     ? requestEntityName.value : `${pascalToCamelCase(options.crudName)}`] = crudEntity.value;
 
     // requestItem.data = crudEntity.value;
-    requestItem[jsonRootName || 'data'] = data
+    // requestItem[jsonRootName || 'data'] = data
 
     loading.value = true;
     try {
       const response = await api.raw<T>(enpoint, {
         method: methodType,
-        body: requestItem
+        body: data
       });
 
       if (response.status != 200 && response.status != 201) {

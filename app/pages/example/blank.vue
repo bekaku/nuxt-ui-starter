@@ -4,6 +4,7 @@ definePageMeta({
   // requiresPermission: ['role_manage', 'rome_list'],
   // breadcrumbs: ExampleHomeBreadcrumb,
   // tabs: TabTest,
+  // pageName: "model_user",
 });
 useSeoMeta({
   title: "Blank page",

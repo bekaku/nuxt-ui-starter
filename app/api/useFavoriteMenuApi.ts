@@ -6,17 +6,13 @@ export const useFavoriteMenuApi = () => {
   const createFavorite = async (request: FavoriteMenu): Promise<FavoriteMenu | null> => {
     return api<FavoriteMenu>('/api/favoriteMenu', {
       method: 'POST',
-      body: {
-        data: request
-      }
+      body: request
     })
   };
   const deleteFavorite = async (request: FavoriteMenu): Promise<ResponseMessage | null> => {
     return api<ResponseMessage>('/api/favoriteMenu', {
       method: 'DELETE',
-      body: {
-        data: request
-      }
+      body: request
     })
   };
 

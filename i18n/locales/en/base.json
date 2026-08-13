@@ -330,6 +330,13 @@
     "updatePasswordSub": "Confirm your current password before setting a new one.",
     "addImagelink": "Add image link"
   },
+    "ai": {
+    "thinking": "Thinking",
+    "thinkingShow": "Show the thought process.",
+    "promtLabel": "Type your message here...",
+    "aiMistakeable": "AI may provide incorrect answers. Please verify important information before use.",
+    "source": "Source"
+  },
   "drive": {
     "title": "My Files",
     "folder": "Folder",

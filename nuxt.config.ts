@@ -225,7 +225,23 @@ export default defineNuxtConfig({
         'audio/wav',
         'audio/ogg',
         'audio/flac',
-        'audio/mp4'
+        'audio/mp4',
+        'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+        'application/vnd.ms-excel.sheet.macroenabled.12',
+        'image/tiff',
+        'image/bmp',
+        'image/svg+xml',
+        'text/markdown',
+        'text/x-rst',
+        'application/json',
+        'text/tab-separated-values',
+        'application/yaml',
+        'application/x-yaml',
+        'text/yaml',
+        'application/xml',
+        'text/xml',
+        'text/html'
+
       ]
     }
   },

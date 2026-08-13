@@ -155,7 +155,7 @@ export const useUpload = () => {
         }
 
         if (setProgress) {
-          const progressPercent = (chunkIndex + 1) / totalChunks;
+          const progressPercent = Math.round(((chunkIndex + 1) / totalChunks) * 100);
           await setUploadProgress(currentFileIndex.value, 'UPLOADING', true, progressPercent);
         }
       }
@@ -180,9 +180,7 @@ export const useUpload = () => {
 
       const mergeResponse = await api.raw<FileManager | null>("/api/fileManager/mergeChunkApi", {
         method: "POST",
-        body: {
-          data: mergeData
-        },
+        body: mergeData,
       });
 
       if (mergeResponse && mergeResponse.status === 200 && (mergeResponse as any)._data && (mergeResponse as any)._data.id) {
@@ -193,7 +191,7 @@ export const useUpload = () => {
 
       // 3. Finish Upload
       if (setProgress) {
-        await setUploadProgress(currentFileIndex.value, 'COMPLETED', false, 1);
+        await setUploadProgress(currentFileIndex.value, 'COMPLETED', false, 100);
       }
       console.log("Upload Complete!");
       return responseFile;

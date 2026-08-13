@@ -39,7 +39,7 @@ async function onSubmit(event: FormSubmitEvent<PasswordSchema>) {
   try {
     const response = await api.raw<void>("/api/appUser/selfUpdatePassword", {
       method: "PUT",
-      body: { data: password },
+      body: password,
     });
 
     if (response && response.status == 200) {
