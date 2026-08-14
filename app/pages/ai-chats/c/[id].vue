@@ -1,14 +1,33 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { marked } from "marked";
-import { useAiChat } from "~/composables/useAiChat";
+import { MdPreview } from "md-editor-v3";
+import "md-editor-v3/lib/style.css";
+definePageMeta({
+  layout: "ai",
+});
+const {
+  conversationId,
+  chatTitle,
+  messages,
+  status,
+  error,
+  sendMessage,
+  stop,
+} = useAiChat();
 
-definePageMeta({ layout: "default" });
-useSeoMeta({ title: "Ai chats page" });
-
-const { messages, status, error, sendMessage, stop } = useAiChat();
+useSeoMeta({
+  title: () => chatTitle.value,
+});
+const { isDark } = useTheme();
 const inputMessage = ref("");
 const selectedFilters = ref([]);
+const chatId = useRoute().params.id as string;
+
+onMounted(() => {
+  if (chatId && chatId !== "new") {
+    conversationId.value = chatId;
+  }
+});
 
 const onSubmit = async () => {
   if (
@@ -22,15 +41,19 @@ const onSubmit = async () => {
   await sendMessage(msg, selectedFilters.value);
 };
 
-const renderMarkdown = (text: string) => {
-  if (!text) return "";
-  return marked.parse(text);
-};
+// const renderMarkdown = (text: string) => {
+//   if (!text) return "";
+//   return marked.parse(text);
+// };
 
 function onReload() {
   // ถ้าอยาก regenerate คำตอบล่าสุด ต้องเก็บ prompt ล่าสุดไว้ต่างหาก
   // แล้วเรียก sendMessage(lastUserPrompt) ใหม่
 }
+
+const test = () => {
+  window.history.replaceState(null, "", "/ai-chats/c/99999");
+};
 </script>
 
 <template>
@@ -39,6 +62,9 @@ function onReload() {
     class="relative min-h-0"
     :ui="{ body: 'p-0 sm:p-0 overscroll-none' }"
   >
+    <template #header>
+      <UDashboardNavbar :title="chatTitle || 'New chat'" />
+    </template>
     <template #body>
       <div class="flex flex-1 justify-center min-h-0">
         <div class="w-full min-w-0 max-w-3xl flex flex-col gap-4 sm:gap-6 px-4">
@@ -50,7 +76,10 @@ function onReload() {
           >
             <template #indicator>
               <div class="flex items-center gap-1.5">
-                <UChatShimmer :text="`${$t('ai.thinking')}...`" class="text-sm" />
+                <UChatShimmer
+                  :text="`${$t('ai.thinking')}...`"
+                  class="text-sm"
+                />
               </div>
             </template>
 
@@ -72,22 +101,51 @@ function onReload() {
                     :text="`${$t('ai.thinking')}...`"
                     :spread="5"
                   />
-                  <span v-else>{{ $t('ai.thinkingShow') }}</span>
+                  <span v-else>{{ $t("ai.thinkingShow") }}</span>
                 </UButton>
 
                 <template #content>
                   <div
                     class="text-sm text-muted/60 border-l-2 border-(--ui-border) pl-3 py-1 my-2 [&_p]:my-1.5 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_ul]:my-1.5 [&_ol]:my-1.5 [&_li]:my-0 [&_strong]:font-medium"
+                  >
+                    <MdPreview
+                      v-if="message.thinkingContent"
+                      :modelValue="message.thinkingContent"
+                      language="en-US"
+                      preview-theme="github"
+                      code-theme="github"
+                      :show-code-row-number="true"
+                      class="think-mode-preview  bg-transparent!"
+                    />
+                  </div>
+                  <!-- <div
+                    class="text-sm text-muted/60 border-l-2 border-(--ui-border) pl-3 py-1 my-2 [&_p]:my-1.5 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_ul]:my-1.5 [&_ol]:my-1.5 [&_li]:my-0 [&_strong]:font-medium"
                     v-html="renderMarkdown(message.thinkingContent)"
-                  />
+                  /> -->
                 </template>
               </UCollapsible>
 
               <!-- Main answer -->
-              <div
+              <!-- <div
                 class="prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-p:first:mt-0 prose-p:last:mb-0 prose-pre:my-2 prose-ul:my-1.5 prose-ol:my-1.5"
                 v-html="renderMarkdown(message.content)"
-              />
+              /> -->
+              <div
+                class="prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-p:first:mt-0 prose-p:last:mb-0 prose-pre:my-2 prose-ul:my-1.5 prose-ol:my-1.5"
+              >
+                <!-- <BaseMarkdownPreview :content="message.content" /> -->
+                <MdPreview
+                  v-if="message.content"
+                  :modelValue="message.content"
+                  :theme="isDark ? 'dark' : 'light'"
+                  language="en-US"
+                  preview-theme="github"
+                  code-theme="github"
+                  :show-code-row-number="true"
+                  class="bg-transparent!"
+                  :code-foldable="false"
+                />
+              </div>
 
               <!-- Sources -->
               <div
@@ -102,7 +160,11 @@ function onReload() {
                   size="sm"
                   :icon="'i-lucide-file-text'"
                 >
-                  {{ source.fileName ?? source.title ?? `${$t('ai.source')} ${i + 1}` }}
+                  {{
+                    source.fileName ??
+                    source.title ??
+                    `${$t("ai.source")} ${i + 1}`
+                  }}
                 </UBadge>
               </div>
             </template>
@@ -113,7 +175,7 @@ function onReload() {
               v-model="inputMessage"
               :placeholder="$t('ai.promtLabel')"
               :error="error"
-              color="neutral"
+              color="primary"
               variant="subtle"
               class="[view-transition-name:chat-prompt]"
               :ui="{ base: 'px-1.5' }"
@@ -136,7 +198,7 @@ function onReload() {
             </UChatPrompt>
 
             <p class="text-center text-xs text-muted mt-2">
-              {{ $t('ai.aiMistakeable') }}
+              {{ $t("ai.aiMistakeable") }}
             </p>
           </div>
         </div>
@@ -144,3 +206,40 @@ function onReload() {
     </template>
   </UDashboardPanel>
 </template>
+<style>
+.md-editor,
+.md-editor-preview,
+.md-editor-preview p,
+.md-editor-preview span,
+.md-editor-preview li,
+.md-editor-preview h1,
+.md-editor-preview h2,
+.md-editor-preview h3,
+.md-editor-preview h4,
+.md-editor-preview h5,
+.md-editor-preview h6 {
+  font-family: inherit !important;
+}
+.md-editor-preview pre,
+.md-editor-preview code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+}
+.md-editor-preview-wrapper { padding: 0 !important; }
+.md-editor { background-color: transparent !important; }
+.md-editor-dark { --md-bk-color: transparent !important; }
+
+.think-mode-preview .md-editor-preview {
+  font-size: 0.85rem !important;
+  color: #9ca3af !important;
+  font-style: italic !important;
+  line-height: 1.6 !important;
+}
+
+.think-mode-preview .md-editor-preview pre {
+  opacity: 0.8 !important;
+}
+
+.dark .think-mode-preview .md-editor-preview {
+  color: #6b7280 !important;
+}
+</style>

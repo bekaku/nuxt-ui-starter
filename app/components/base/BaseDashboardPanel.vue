@@ -8,10 +8,12 @@ const props = withDefaults(
     maxSize?: number;
     defaultSize?: number;
     resizable?: boolean;
+    collapseable?: boolean;
     ui?: DashboardPanelProps["ui"];
   }>(),
   {
     resizable: false,
+    collapseable:false,
     ui: () => ({
       root: "gap-1",
     }),
@@ -50,7 +52,7 @@ const items = [
         <UDashboardNavbar :title="title" :ui >
           <template #leading>
             <slot name="leading">
-              <UDashboardSidebarCollapse />
+              <UDashboardSidebarCollapse v-if="collapseable" />
             </slot>
           </template>
           <template #trailing>

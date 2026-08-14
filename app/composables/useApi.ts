@@ -11,7 +11,7 @@ import { parse, parseSetCookie } from 'cookie-es';
         setAuth(response._data);
       }
  try {
-      const response = await api<AppUser>('/api/auth/login', {
+      const response = await api<ApiResponse<AppUser>>('/api/auth/login', {
         method: 'POST',
         body: {
           emailOrUsername: req.emailOrUsername,

@@ -11,6 +11,7 @@ const { appNavigations, addFavoriteMenus, removeFavoriteMenus } = useAuth();
 const { getFavoriteNavigations, findByUrl, getFaveroteIndex, isFaveroteExist } =
   useMenu();
 const open = ref(false);
+const { isDark } = useTheme();
 const groups = computed(() => [
   {
     id: "links",
@@ -122,7 +123,25 @@ const onUnFav = async (e: any, item: AppNavigationMenuItem) => {
       :ui="{ footer: 'lg:border-t lg:border-default' }"
     >
       <template #header="{ collapsed }">
-        <UserMenu :collapsed="collapsed" />
+         <!-- <TeamsMenu :collapsed="collapsed" /> -->
+           <div class="flex w-full justify-between">
+          <UButton
+            v-if="!collapsed"
+            :avatar="{
+              src: !isDark ? '/logo/logo-black.png' : '/logo/logo-white.png',
+              alt: 'App',
+            }"
+            to="/"
+            variant="ghost"
+            :square="collapsed"
+            class="data-[state=open]:bg-elevated cursor-pointer justify-start"
+            :class="[!collapsed && 'py-2']"
+            :ui="{
+              leadingAvatar: ['rounded-none  bg-transparent', !collapsed ?'size-10':'size-5' ],
+            }"
+          />
+          <UDashboardSidebarCollapse icon="lucide:sidebar" />
+        </div>
       </template>
 
       <template #default="{ collapsed }">
@@ -204,7 +223,8 @@ const onUnFav = async (e: any, item: AppNavigationMenuItem) => {
       </template>
 
       <template #footer="{ collapsed }">
-        <TeamsMenu :collapsed="collapsed" />
+
+     <UserMenu :collapsed="collapsed" />
       </template>
     </UDashboardSidebar>
 

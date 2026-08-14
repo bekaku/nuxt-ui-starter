@@ -6,7 +6,9 @@ import {
 } from "@internationalized/date";
 import type { ISeriresCategories } from "~/types/chart";
 import type { LabelValue } from "~/types/common";
-
+definePageMeta({
+  pageName: "base.home",
+});
 const df = new DateFormatter("en-US", { dateStyle: "medium" });
 const tz = getLocalTimeZone();
 const initialEnd = today(tz);
@@ -64,7 +66,7 @@ const { data: dashBaordRecentSalseItems } = await useFetch<
 </script>
 
 <template>
-  <BaseDashboardPanel id="home" title="Home">
+  <BaseDashboardPanel id="home" :title="$t('base.home')">
     <BaseItem
       title="Dashboard"
       description="Top picks for you. Updated daily."

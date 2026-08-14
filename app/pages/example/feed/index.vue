@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { NavigationMenuItem, SelectItem, SelectMenuItem } from "@nuxt/ui";
 import type { FeedItem } from "~/types";
-
+definePageMeta({
+  layout: "feed",
+});
 useSeoMeta({
   title: "Feed page",
 });

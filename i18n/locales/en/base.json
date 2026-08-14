@@ -330,13 +330,6 @@
     "updatePasswordSub": "Confirm your current password before setting a new one.",
     "addImagelink": "Add image link"
   },
-    "ai": {
-    "thinking": "Thinking",
-    "thinkingShow": "Show the thought process.",
-    "promtLabel": "Type your message here...",
-    "aiMistakeable": "AI may provide incorrect answers. Please verify important information before use.",
-    "source": "Source"
-  },
   "drive": {
     "title": "My Files",
     "folder": "Folder",
@@ -466,7 +459,18 @@
     "all": "All",
     "groups": "Groups",
     "favorite": "Favorite",
+    "unfavorite": "Unfavorite",
+    "newChat": "New Chat",
+    "recent": "Recent",
+    "searchChat": "Search chats",
     "typeMessage": "Type your message"
+  },
+  "ai": {
+    "thinking": "Thinking",
+    "thinkingShow": "Show the thought process.",
+    "promtLabel": "Type your message here...",
+    "aiMistakeable": "AI may provide incorrect answers. Please verify important information before use.",
+    "source": "Source"
   },
   "authen": {
     "login": "Login",

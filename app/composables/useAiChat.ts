@@ -1,8 +1,9 @@
 import type { AvatarProps } from '@nuxt/ui'
+import type { AiChat, AiRole } from '~/types/models'
 
 export interface ChatMessage {
   id: string
-  role: 'user' | 'assistant' | 'system'
+  role: AiRole
   content: string
   parts?: any[]
   name?: string
@@ -15,16 +16,22 @@ export interface ChatMessage {
 export type ChatStatus = 'ready' | 'submitted' | 'streaming' | 'error'
 
 export const useAiChat = () => {
+
+  const recentChats = useState<AiChat[]>('ai:recent', () => []);
   const messages = ref<ChatMessage[]>([])
   const status = ref<ChatStatus>('ready')
   const error = ref<Error | undefined>(undefined)
+  const { t } = useLang()
   const conversationId = ref<string | null>(null)
   let abortController: AbortController | null = null
 
+  const { onReplaceUrl } = useBase();
   const api = useApi()
-
+  const chatTitle = ref<string>(t('chats.newChat'))
+  const router = useRouter();
   const sendMessage = async (message: string, filterNames: string[] = []) => {
     if (!message.trim()) return
+
 
     error.value = undefined
     status.value = 'submitted'
@@ -55,7 +62,7 @@ export const useAiChat = () => {
     abortController = new AbortController()
 
     try {
-      const stream = await api<ReadableStream>('/api/aiRagChat/stream', {
+      const stream = await api<ReadableStream>('/api/aiChat/stream', {
         method: 'POST',
         responseType: 'stream',
         headers: { Accept: 'text/event-stream' },
@@ -88,6 +95,18 @@ export const useAiChat = () => {
 
               try {
                 const event = JSON.parse(jsonStr)
+
+                if (event.type === 'chat_id') {
+                  conversationId.value = event.content
+                  // router.replace(`/ai-chats/c/${event.content}`)
+                  onReplaceUrl(`/ai-chats/c/${event.content}`)
+                  continue
+                }
+                if (event.type === 'title') {
+                  chatTitle.value = event.content
+                  continue
+                }
+
                 const currentMsg = messages.value[aiMessageIndex]
                 if (!currentMsg) continue
 
@@ -136,7 +155,7 @@ export const useAiChat = () => {
       status.value = 'error'
       const currentMsg = messages.value[aiMessageIndex]
       if (currentMsg) {
-        currentMsg.content += '\n\n**[เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์]**'
+        currentMsg.content += `\n\n**[${t('error.internalServererror')}]**`
         currentMsg.parts = [{ type: 'text', text: currentMsg.content }]
       }
     } finally {
@@ -148,12 +167,30 @@ export const useAiChat = () => {
     abortController?.abort()
   }
 
+
+  const onPin = (chatId: string) => {
+  const item = recentChats.value.find((item) => item.id === chatId);
+  if (item) {
+    item.pin = true;
+  }
+};
+const onUnPin = (chatId: string) => {
+  const item = recentChats.value.find((item) => item.id === chatId);
+  if (item) {
+    item.pin = false;
+  }
+};
+
   return {
+    recentChats,
     messages,
     status,
     error,
     conversationId,
+    chatTitle,
     sendMessage,
-    stop
+    stop,
+    onPin,
+    onUnPin
   }
 }

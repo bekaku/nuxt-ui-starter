@@ -14,6 +14,11 @@ export const useMenu = () => {
         to: "/",
       },
       {
+        label: "Ai Chats",
+        icon: "hugeicons:ai-magic",
+        to: "/ai-chats/c/new",
+      },
+      {
         label: t("nav.developers"),
         icon: "lucide:file-code",
         slot: 'developer-label' as const,
@@ -33,7 +38,7 @@ export const useMenu = () => {
         slot: 'admin-label' as const,
         defaultOpen: true,
         children: [
-           {
+          {
             label: t('model.ai_document_meta.table'),
             icon: "lucide:brain-circuit",
             to: "/ai-document-meta",
@@ -107,11 +112,6 @@ export const useMenu = () => {
             to: "/example/blank",
           },
           {
-            label: "Ai Chats",
-            icon: "hugeicons:ai-magic",
-            to: "/example/ai-chats",
-          },
-          {
             label: "Chats",
             icon: "lucide:message-circle",
             to: "/example/chats",
@@ -131,12 +131,12 @@ export const useMenu = () => {
             icon: "i-lucide-users",
             to: "/example/customers",
           },
-           {
+          {
             label: "Darg and Drop",
             icon: "lucide:move",
             to: "/example/drag-drop",
           },
-           {
+          {
             label: "Download files",
             icon: "lucide:cloud-download",
             to: "/example/download-files",

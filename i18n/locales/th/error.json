@@ -64,6 +64,7 @@
     "atLeastUppercase": "อย่างน้อย {0} ตัวอักษรพิมพ์ใหญ่",
     "atLeastLowercase": "อย่างน้อย {0} ตัวอักษรพิมพ์เล็ก",
     "atLeastNumbers": "อย่างน้อย {0} ตัวเลข",
-    "passwordMustDefferent": "รหัสผ่านใหม่ต้องแตกต่างจากรหัสผ่านเดิม"
+    "passwordMustDefferent": "รหัสผ่านใหม่ต้องแตกต่างจากรหัสผ่านเดิม",
+    "internalServererror": "เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์"
   }
 }

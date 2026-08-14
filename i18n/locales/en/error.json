@@ -64,6 +64,7 @@
     "atLeastUppercase": "At least {0} uppercase letter",
     "atLeastLowercase": "At least {0} lowercase letter",
     "atLeastNumbers": "At least {0} number",
-    "passwordMustDefferent": "The new password must be different from the old password."
+    "passwordMustDefferent": "The new password must be different from the old password.",
+    "internalServererror": "An error occurred while connecting to the server."
   }
 }

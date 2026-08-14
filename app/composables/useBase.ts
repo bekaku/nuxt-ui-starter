@@ -47,7 +47,11 @@ export const useBase = () => {
     return val != undefined ? +val : 0;
   };
   const onReplaceUrl = (url: string) => {
-    history.pushState({}, '', url);
+    if (import.meta.client) {
+      history.pushState({}, '', url);
+      // window.history.replaceState(null, '', url)
+    }
+
   };
   const onPageGo = (link: string | undefined, replace?: boolean): void => {
     if (!link) {
