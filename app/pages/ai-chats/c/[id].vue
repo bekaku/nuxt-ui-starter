@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { MdPreview } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
+import type { ChatSourceReference } from "~/types/models";
 definePageMeta({
   layout: "ai",
 });
@@ -18,6 +19,7 @@ const {
 useSeoMeta({
   title: () => chatTitle.value,
 });
+const { t } = useLang();
 const { isDark } = useTheme();
 const inputMessage = ref("");
 const selectedFilters = ref([]);
@@ -53,6 +55,42 @@ function onReload() {
 
 const test = () => {
   window.history.replaceState(null, "", "/ai-chats/c/99999");
+};
+
+const getSourceIcon = (source: ChatSourceReference) => {
+  switch (source.type) {
+    case "DATABASE_TABLE":
+      return "i-lucide-database";
+    case "DATABASE_QUERY":
+      return "i-lucide-terminal";
+    case "DOCUMENT":
+    default:
+      return "i-lucide-file-text";
+  }
+};
+const getSourceLabel = (source: ChatSourceReference, index: number) => {
+  switch (source.type) {
+    case "DATABASE_TABLE":
+      return source.schema
+        ? `${source.schema}.${source.tableName}`
+        : (source.tableName ?? "Table");
+    case "DATABASE_QUERY":
+      if (!source.query) return "SQL Query";
+      return source.query.length > 25
+        ? `${source.query.slice(0, 25)}...`
+        : source.query;
+    case "DOCUMENT":
+    default:
+      return (
+        source.fileName ?? source.title ?? `${t("ai.source")} ${index + 1}`
+      );
+  }
+};
+const getSourceTooltip = (source: ChatSourceReference) => {
+  if (source.type === "DATABASE_QUERY") return source.query;
+  if (source.type === "DATABASE_TABLE")
+    return `${source.schema}.${source.tableName}`;
+  return source.fileName;
 };
 </script>
 
@@ -115,7 +153,7 @@ const test = () => {
                       preview-theme="github"
                       code-theme="github"
                       :show-code-row-number="true"
-                      class="think-mode-preview  bg-transparent!"
+                      class="think-mode-preview bg-transparent!"
                     />
                   </div>
                   <!-- <div
@@ -152,7 +190,7 @@ const test = () => {
                 v-if="message.sources?.length"
                 class="mt-3 flex flex-wrap gap-1.5"
               >
-                <UBadge
+                <!-- <UBadge
                   v-for="(source, i) in message.sources"
                   :key="i"
                   color="neutral"
@@ -165,6 +203,18 @@ const test = () => {
                     source.title ??
                     `${$t("ai.source")} ${i + 1}`
                   }}
+                </UBadge> -->
+                <UBadge
+                  v-for="(source, i) in message.sources"
+                  :key="i"
+                  color="neutral"
+                  variant="outline"
+                  size="sm"
+                  :icon="getSourceIcon(source)"
+                  :title="getSourceTooltip(source)"
+                  class="max-w-xs truncate"
+                >
+                  {{ getSourceLabel(source, i) }}
                 </UBadge>
               </div>
             </template>
@@ -222,11 +272,19 @@ const test = () => {
 }
 .md-editor-preview pre,
 .md-editor-preview code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace !important;
 }
-.md-editor-preview-wrapper { padding: 0 !important; }
-.md-editor { background-color: transparent !important; }
-.md-editor-dark { --md-bk-color: transparent !important; }
+.md-editor-preview-wrapper {
+  padding: 0 !important;
+}
+.md-editor {
+  background-color: transparent !important;
+}
+.md-editor-dark {
+  --md-bk-color: transparent !important;
+}
 
 .think-mode-preview .md-editor-preview {
   font-size: 0.85rem !important;

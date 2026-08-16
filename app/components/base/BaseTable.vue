@@ -587,6 +587,7 @@ watch(
 
           <div class="flex flex-wrap items-center gap-1.5 my-4 md:my-0">
             <slot name="table-header-end">
+              <slot name="table-header-end-prepend"/>
               <UTooltip v-if="showSearchBtn" :text="$t('base.search')">
                 <UButton
                   icon="i-lucide-search"
@@ -646,6 +647,7 @@ watch(
                   trailing-icon="i-lucide-settings-2"
                 />
               </UDropdownMenu>
+              <slot name="table-header-end-append"/>
             </slot>
           </div>
         </slot>

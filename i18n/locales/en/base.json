@@ -470,7 +470,8 @@
     "thinkingShow": "Show the thought process.",
     "promtLabel": "Type your message here...",
     "aiMistakeable": "AI may provide incorrect answers. Please verify important information before use.",
-    "source": "Source"
+    "source": "Source",
+    "syncDatabaseSchema": "Sync database schema"
   },
   "authen": {
     "login": "Login",

@@ -2,6 +2,7 @@ import type { ChatMessageType, ChatType, EmojiType, FileMimeType, ILanguge, Logi
 export type IPermissionOperationType = 1 | 2 | 3; // 1=crud, 2=report, 3=other
 export type PermissionType = "CRUD" | "REPORT" | "OTHER" | "FEATURE";
 export type AiRole = "user" | "assistant" | "system";
+export type AiChatSourceType = "DOCUMENT" | "DATABASE_TABLE" | "DATABASE_QUERY";
 export type IdType = bigint | string | null | undefined;
 export interface Id {
   id?: IdType
@@ -230,4 +231,14 @@ export interface AiChatMessage extends Id {
   aiRole: AiRole
   content: string
   createdDate: string
+}
+export interface ChatSourceReference {
+  type?: AiChatSourceType
+  fileName?: string
+  documentType?: string
+  schema?: string
+  tableName?: string
+  query?: string
+  score?: number
+  title?: string
 }

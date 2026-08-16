@@ -10,11 +10,15 @@ definePageMeta({
   pageName: "model.ai_document_meta.table",
   requiresPermission: ["ai_document_meta_list"],
 });
+
+const toast = useToast();
 const confirm = useConfirmDialog();
+const loader = useLoader();
 const UBadge = resolveComponent("UBadge");
 const UButton = resolveComponent("UButton");
 const UIcon = resolveComponent("UIcon");
 const { t } = useLang();
+const api = useApi();
 const {
   dataList,
   loading,
@@ -147,7 +151,40 @@ const onManualDelete = async (index: number) => {
   onItemDelete(index);
 };
 
+const onSyncDatabaseSchema = async () => {
+  const conf = await confirm({
+    title: "Sync Database Schema",
+    confirmButton: {
+      label: t("base.okay"),
+      color: "warning",
+      icon: "lucide:database-backup",
+    },
+  });
+  if (!conf) {
+    return;
+  }
 
+  loader.open()
+  try {
+    const response = await api.raw<void>(
+      "/api/aiDocumentMeta/ingestDatabaseSchemas",
+      {
+        method: "POST",
+      },
+    );
+    if (response && response?.status == 200) {
+      toast.add({
+        description: t("success.success"),
+        icon: "lucide:check",
+        color: "success",
+      });
+    }
+  } catch (error) {
+    console.error("Failed to fetch profile ", error);
+  } finally {
+    loader.close()
+  }
+};
 </script>
 
 <template>
@@ -177,6 +214,14 @@ const onManualDelete = async (index: number) => {
       @on-keyword-search="onKeywordSearch"
       @on-search="onSearch"
     >
+      <template #table-header-end-append>
+        <UButton
+          :label="$t('ai.syncDatabaseSchema')"
+          icon="lucide:database-backup"
+          color="warning"
+          @click="onSyncDatabaseSchema"
+        />
+      </template>
       <template #actions-cell="{ row }">
         <UButton
           icon="lucide:trash"

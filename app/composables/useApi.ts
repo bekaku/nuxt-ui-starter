@@ -4,12 +4,15 @@ import { parse, parseSetCookie } from 'cookie-es';
 // let refreshPromise: Promise<RefreshTokenResponse> | null = null
 
 /*
-   const response = await api.raw<AppUser>('/api/appUser/currentUserData', {
-        method: 'GET'
-      })
-      if (response && response?.status == 200 && response._data && !isAppException(response._data)) {
-        setAuth(response._data);
-      }
+  try {
+    const response = await api.raw<void>("/api/appUser/currentUserData", {
+      method: "GET",
+    });
+    if (response && response?.status == 200) {
+    }
+  } catch (error) {
+    console.error("Failed to fetch profile ", error);
+  }
  try {
       const response = await api<ApiResponse<AppUser>>('/api/auth/login', {
         method: 'POST',
