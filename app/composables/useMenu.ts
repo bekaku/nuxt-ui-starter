@@ -14,7 +14,7 @@ export const useMenu = () => {
         to: "/",
       },
       {
-        label: "Ai Chats",
+        label: t('ai.chatWithAi'),
         icon: "hugeicons:ai-magic",
         to: "/ai-chats/c/new",
       },

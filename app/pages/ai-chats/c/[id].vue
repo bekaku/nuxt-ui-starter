@@ -14,20 +14,25 @@ const {
   error,
   sendMessage,
   stop,
+  initialMessage,
 } = useAiChat();
 
 useSeoMeta({
   title: () => chatTitle.value,
 });
+const { writeToClipboard } = useBase();
 const { t } = useLang();
 const { isDark } = useTheme();
 const inputMessage = ref("");
 const selectedFilters = ref([]);
 const chatId = useRoute().params.id as string;
 
-onMounted(() => {
+onMounted(async () => {
   if (chatId && chatId !== "new") {
-    conversationId.value = chatId;
+    if (isNumericOnly(chatId)) {
+      conversationId.value = chatId;
+      await initialMessage();
+    }
   }
 });
 
@@ -92,6 +97,25 @@ const getSourceTooltip = (source: ChatSourceReference) => {
     return `${source.schema}.${source.tableName}`;
   return source.fileName;
 };
+
+const getCopyBtn = (item: any) => [
+  {
+    label: $t("base.copyToClipboard"),
+    icon: "i-lucide-copy",
+    onSelect() {
+      console.log("copy:", item);
+    },
+  },
+];
+const onCopyMessage = (event: any, item: any) => {
+  console.log("onCopyMessage", item);
+  if (item?.parts?.length > 0) {
+    const part = item?.parts[0];
+    if (part?.text) {
+      writeToClipboard(part.text);
+    }
+  }
+};
 </script>
 
 <template>
@@ -107,6 +131,29 @@ const getSourceTooltip = (source: ChatSourceReference) => {
       <div class="flex flex-1 justify-center min-h-0">
         <div class="w-full min-w-0 max-w-3xl flex flex-col gap-4 sm:gap-6 px-4">
           <UChatMessages
+            :ui="{
+              autoScroll: 'mb-15',
+            }"
+            :assistant="{
+              variant: 'naked',
+              actions: [
+                {
+                  label: $t('base.copyToClipboard'),
+                  icon: 'i-lucide-copy',
+                  onClick: onCopyMessage,
+                },
+              ],
+            }"
+            :user="{
+              variant: 'subtle',
+              actions: [
+                {
+                  label: $t('base.copyToClipboard'),
+                  icon: 'i-lucide-copy',
+                  onClick: onCopyMessage,
+                },
+              ],
+            }"
             should-auto-scroll
             :messages="messages"
             :status="status"
@@ -156,22 +203,13 @@ const getSourceTooltip = (source: ChatSourceReference) => {
                       class="think-mode-preview bg-transparent!"
                     />
                   </div>
-                  <!-- <div
-                    class="text-sm text-muted/60 border-l-2 border-(--ui-border) pl-3 py-1 my-2 [&_p]:my-1.5 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_ul]:my-1.5 [&_ol]:my-1.5 [&_li]:my-0 [&_strong]:font-medium"
-                    v-html="renderMarkdown(message.thinkingContent)"
-                  /> -->
                 </template>
               </UCollapsible>
 
               <!-- Main answer -->
-              <!-- <div
-                class="prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-p:first:mt-0 prose-p:last:mb-0 prose-pre:my-2 prose-ul:my-1.5 prose-ol:my-1.5"
-                v-html="renderMarkdown(message.content)"
-              /> -->
               <div
                 class="prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-p:first:mt-0 prose-p:last:mb-0 prose-pre:my-2 prose-ul:my-1.5 prose-ol:my-1.5"
               >
-                <!-- <BaseMarkdownPreview :content="message.content" /> -->
                 <MdPreview
                   v-if="message.content"
                   :modelValue="message.content"
@@ -190,20 +228,6 @@ const getSourceTooltip = (source: ChatSourceReference) => {
                 v-if="message.sources?.length"
                 class="mt-3 flex flex-wrap gap-1.5"
               >
-                <!-- <UBadge
-                  v-for="(source, i) in message.sources"
-                  :key="i"
-                  color="neutral"
-                  variant="outline"
-                  size="sm"
-                  :icon="'i-lucide-file-text'"
-                >
-                  {{
-                    source.fileName ??
-                    source.title ??
-                    `${$t("ai.source")} ${i + 1}`
-                  }}
-                </UBadge> -->
                 <UBadge
                   v-for="(source, i) in message.sources"
                   :key="i"

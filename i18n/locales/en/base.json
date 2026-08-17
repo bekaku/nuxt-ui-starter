@@ -328,7 +328,8 @@
     "settingEmailDescription": "Used to sign in, for email receipts and product updates.",
     "settingUsernameDescription": "Your unique username for logging in and your profile URL.",
     "updatePasswordSub": "Confirm your current password before setting a new one.",
-    "addImagelink": "Add image link"
+    "addImagelink": "Add image link",
+    "copyToClipboard": "Copy to clipboard"
   },
   "drive": {
     "title": "My Files",
@@ -453,6 +454,7 @@
     "monthShorts": "Jan._Feb._Mar._Apr._May_Jun._Jul._Aug._Sep._Oct._Nov._Dec."
   },
   "chats": {
+    "chatWithAi": "Chat with AI",
     "chats": "Chats",
     "media": "Media",
     "files": "Files",

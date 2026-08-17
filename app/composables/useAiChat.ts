@@ -1,17 +1,9 @@
 import type { AvatarProps } from '@nuxt/ui'
-import type { AiChat, AiRole } from '~/types/models'
+import type { AnyARecord } from 'node:dns'
+import type { ApiResponse } from '~/types/common'
+import type { AiChat, AiChatMessage, AiRole, ChatMessage } from '~/types/models'
 
-export interface ChatMessage {
-  id: string
-  role: AiRole
-  content: string
-  parts?: any[]
-  name?: string
-  avatar?: AvatarProps
-  thinkingContent?: string
-  isThinkingDone: boolean,
-  sources?: any[]
-}
+
 
 export type ChatStatus = 'ready' | 'submitted' | 'streaming' | 'error'
 
@@ -28,10 +20,58 @@ export const useAiChat = () => {
   const { onReplaceUrl } = useBase();
   const api = useApi()
   const chatTitle = ref<string>(t('chats.newChat'))
-  const router = useRouter();
+
+  const loading = ref(true);
+  const page = ref(0)
+  const size = ref(10)
+  const initialMessage = async () => {
+    if (!conversationId.value) {
+      return;
+    }
+    try {
+      // @ts-ignore
+      const response = await api<ApiResponse<AiChatMessage>>(
+        `api/aiChat/messages/${conversationId.value}?page=${page.value}&sort=id,desc&size=${size.value}` as string,
+        { method: 'GET' }
+      )
+
+      if (response?.dataList?.length) {
+      // @ts-ignore
+        messages.value = [...response.dataList]
+          .reverse()
+          .map((message) => ({
+            id: message.id,
+            role: message.aiRole,
+            content: message.content,
+            parts: [
+              {
+                type: 'text',
+                text: message.content
+              }
+            ],
+            thinkingContent: undefined,
+            isThinkingDone: true,
+            avatar: message.aiRole === 'assistant'
+              ? {
+                icon: 'hugeicons:ai-magic',
+                color: 'primary'
+              }
+              : undefined,
+            sources: []
+          }))
+      }
+
+    } catch (error) {
+      console.error('Failed to fetch messages', error);
+    } finally {
+      loading.value = false;
+    }
+  }
+
   const sendMessage = async (message: string, filterNames: string[] = []) => {
     if (!message.trim()) return
 
+    const isNewChat = !conversationId.value;
 
     error.value = undefined
     status.value = 'submitted'
@@ -64,7 +104,7 @@ export const useAiChat = () => {
     try {
       const stream = await api<ReadableStream>('/api/aiChat/stream', {
         method: 'POST',
-        responseType: 'stream',
+        responseType: 'stream', // useApi จะคืนค่ากลับมาเป็น Stream ให้
         headers: { Accept: 'text/event-stream' },
         signal: abortController.signal,
         body: {
@@ -144,6 +184,15 @@ export const useAiChat = () => {
         }
       }
 
+      if (isNewChat && conversationId.value) {
+        recentChats.value.unshift({
+          id: conversationId.value,
+          title: chatTitle.value,
+          updatedDate: new Date().toISOString(),
+          pin: false
+        });
+      }
+
       status.value = 'ready'
     } catch (err: any) {
       if (err?.name === 'AbortError') {
@@ -169,17 +218,17 @@ export const useAiChat = () => {
 
 
   const onPin = (chatId: string) => {
-  const item = recentChats.value.find((item) => item.id === chatId);
-  if (item) {
-    item.pin = true;
-  }
-};
-const onUnPin = (chatId: string) => {
-  const item = recentChats.value.find((item) => item.id === chatId);
-  if (item) {
-    item.pin = false;
-  }
-};
+    const item = recentChats.value.find((item) => item.id === chatId);
+    if (item) {
+      item.pin = true;
+    }
+  };
+  const onUnPin = (chatId: string) => {
+    const item = recentChats.value.find((item) => item.id === chatId);
+    if (item) {
+      item.pin = false;
+    }
+  };
 
   return {
     recentChats,
@@ -188,9 +237,11 @@ const onUnPin = (chatId: string) => {
     error,
     conversationId,
     chatTitle,
+    loading,
     sendMessage,
     stop,
     onPin,
-    onUnPin
+    onUnPin,
+    initialMessage
   }
 }

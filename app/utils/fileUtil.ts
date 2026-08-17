@@ -345,6 +345,9 @@ export const getFileExtension = (t: string): string | undefined => {
     case 'video/3gpp2':
       extension = '.3g2';
       break;
+    case 'text/markdown':
+      extension = '.md';
+      break;
     default:
       extension = undefined;
       break;
@@ -513,6 +516,7 @@ export const getFileTypeIcon = (t: string) => {
     case 'video/3gpp2':
       icon = 'vscode-icons:file-type-video';
       break;
+    case '.md':
     case 'text/markdown':
       icon = 'bi:markdown';
       break;

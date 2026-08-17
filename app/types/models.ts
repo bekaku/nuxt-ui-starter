@@ -1,3 +1,4 @@
+import type { AvatarProps } from "@nuxt/ui";
 import type { ChatMessageType, ChatType, EmojiType, FileMimeType, ILanguge, LoginLogType, UploadStatus, VideoSrc, VideoTrack } from "./common";
 export type IPermissionOperationType = 1 | 2 | 3; // 1=crud, 2=report, 3=other
 export type PermissionType = "CRUD" | "REPORT" | "OTHER" | "FEATURE";
@@ -241,4 +242,15 @@ export interface ChatSourceReference {
   query?: string
   score?: number
   title?: string
+}
+export interface ChatMessage {
+  id: IdType
+  role: AiRole
+  content: string
+  parts?: any[]
+  name?: string
+  avatar?: AvatarProps
+  thinkingContent?: string
+  isThinkingDone: boolean,
+  sources?: any[]
 }

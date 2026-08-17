@@ -9,8 +9,8 @@ import type {
 } from "~/types/models";
 
 definePageMeta({
-  pageName: "model_permission",
-  requiresPermission: ["permission_view", "permission_add", "permission_edit"],
+  pageName: "model.ai_document_meta.table",
+  requiresPermission: ["ai_document_meta_add"],
 });
 
 const { t } = useLang();
