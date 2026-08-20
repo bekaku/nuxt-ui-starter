@@ -83,7 +83,7 @@ note、abstract、info、tip、success、question、warning、failure、danger�
     <UCard title="Editor" class="mb-8">
       <BaseMarkdownEditor v-model="content" :editor-id="contentId" />
     </UCard>
-    <UCard title="Preview">
+    <UCard title="Preview" class="mb-12">
       <BaseMarkdownPreview :content="content" :editor-id="contentPreviewId" />
     </UCard>
   </BaseDashboardPanel>

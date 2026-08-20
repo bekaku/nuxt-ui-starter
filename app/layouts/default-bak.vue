@@ -112,17 +112,19 @@ const onUnFav = async (e: any, item: AppNavigationMenuItem) => {
 
 <template>
   <UDashboardGroup unit="rem">
+    <!-- class="bg-elevated/25" -->
+     <!-- bg-default -->
     <UDashboardSidebar
       id="default"
       v-model:open="open"
       collapsible
       resizable
-     class="border-r-0 py-4 dark:[--ui-bg-elevated:var(--ui-color-neutral-900)]"
-      :menu="{ inset: true }"
+      class="bg-elevated/25"
+      :ui="{ footer: 'lg:border-t lg:border-default' }"
     >
       <template #header="{ collapsed }">
-        <!-- <TeamsMenu :collapsed="collapsed" /> -->
-        <div class="flex w-full justify-between">
+         <!-- <TeamsMenu :collapsed="collapsed" /> -->
+           <div class="flex w-full justify-between">
           <UButton
             v-if="!collapsed"
             :avatar="{
@@ -135,10 +137,7 @@ const onUnFav = async (e: any, item: AppNavigationMenuItem) => {
             class="data-[state=open]:bg-elevated cursor-pointer justify-start"
             :class="[!collapsed && 'py-2']"
             :ui="{
-              leadingAvatar: [
-                'rounded-none  bg-transparent',
-                !collapsed ? 'size-10' : 'size-5',
-              ],
+              leadingAvatar: ['rounded-none  bg-transparent', !collapsed ?'size-10':'size-5' ],
             }"
           />
           <UDashboardSidebarCollapse icon="lucide:sidebar" />
@@ -224,7 +223,8 @@ const onUnFav = async (e: any, item: AppNavigationMenuItem) => {
       </template>
 
       <template #footer="{ collapsed }">
-        <UserMenu :collapsed="collapsed" />
+
+     <UserMenu :collapsed="collapsed" />
       </template>
     </UDashboardSidebar>
 
@@ -234,11 +234,7 @@ const onUnFav = async (e: any, item: AppNavigationMenuItem) => {
       :color-mode="false"
     />
 
-    <div
-      class="flex-1 flex m-4 lg:ml-0 rounded-lg ring ring-default/45 shadow-xs bg-default/75 min-w-0 overflow-hidden"
-    >
-      <slot />
-    </div>
+    <slot />
 
     <NotificationsSlideover />
   </UDashboardGroup>

@@ -152,7 +152,9 @@ export const useBase = () => {
     navigator.clipboard.writeText(text);
     if (nuxtApp.$toast) {
       nuxtApp.$toast.add({
-        description: t('success.copy')
+        description: t('success.copy'),
+        duration: 1000,
+        progress: false
       })
     }
   }

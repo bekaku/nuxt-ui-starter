@@ -252,5 +252,6 @@ export interface ChatMessage {
   avatar?: AvatarProps
   thinkingContent?: string
   isThinkingDone: boolean,
+  isThinkingOpen?: boolean,
   sources?: any[]
 }

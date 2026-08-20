@@ -28,10 +28,8 @@ import { parse, parseSetCookie } from 'cookie-es';
         setAuth(response.data);
       }
 
-      return response.data || null;
     } catch (error) {
-      console.error('Failed to fetch profile', error);
-      return null;
+      console.error('Failed', error);
     } finally {
       loading.value = false;
     }
@@ -96,14 +94,14 @@ export const useApi = () => {
   const exeptionNotify = (response: any) => {
     if (response && response._data) {
       if (isAppException(response._data)) {
-        notifyMessage(response._data);
+        notifyMessage(response._data, response.status);
       } else if (isServerResponseMessage(response._data)) {
-        notifyServerMessage(response._data);
+        notifyServerMessage(response._data, response.status);
       }
     }
   };
 
-  const notifyMessage = (response: AppException | null): void => {
+  const notifyMessage = (response: AppException | null, status: number): void => {
     if (import.meta.client && response && nuxtApp.$toast && (response.message || response.errors?.length)) {
       nuxtApp.$toast.add({
         title: h('span', { class: 'text-red-500 font-bold' }, response.message),
@@ -120,12 +118,12 @@ export const useApi = () => {
     }
   };
 
-  const notifyServerMessage = (response: ResponseMessage): void => {
+  const notifyServerMessage = (response: ResponseMessage, status: number): void => {
     if (import.meta.client && nuxtApp.$toast && response && response.message) {
       nuxtApp.$toast.add({
         description: response.message,
-        icon: response.status == '200 OK' || response.status == '201 Created' ? 'lucide:circle-check' : 'i-lucide-alert-circle',
-        color: response.status == '200 OK' || response.status == '201 Created' ? 'success' : 'error',
+        icon: status < 400  ? 'lucide:circle-check' : 'i-lucide-alert-circle',
+        color: status < 400 ? 'success' : 'error',
       })
     }
   }

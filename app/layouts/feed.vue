@@ -84,7 +84,7 @@ const items: NavigationMenuItem[][] = [
         />
       </template>
     </UHeader>
-    <UMain>
+    <UMain class="bg-default/75">
       <slot />
     </UMain>
   </div>

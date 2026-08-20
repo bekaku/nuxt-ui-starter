@@ -189,7 +189,7 @@ const onDragEnd = (event: any) => {
 </script>
 
 <template>
-  <BaseDashboardPanel id="example-drag-drop" title="Darg and Drop">
+  <BaseDashboardPanel id="example-drag-drop" title="Darg and Drop" body-class="max-w-full">
     <UScrollArea
       orientation="horizontal"
       class="w-full data-[orientation=vertical]:h-96 p-4"

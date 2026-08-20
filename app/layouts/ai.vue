@@ -17,7 +17,7 @@ const { firstLoaded, dataList, loadData } = usePagefecth<AiChat>({
   ],
   itemsPerPage: 10,
 });
-const { recentChats, onPin, onUnPin } = useAiChat();
+const { recentChats, onPin, onUnPin, onDeleteChat } = useAiChat();
 onMounted(async () => {
   await loadData();
   if (dataList.value.length > 0) {
@@ -110,8 +110,11 @@ const getDropdownItems = (item: any): DropdownMenuItem[][] => [
       label: t("base.delete"),
       icon: "i-lucide-trash",
       color: "error",
-      onSelect() {
+      async onSelect() {
         console.log("press Delete :", item);
+        if (item.value) {
+          await onDeleteChat(item.value);
+        }
       },
     },
   ],
@@ -143,8 +146,11 @@ const getPinDropdownItems = (item: any): DropdownMenuItem[][] => [
       label: t("base.delete"),
       icon: "i-lucide-trash",
       color: "error",
-      onSelect() {
+      async onSelect() {
         console.log("press Delete :", item);
+        if (item.value) {
+          await onDeleteChat(item.value);
+        }
       },
     },
   ],
@@ -160,9 +166,11 @@ const getPinDropdownItems = (item: any): DropdownMenuItem[][] => [
       v-model:open="open"
       collapsible
       resizable
-      class="bg-elevated/25"
-      :ui="{ footer: 'lg:border-t lg:border-default' }"
+      class="border-r-0 py-4 dark:[--ui-bg-elevated:var(--ui-color-neutral-900)]"
+      :menu="{ inset: true }"
+
     >
+     <!-- :ui="{ footer: 'lg:border-t lg:border-default' }" -->
       <template #header="{ collapsed }">
         <!-- <TeamsMenu :collapsed="collapsed" /> -->
         <div class="flex w-full justify-between">
@@ -279,6 +287,10 @@ const getPinDropdownItems = (item: any): DropdownMenuItem[][] => [
         <UserMenu :collapsed="collapsed" />
       </template>
     </UDashboardSidebar>
-    <slot />
+    <div
+      class="flex-1 flex m-4 lg:ml-0 rounded-lg ring ring-default/45 shadow-xs bg-default/75  min-w-0 overflow-hidden"
+    >
+      <slot />
+    </div>
   </UDashboardGroup>
 </template>

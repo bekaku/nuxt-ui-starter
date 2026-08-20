@@ -7,13 +7,20 @@ import type { AiChat, AiChatMessage, AiRole, ChatMessage } from '~/types/models'
 
 export type ChatStatus = 'ready' | 'submitted' | 'streaming' | 'error'
 
-export const useAiChat = () => {
+
+interface AiChatOptions {
+  bottomAnchor?: Ref<HTMLElement | null>
+}
+
+export const useAiChat = (options: AiChatOptions = {}) => {
 
   const recentChats = useState<AiChat[]>('ai:recent', () => []);
+  const recentDeleteId = useState<string | undefined>('ai:recent:deleteid', () => undefined);
   const messages = ref<ChatMessage[]>([])
   const status = ref<ChatStatus>('ready')
   const error = ref<Error | undefined>(undefined)
   const { t } = useLang()
+  const confirm = useConfirmDialog();
   const conversationId = ref<string | null>(null)
   let abortController: AbortController | null = null
 
@@ -28,6 +35,7 @@ export const useAiChat = () => {
     if (!conversationId.value) {
       return;
     }
+
     try {
       // @ts-ignore
       const response = await api<ApiResponse<AiChatMessage>>(
@@ -36,7 +44,7 @@ export const useAiChat = () => {
       )
 
       if (response?.dataList?.length) {
-      // @ts-ignore
+        // @ts-ignore
         messages.value = [...response.dataList]
           .reverse()
           .map((message) => ({
@@ -51,6 +59,7 @@ export const useAiChat = () => {
             ],
             thinkingContent: undefined,
             isThinkingDone: true,
+            isThinkingOpen: false,
             avatar: message.aiRole === 'assistant'
               ? {
                 icon: 'hugeicons:ai-magic',
@@ -59,6 +68,13 @@ export const useAiChat = () => {
               : undefined,
             sources: []
           }))
+      }
+
+      if (recentChats.value && recentChats.value.length > 0) {
+        const chat = recentChats.value.find((item) => item.id === conversationId.value);
+        if (chat) {
+          chatTitle.value = chat.title;
+        }
       }
 
     } catch (error) {
@@ -84,7 +100,8 @@ export const useAiChat = () => {
       role: 'user',
       content: message,
       parts: [{ type: 'text', text: message }],
-      isThinkingDone: false
+      isThinkingDone: false,
+      isThinkingOpen: false
     })
 
     const aiMessageIndex = messages.value.length
@@ -96,8 +113,10 @@ export const useAiChat = () => {
       parts: [{ type: 'text', text: '' }],
       thinkingContent: '',
       avatar: { icon: 'hugeicons:ai-magic', color: 'primary' },
-      isThinkingDone: false
+      isThinkingDone: false,
+      isThinkingOpen: false
     })
+    scrollToBottom();
 
     abortController = new AbortController()
 
@@ -154,9 +173,13 @@ export const useAiChat = () => {
 
                 if (event.type === 'thinking') {
                   currentMsg.thinkingContent += event.content
+                  currentMsg.isThinkingOpen = true
                 }
                 else if (event.type === 'token') {
-                  if (!currentMsg.isThinkingDone) currentMsg.isThinkingDone = true
+                  if (!currentMsg.isThinkingDone) {
+                    currentMsg.isThinkingDone = true
+                    currentMsg.isThinkingOpen = false
+                  }
                   if (!event.content.includes('<think>') && !event.content.includes('</think>')) {
                     currentMsg.content += event.content
                     currentMsg.parts = [{ type: 'text', text: currentMsg.content }]
@@ -168,6 +191,7 @@ export const useAiChat = () => {
                 else if (event.type === 'done') {
                   conversationId.value = event.content
                   currentMsg.isThinkingDone = true
+                  currentMsg.isThinkingOpen = false
 
                   const thinkMatch = currentMsg.content.match(/<think>([\s\S]*?)<\/think>/)
                   if (thinkMatch && thinkMatch[1]) {
@@ -204,6 +228,8 @@ export const useAiChat = () => {
       status.value = 'error'
       const currentMsg = messages.value[aiMessageIndex]
       if (currentMsg) {
+        currentMsg.isThinkingDone = true
+        currentMsg.isThinkingOpen = false
         currentMsg.content += `\n\n**[${t('error.internalServererror')}]**`
         currentMsg.parts = [{ type: 'text', text: currentMsg.content }]
       }
@@ -217,17 +243,65 @@ export const useAiChat = () => {
   }
 
 
-  const onPin = (chatId: string) => {
+  const onPin = async (chatId: string) => {
     const item = recentChats.value.find((item) => item.id === chatId);
     if (item) {
       item.pin = true;
+      await onUpdateChat(item);
     }
   };
-  const onUnPin = (chatId: string) => {
+  const onUnPin = async (chatId: string) => {
     const item = recentChats.value.find((item) => item.id === chatId);
     if (item) {
       item.pin = false;
+      await onUpdateChat(item);
     }
+  };
+
+  const onDeleteChat = async (id: string) => {
+    const conf = await confirm({
+      title: t("base.deleteCountConfirm", { count: 1 }),
+      description: t("base.deleteConfirmHelp"),
+      confirmButton: {
+        label: t("base.delete"),
+        color: "error",
+        icon: "lucide:trash",
+      },
+    });
+    if (!conf) {
+      return
+    }
+    try {
+      await api<void>(`/api/aiChat/${id}`, {
+        method: 'DELETE',
+      });
+      recentChats.value = recentChats.value.filter((item) => item.id !== id);
+      recentDeleteId.value = id;
+    } catch (error) {
+      console.error('Failed', error);
+    }
+  }
+
+  const onUpdateChat = async (item: AiChat) => {
+
+    try {
+      await api<void>(`/api/aiChat/${item.id}`, {
+        method: 'PUT',
+        body: item
+      });
+
+    } catch (error) {
+      console.error('Failed', error);
+    }
+  }
+
+  const scrollToBottom = async () => {
+    await nextTick();
+    setTimeout(() => {
+      if (options.bottomAnchor?.value) {
+        options.bottomAnchor.value.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      }
+    }, 100);
   };
 
   return {
@@ -238,10 +312,13 @@ export const useAiChat = () => {
     conversationId,
     chatTitle,
     loading,
+    recentDeleteId,
     sendMessage,
     stop,
     onPin,
     onUnPin,
-    initialMessage
+    onDeleteChat,
+    initialMessage,
+    scrollToBottom
   }
 }

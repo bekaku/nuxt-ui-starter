@@ -5,7 +5,7 @@ export default defineAppConfig({
   ui: {
     colors: {
       primary: 'teal',
-      neutral: 'mist',
+      neutral: 'stone',
       info: 'sky',
       secondary: 'slate',
       success: 'success',
@@ -92,6 +92,6 @@ export default defineAppConfig({
           ]
         }
       ]
-    }
+    },
   }
 })

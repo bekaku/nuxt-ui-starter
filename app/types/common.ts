@@ -74,12 +74,20 @@ export interface ChoosePhotoItem {
 }
 export type IHttpStatus =
   | '200 OK'
+  | 'OK'
   | '201 Created'
+  | 'Created'
   | '404 Not Found'
+  | 'Not Found'
   | '401 Unauthorized'
+  | 'Unauthorized'
   | '400 Bad Request'
+  | 'Bad Request'
   | '403 Forbidden'
-  | '500 Internal Server Error';
+  | 'Forbidden'
+  | '500 Internal Server Error'
+  | 'Internal Server Error'
+  ;
 export type IMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 export type ITheme = 'dark' | 'light' | 'system' | 'realtime';
 export type ILanguge = 'en' | 'th';
