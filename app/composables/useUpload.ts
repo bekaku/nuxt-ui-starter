@@ -168,6 +168,7 @@ export const useUpload = () => {
         totalChunks: totalChunks,
         originalFilename: filename,
         resizeImage: true,
+        createThumbnail: true
       };
 
       if (options?.metaData) {
@@ -176,6 +177,8 @@ export const useUpload = () => {
         if (options.metaData?.title) mergeData.title = options.metaData.title;
         if (options.metaData?.description) mergeData.description = options.metaData.description;
         if (options.metaData?.thumbnailFileId) mergeData.thumbnailFileId = options.metaData.thumbnailFileId;
+        if (options.metaData?.resizeImage === false) mergeData.resizeImage = false;
+        if (options.metaData?.createThumbnail === false) mergeData.createThumbnail = false;
       }
 
       const mergeResponse = await api.raw<FileManager | null>("/api/fileManager/mergeChunkApi", {

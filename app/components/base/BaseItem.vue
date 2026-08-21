@@ -20,7 +20,7 @@ const props = withDefaults(
     button: false,
     disabled: false,
     separator: false,
-    titleBold: true,
+    titleBold: false,
     whitespaceNowrap: false,
     dense: false,
   },

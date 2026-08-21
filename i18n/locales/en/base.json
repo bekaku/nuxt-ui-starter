@@ -329,7 +329,8 @@
     "settingUsernameDescription": "Your unique username for logging in and your profile URL.",
     "updatePasswordSub": "Confirm your current password before setting a new one.",
     "addImagelink": "Add image link",
-    "copyToClipboard": "Copy to clipboard"
+    "copyToClipboard": "Copy to clipboard",
+    "confirm": "Confirm"
   },
   "drive": {
     "title": "My Files",
@@ -473,7 +474,27 @@
     "promtLabel": "Type your message here...",
     "aiMistakeable": "AI may provide incorrect answers. Please verify important information before use.",
     "source": "Source",
-    "syncDatabaseSchema": "Sync database schema"
+    "syncDatabaseSchema": "Sync database schema",
+    "chatHistory": "Chat history",
+    "chatHistoryNotfound": "No chat history found.",
+    "modelLoadFailed": "Unable to load the AI model",
+    "modelPreparing": "Preparing the AI system"
+  },
+  "faceDetection": {
+    "instruction1": "Please look at the camera and 'blink' once",
+    "instruction2": "Status: Normal mode. Liveness check is not performed. Please press the shutter button manually.",
+    "lookAtCamera": "Please look at the camera",
+    "useThisImage": "Use this image",
+    "switchCamera": "Switch camera",
+    "takePicture": "Take a picture",
+    "retake": "Retake",
+    "modeLiveness": "Verify your identity with face (Liveness)",
+    "cameraLoading": "Opening the camera...",
+    "modelLoading": "Loading the AI ​​model...",
+    "takePictureFace": "Take a picture of a face.",
+    "camera": "Camera",
+    "detectSuccess": "Identity verification successful.",
+    "registerFace": "Register face"
   },
   "authen": {
     "login": "Login",

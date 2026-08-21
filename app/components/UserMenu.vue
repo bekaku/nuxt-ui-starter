@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from "@nuxt/ui";
 
-defineProps<{
+const { showName = true } = defineProps<{
   collapsed?: boolean;
+  showName?: boolean;
+  dropdownUi?: DropdownMenuItem["ui"];
 }>();
 
 const colorMode = useColorMode();
@@ -210,21 +212,23 @@ const items = computed<DropdownMenuItem[][]>(() => [
     },
   ],
 ]);
-
 </script>
 
 <template>
   <UDropdownMenu
+    v-bind="$attrs"
     :items="items"
     :content="{ align: 'center', collisionPadding: 12 }"
-    :ui="{
-      content: collapsed ? 'w-48' : 'w-(--reka-dropdown-menu-trigger-width)',
-    }"
+    :ui="
+      dropdownUi || {
+        content: collapsed ? 'w-48' : 'w-(--reka-dropdown-menu-trigger-width)',
+      }
+    "
   >
     <UButton
       v-bind="{
         ...(user as any),
-        label: collapsed ? undefined : user?.name,
+        label: collapsed || !showName ? undefined : user?.name,
         trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down',
       }"
       color="neutral"

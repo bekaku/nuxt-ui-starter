@@ -2,24 +2,24 @@
 import type { ButtonProps } from '@nuxt/ui';
 
 // import type { BaseFilePicker } from "#components";
-// const { count = 0, message = "hello" } = defineProps<{
-//   count?: number;
-//   message?: string;
-// }>();
-const props = withDefaults(
-  defineProps<{
-    height?: number;
-    autofocus?: boolean;
-    close?: boolean | ButtonProps;
-  }>(),
-  {
-    height: 450,
-    autofocus: false,
-      close : () => ({
-    class: "rounded-full",
-  })
-  }
-);
+const { count = 0, message = "hello" } = defineProps<{
+  count?: number;
+  message?: string;
+}>();
+// const props = withDefaults(
+//   defineProps<{
+//     height?: number;
+//     autofocus?: boolean;
+//     close?: boolean | ButtonProps;
+//   }>(),
+//   {
+//     height: 450,
+//     autofocus: false,
+//       close : () => ({
+//     class: "rounded-full",
+//   })
+//   }
+// );
 const emit = defineEmits<{
   "on-close": [];
   change: [id: number];

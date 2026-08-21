@@ -2,11 +2,11 @@
 import { ref } from "vue";
 import { MdPreview } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
-import type { ChatSourceReference } from "~/types/models";
+import type { AiChat, ChatSourceReference } from "~/types/models";
+import type { DropdownMenuItem } from "@nuxt/ui";
 definePageMeta({
   layout: "ai",
 });
-
 
 const { writeToClipboard } = useBase();
 const { t } = useLang();
@@ -18,21 +18,31 @@ const chatId = useRoute().params.id as string;
 const bottomAnchor = useTemplateRef("bottomAnchor");
 const {
   conversationId,
-  chatTitle,
+  currentChat,
   messages,
   status,
   error,
-  recentDeleteId,
+  chatAction,
+  chatActionItem,
+  getItemById,
   sendMessage,
   stop,
   initialMessage,
   scrollToBottom,
+  onRenameChat,
+  onPin,
+  onUnPin,
+  onDeleteChat,
 } = useAiChat({
   bottomAnchor,
 });
 useSeoMeta({
-  title: () => chatTitle.value,
+  title: () => currentChat.value?.title || "New Chat",
 });
+
+const changeNameModal = ref(false);
+const renameChat = ref<AiChat>();
+const updating = ref(false);
 onMounted(async () => {
   if (chatId && chatId !== "new") {
     if (isNumericOnly(chatId)) {
@@ -56,19 +66,7 @@ const onSubmit = async () => {
   await sendMessage(msg, selectedFilters.value);
 };
 
-// const renderMarkdown = (text: string) => {
-//   if (!text) return "";
-//   return marked.parse(text);
-// };
-
-function onReload() {
-  // ถ้าอยาก regenerate คำตอบล่าสุด ต้องเก็บ prompt ล่าสุดไว้ต่างหาก
-  // แล้วเรียก sendMessage(lastUserPrompt) ใหม่
-}
-
-const test = () => {
-  window.history.replaceState(null, "", "/ai-chats/c/99999");
-};
+const onReload = () => {};
 
 const getSourceIcon = (source: ChatSourceReference) => {
   switch (source.type) {
@@ -106,15 +104,6 @@ const getSourceTooltip = (source: ChatSourceReference) => {
   return source.fileName;
 };
 
-const getCopyBtn = (item: any) => [
-  {
-    label: $t("base.copyToClipboard"),
-    icon: "i-lucide-copy",
-    onSelect() {
-      console.log("copy:", item);
-    },
-  },
-];
 const onCopyMessage = (event: any, item: any) => {
   console.log("onCopyMessage", item);
   if (item?.parts?.length > 0) {
@@ -125,27 +114,112 @@ const onCopyMessage = (event: any, item: any) => {
   }
 };
 
+const onOpenChangeNameDiaolog = () => {
+  if (!currentChat.value) {
+    return;
+  }
+  changeNameModal.value = true;
+  renameChat.value = { ...currentChat.value };
+};
+const renameChatSubmit = async () => {
+  if (!renameChat.value) {
+    return;
+  }
+  updating.value = true;
+  await onRenameChat(renameChat.value);
+  changeNameModal.value = false;
+  updating.value = false;
+  renameChat.value = undefined;
+};
 watch(
-  () => recentDeleteId.value,
+  () => chatAction.value,
   () => {
-    if (recentDeleteId.value) {
-      if (conversationId.value === recentDeleteId.value) {
-        recentDeleteId.value = undefined;
-        navigateTo("/ai-chats/c/new");
+    console.log(
+      "watch chatAction.value",
+      chatAction.value,
+      chatActionItem.value,
+    );
+    if (currentChat.value && chatAction.value && chatActionItem.value) {
+      if (conversationId.value === chatActionItem.value.id) {
+        if (chatAction.value == "delete") {
+          chatAction.value = undefined;
+          chatActionItem.value = undefined;
+          navigateTo("/ai-chats/c/new");
+        } else if (chatAction.value == "rename") {
+          currentChat.value.title = chatActionItem.value.title;
+          setTimeout(() => {
+            chatAction.value = undefined;
+            chatActionItem.value = undefined;
+          }, 100);
+        }
       }
     }
   },
 );
+
+const getDropdownItems = (): DropdownMenuItem[][] => [
+  [
+    {
+      label: currentChat.value?.pin
+        ? t("chats.unfavorite")
+        : t("chats.favorite"),
+      icon: currentChat.value?.pin ? "lucide:star-minus" : "lucide:star",
+      color: currentChat.value?.pin ? "warning" : "neutral",
+      onSelect() {
+        console.log("press Star menu:", currentChat.value);
+        console.log("ID menu:", currentChat.value?.id);
+        if (currentChat.value?.id) {
+          if (!currentChat.value.pin) {
+            onPin(currentChat.value.id as string);
+          } else {
+            onUnPin(currentChat.value.id as string);
+          }
+        }
+      },
+    },
+    {
+      label: t("drive.changName"),
+      icon: "lucide:pencil",
+      onSelect() {
+        onOpenChangeNameDiaolog();
+      },
+    },
+  ],
+  [
+    {
+      label: t("base.delete"),
+      icon: "i-lucide-trash",
+      color: "error",
+      async onSelect() {
+        console.log("press Delete :", currentChat.value);
+        if (currentChat.value?.id) {
+          await onDeleteChat(currentChat.value.id as string);
+        }
+      },
+    },
+  ],
+];
 </script>
 
 <template>
   <BaseDashboardPanel
     id="ai-chats"
-    :title="chatTitle || 'New chat'"
+    :title="currentChat?.title || 'New chat'"
     class="relative min-h-0"
     :ui="{ body: 'p-0 sm:p-0 overscroll-none' }"
     body-class="w-full max-w-[1440px] mx-auto pt-(--ui-header-height) pb-16 sm:pb-12 flex flex-col flex-1 min-h-0"
   >
+    <template #navbarRight>
+      <UDropdownMenu
+        v-if="currentChat"
+        :items="getDropdownItems()"
+        :content="{ align: 'start' }"
+        :modal="false"
+        size="xs"
+      >
+        <UButton variant="ghost" icon="lucide:more-vertical" />
+      </UDropdownMenu>
+    </template>
     <div class="flex flex-1 justify-center min-h-0">
       <div class="w-full min-w-0 max-w-3xl flex flex-col gap-4 sm:gap-6 px-4">
         <UChatMessages
@@ -265,7 +339,10 @@ watch(
           </template>
         </UChatMessages>
 
-        <div ref="bottomAnchor" class="h-px w-full opacity-0 shrink-0 scroll-mb-40"></div>
+        <div
+          ref="bottomAnchor"
+          class="h-px w-full opacity-0 shrink-0 scroll-mb-40"
+        ></div>
         <div class="sticky bottom-0 z-10 pb-4 sm:pb-6">
           <UChatPrompt
             v-model="inputMessage"
@@ -300,6 +377,14 @@ watch(
       </div>
     </div>
   </BaseDashboardPanel>
+
+  <LazyChatRenameForm
+    v-if="changeNameModal"
+    v-model="renameChat"
+    v-model:open="changeNameModal"
+    :loading="updating"
+    @on-submit="renameChatSubmit"
+  />
 </template>
 <style>
 .md-editor,

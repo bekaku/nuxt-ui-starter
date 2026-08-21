@@ -13,6 +13,7 @@
   "dependencies": {
     "@capacitor/device": "^8.0.3",
     "@internationalized/date": "^3.12.3",
+    "@mediapipe/tasks-vision": "^1.0.1",
     "@nuxt/image": "2.1.0",
     "@nuxt/ui": "^4.10.0",
     "@nuxtjs/device": "^4.0.0",

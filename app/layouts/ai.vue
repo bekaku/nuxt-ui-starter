@@ -6,9 +6,12 @@ import type { AiChat } from "~/types/models";
 const route = useRoute();
 const toast = useToast();
 const { t } = useLang();
-const { isDark } = useTheme();
+const { isDark, appLayout } = useTheme();
 const open = ref(false);
 
+const changeNameModal = ref(false);
+const renameChat = ref<AiChat>();
+const updating = ref(false);
 const { firstLoaded, dataList, loadData } = usePagefecth<AiChat>({
   apiEndpoint: "/api/aiChat/history",
   defaultSorts: [
@@ -17,7 +20,8 @@ const { firstLoaded, dataList, loadData } = usePagefecth<AiChat>({
   ],
   itemsPerPage: 10,
 });
-const { recentChats, onPin, onUnPin, onDeleteChat } = useAiChat();
+const { recentChats, onPin, onUnPin, onDeleteChat, getItemById, onRenameChat } =
+  useAiChat();
 onMounted(async () => {
   await loadData();
   if (dataList.value.length > 0) {
@@ -83,7 +87,6 @@ const recentItems = computed<NavigationMenuItem[][]>(() => {
 
   return [items];
 });
-
 const getDropdownItems = (item: any): DropdownMenuItem[][] => [
   [
     {
@@ -102,6 +105,9 @@ const getDropdownItems = (item: any): DropdownMenuItem[][] => [
       icon: "lucide:pencil",
       onSelect() {
         console.log("press Rename:", item);
+        if (item.value) {
+          onOpenChangeNameDiaolog(item.value);
+        }
       },
     },
   ],
@@ -138,6 +144,9 @@ const getPinDropdownItems = (item: any): DropdownMenuItem[][] => [
       icon: "lucide:pencil",
       onSelect() {
         console.log("press Rename:", item);
+        if (item.value) {
+          onOpenChangeNameDiaolog(item.value);
+        }
       },
     },
   ],
@@ -155,22 +164,43 @@ const getPinDropdownItems = (item: any): DropdownMenuItem[][] => [
     },
   ],
 ];
+
+const onOpenChangeNameDiaolog = (chatId: string) => {
+  const item = getItemById(chatId);
+  if (item) {
+    changeNameModal.value = true;
+    renameChat.value = { ...item };
+    console.log("onOpenChangeNameDiaolog", item);
+  }
+};
+
+const renameChatSubmit = async () => {
+  if (renameChat.value && renameChat.value.id) {
+    console.log("renameChat", renameChat.value);
+    updating.value = true;
+    await onRenameChat(renameChat.value);
+    changeNameModal.value = false;
+    updating.value = false;
+    renameChat.value = undefined;
+  }
+};
 </script>
 
 <template>
   <UDashboardGroup unit="rem">
-    <!-- class="bg-elevated/25" -->
-    <!-- bg-default -->
     <UDashboardSidebar
       id="ai"
       v-model:open="open"
       collapsible
       resizable
-      class="border-r-0 py-4 dark:[--ui-bg-elevated:var(--ui-color-neutral-900)]"
+      :class="
+        appLayout == 'boxed'
+          ? 'border-r-0 py-4 dark:[--ui-bg-elevated:var(--ui-color-neutral-900)]'
+          : ''
+      "
+      :ui="{ footer: 'lg:border-t lg:border-default' }"
       :menu="{ inset: true }"
-
     >
-     <!-- :ui="{ footer: 'lg:border-t lg:border-default' }" -->
       <template #header="{ collapsed }">
         <!-- <TeamsMenu :collapsed="collapsed" /> -->
         <div class="flex w-full justify-between">
@@ -288,9 +318,15 @@ const getPinDropdownItems = (item: any): DropdownMenuItem[][] => [
       </template>
     </UDashboardSidebar>
     <div
-      class="flex-1 flex m-4 lg:ml-0 rounded-lg ring ring-default/45 shadow-xs bg-default/75  min-w-0 overflow-hidden"
+      class="flex-1 flex min-w-0 bg-default/75"
+      :class="
+        appLayout == 'boxed'
+          ? 'm-4 lg:ml-0 rounded-lg ring ring-default/45 shadow-xs overflow-hidden'
+          : ''
+      "
     >
       <slot />
     </div>
   </UDashboardGroup>
+  <LazyChatRenameForm v-if="changeNameModal" v-model="renameChat" v-model:open="changeNameModal" :loading="updating" @on-submit="renameChatSubmit" />
 </template>

@@ -1,11 +1,10 @@
-import type { AvatarProps } from '@nuxt/ui'
-import type { AnyARecord } from 'node:dns'
 import type { ApiResponse } from '~/types/common'
-import type { AiChat, AiChatMessage, AiRole, ChatMessage } from '~/types/models'
+import type { AiChat, AiChatMessage, ChatMessage } from '~/types/models'
 
 
 
 export type ChatStatus = 'ready' | 'submitted' | 'streaming' | 'error'
+export type ChatAction = 'delete' | 'rename'
 
 
 interface AiChatOptions {
@@ -13,20 +12,29 @@ interface AiChatOptions {
 }
 
 export const useAiChat = (options: AiChatOptions = {}) => {
-
+  const { t } = useLang()
   const recentChats = useState<AiChat[]>('ai:recent', () => []);
-  const recentDeleteId = useState<string | undefined>('ai:recent:deleteid', () => undefined);
+  const chatAction = useState<ChatAction | undefined>('ai:chat:action', () => undefined);
+  const chatActionItem = useState<AiChat | undefined>('ai:chat:item', () => undefined);
+  const currentChat = ref<AiChat | undefined>({
+    title: t('chats.newChat'),
+    updatedDate: '',
+    pin: false
+  });
+
+  const chatTitle = ref(t('chats.newChat'))
+
+
   const messages = ref<ChatMessage[]>([])
   const status = ref<ChatStatus>('ready')
   const error = ref<Error | undefined>(undefined)
-  const { t } = useLang()
+
   const confirm = useConfirmDialog();
   const conversationId = ref<string | null>(null)
   let abortController: AbortController | null = null
 
   const { onReplaceUrl } = useBase();
   const api = useApi()
-  const chatTitle = ref<string>(t('chats.newChat'))
 
   const loading = ref(true);
   const page = ref(0)
@@ -73,7 +81,7 @@ export const useAiChat = (options: AiChatOptions = {}) => {
       if (recentChats.value && recentChats.value.length > 0) {
         const chat = recentChats.value.find((item) => item.id === conversationId.value);
         if (chat) {
-          chatTitle.value = chat.title;
+          currentChat.value = chat;
         }
       }
 
@@ -209,12 +217,13 @@ export const useAiChat = (options: AiChatOptions = {}) => {
       }
 
       if (isNewChat && conversationId.value) {
-        recentChats.value.unshift({
+        currentChat.value = {
           id: conversationId.value,
           title: chatTitle.value,
           updatedDate: new Date().toISOString(),
           pin: false
-        });
+        }
+        recentChats.value.unshift(currentChat.value);
       }
 
       status.value = 'ready'
@@ -243,21 +252,34 @@ export const useAiChat = (options: AiChatOptions = {}) => {
   }
 
 
+  const getItemById = (chatId: string) => recentChats.value.find((item) => item.id === chatId)
+
   const onPin = async (chatId: string) => {
-    const item = recentChats.value.find((item) => item.id === chatId);
+    const item = getItemById(chatId);
     if (item) {
       item.pin = true;
       await onUpdateChat(item);
     }
   };
   const onUnPin = async (chatId: string) => {
-    const item = recentChats.value.find((item) => item.id === chatId);
+    const item = getItemById(chatId);
     if (item) {
       item.pin = false;
       await onUpdateChat(item);
     }
   };
 
+  const onRenameChat = async (chat: AiChat) => {
+    if (chat && chat.id) {
+      await onUpdateChat(chat);
+      const item = getItemById(chat.id as string);
+      if (item) {
+        item.title = chat.title;
+      }
+      chatAction.value = 'rename'
+      chatActionItem.value = item
+    }
+  };
   const onDeleteChat = async (id: string) => {
     const conf = await confirm({
       title: t("base.deleteCountConfirm", { count: 1 }),
@@ -275,8 +297,11 @@ export const useAiChat = (options: AiChatOptions = {}) => {
       await api<void>(`/api/aiChat/${id}`, {
         method: 'DELETE',
       });
+      const item = getItemById(id as string);
+      chatActionItem.value = item
+      chatAction.value = 'delete'
       recentChats.value = recentChats.value.filter((item) => item.id !== id);
-      recentDeleteId.value = id;
+
     } catch (error) {
       console.error('Failed', error);
     }
@@ -310,15 +335,19 @@ export const useAiChat = (options: AiChatOptions = {}) => {
     status,
     error,
     conversationId,
-    chatTitle,
     loading,
-    recentDeleteId,
+    chatAction,
+    chatActionItem,
+    currentChat,
+    getItemById,
     sendMessage,
     stop,
     onPin,
     onUnPin,
     onDeleteChat,
     initialMessage,
-    scrollToBottom
+    scrollToBottom,
+    onUpdateChat,
+    onRenameChat
   }
 }

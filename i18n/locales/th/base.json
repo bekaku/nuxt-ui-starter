@@ -330,7 +330,8 @@
     "settingUsernameDescription": "ชื่อผู้ใช้เฉพาะของคุณสำหรับการเข้าสู่ระบบและ URL โปรไฟล์ของคุณ",
     "updatePasswordSub": "ตรวจสอบรหัสผ่านปัจจุบันของคุณก่อนตั้งรหัสผ่านใหม่",
     "addImagelink": "เพิ่มลิงก์รูปภาพ",
-    "copyToClipboard": "คัดลอกไปยังคลิปบอร์ด"
+    "copyToClipboard": "คัดลอกไปยังคลิปบอร์ด",
+    "confirm": "ยืนยัน"
   },
   "drive": {
     "title": "ไฟล์ของฉัน",
@@ -472,8 +473,29 @@
     "promtLabel": "พิมพ์ข้อความของคุณที่นี่...",
     "aiMistakeable": "AI อาจตอบผิดพลาดได้ โปรดตรวจสอบข้อมูลสำคัญก่อนนำไปใช้",
     "source": "แหล่งที่มา",
-    "syncDatabaseSchema": "ปรับปรุงโครงสร้างฐานข้อมูล"
+    "syncDatabaseSchema": "ปรับปรุงโครงสร้างฐานข้อมูล",
+    "chatHistory": "ประวัติการแชท",
+    "chatHistoryNotfound": "ยังไม่มีประวัติการแชท",
+    "modelLoadFailed": "ไม่สามารถโหลดโมเดล AI ได้",
+    "modelPreparing": "กำลังเตรียมระบบ AI"
   },
+  "faceDetection": {
+    "instruction1": "กรุณามองกล้องและ 'กะพริบตา' 1 ครั้ง",
+    "instruction2": "สถานะ: โหมดปกติ ไม่ได้ทำการตรวจสอบความมีชีวิต โปรดกดปุ่มชัตเตอร์ด้วยตนเอง",
+    "lookAtCamera": "กรุณามองกล้อง",
+    "useThisImage": "ใช้รูปนี้",
+    "switchCamera": "สลับกล้อง",
+    "takePicture": "ถ่ายภาพ",
+    "modeLiveness": "ยืนยันตัวตนด้วยใบหน้า (Liveness)",
+    "retake": "ถ่ายใหม่",
+    "takePictureFace": "ถ่ายภาพใบหน้า",
+    "cameraLoading": "กำลังเปิดกล้อง...",
+    "modelLoading": "กำลังโหลดโมเดล AI...",
+    "camera": "กล้องถ่ายภาพ",
+    "registerFace": "ลงทะเบียนใบหน้า",
+    "detectSuccess": "ตรวจสอบบุคคลจริงสำเร็จ"
+  },
+
   "authen": {
     "login": "เข้าสู่ระบบ",
     "helper1": "ป้อนรหัสยืนยันที่ได้รับจากทางอีเมล",

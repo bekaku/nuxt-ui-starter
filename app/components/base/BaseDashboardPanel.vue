@@ -67,7 +67,7 @@ const items = [
 
           <template #right>
             <slot name="navbarRight">
-              <BaseLangugeSwitcher />
+              <!-- <BaseLangugeSwitcher /> -->
               <BaseThemeSwitcher />
               <UTooltip text="Notifications" :shortcuts="['N']">
                 <UButton
@@ -84,6 +84,7 @@ const items = [
                   </UChip>
                 </UButton>
               </UTooltip>
+              <UserMenu :show-name="false" :dropdown-ui="{content:'w-50'}" />
             </slot>
           </template>
         </UDashboardNavbar>

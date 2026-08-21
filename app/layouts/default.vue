@@ -6,6 +6,7 @@ const { createFavorite, deleteFavorite } = useFavoriteMenuApi();
 
 const route = useRoute();
 const toast = useToast();
+const { appLayout } = useTheme();
 const { t } = useLang();
 const { appNavigations, addFavoriteMenus, removeFavoriteMenus } = useAuth();
 const { getFavoriteNavigations, findByUrl, getFaveroteIndex, isFaveroteExist } =
@@ -117,7 +118,12 @@ const onUnFav = async (e: any, item: AppNavigationMenuItem) => {
       v-model:open="open"
       collapsible
       resizable
-     class="border-r-0 py-4 dark:[--ui-bg-elevated:var(--ui-color-neutral-900)]"
+      :class="
+        appLayout == 'boxed'
+          ? 'border-r-0 py-4 dark:[--ui-bg-elevated:var(--ui-color-neutral-900)]'
+          : ''
+      "
+      :ui="{ footer: 'lg:border-t lg:border-default' }"
       :menu="{ inset: true }"
     >
       <template #header="{ collapsed }">
@@ -235,11 +241,15 @@ const onUnFav = async (e: any, item: AppNavigationMenuItem) => {
     />
 
     <div
-      class="flex-1 flex m-4 lg:ml-0 rounded-lg ring ring-default/45 shadow-xs bg-default/75 min-w-0 overflow-hidden"
+      class="flex-1 flex min-w-0 bg-default/75"
+      :class="
+        appLayout == 'boxed'
+          ? 'm-4 lg:ml-0 rounded-lg ring ring-default/45 shadow-xs overflow-hidden'
+          : ''
+      "
     >
       <slot />
     </div>
-
     <NotificationsSlideover />
   </UDashboardGroup>
 </template>

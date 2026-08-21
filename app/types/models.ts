@@ -27,6 +27,8 @@ export interface FileManagerMetaData extends Id {
   height?: number
   view?: number
   hidden?: boolean
+  resizeImage?: boolean
+  createThumbnail?: boolean
 }
 export interface FileManager extends FileManagerMetaData {
   fileMime: string;
@@ -254,4 +256,20 @@ export interface ChatMessage {
   isThinkingDone: boolean,
   isThinkingOpen?: boolean,
   sources?: any[]
+}
+export interface FaceRecognitionRegisterResponse {
+  id? :IdType
+  userId? :IdType
+  email? :string
+  createdDate? :string
+}
+export interface FaceRecognitionDetechResponse {
+  appUserId? :IdType
+  email? :string
+  username? :string
+  similarityScore? :number
+  cosineDistance? :number
+  image? :ImageDto
+  detectionTime? :string
+  status? :string
 }

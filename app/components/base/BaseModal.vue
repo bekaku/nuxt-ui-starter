@@ -57,7 +57,7 @@ const modelValue = defineModel<boolean>({ default: false });
     <template #body>
       <slot />
     </template>
-    <template #footer="{ close }">
+    <template v-if="$slots.footer" #footer="{ close }">
       <slot name="footer" v-bind="{ close }" />
     </template>
   </UModal>

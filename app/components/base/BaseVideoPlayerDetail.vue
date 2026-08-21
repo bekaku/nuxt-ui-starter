@@ -16,7 +16,11 @@ const getViews = computed(() => readableNumber(file.view || 0));
     </div>
     <div class="flex items-center gap-2 p-2">
       <span v-if="file.createdDate" class="text-sm text-muted">{{
-        formatDistanceFromNow(file.createdDate, locale, true)
+        formatDistanceFromNow({
+          dateString: file.createdDate,
+          suffix: true,
+          ios: false,
+        })
       }}</span>
 
       <UButton variant="soft">

@@ -142,6 +142,11 @@ export const useMenu = () => {
             to: "/example/download-files",
           },
           {
+            label: "Face detection",
+            icon: "hugeicons:face-id",
+            to: "/example/face-detection",
+          },
+          {
             label: "Forms",
             icon: "i-lucide-card-sim",
             to: "/example/form",
