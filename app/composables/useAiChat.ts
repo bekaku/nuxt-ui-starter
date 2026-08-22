@@ -9,6 +9,7 @@ export type ChatAction = 'delete' | 'rename'
 
 interface AiChatOptions {
   bottomAnchor?: Ref<HTMLElement | null>
+  chatContainerRef?: Ref<HTMLElement | null>
 }
 
 export const useAiChat = (options: AiChatOptions = {}) => {
@@ -25,7 +26,7 @@ export const useAiChat = (options: AiChatOptions = {}) => {
   const chatTitle = ref(t('chats.newChat'))
 
 
-  const messages = ref<ChatMessage[]>([])
+
   const status = ref<ChatStatus>('ready')
   const error = ref<Error | undefined>(undefined)
 
@@ -36,9 +37,12 @@ export const useAiChat = (options: AiChatOptions = {}) => {
   const { onReplaceUrl } = useBase();
   const api = useApi()
 
+  const messages = ref<ChatMessage[]>([])
   const loading = ref(true);
+  const loadingMore = ref(false)
   const page = ref(0)
   const size = ref(10)
+  const isLastPage = ref(true)
   const initialMessage = async () => {
     if (!conversationId.value) {
       return;
@@ -50,7 +54,7 @@ export const useAiChat = (options: AiChatOptions = {}) => {
         `api/aiChat/messages/${conversationId.value}?page=${page.value}&sort=id,desc&size=${size.value}` as string,
         { method: 'GET' }
       )
-
+      isLastPage.value = response.last;
       if (response?.dataList?.length) {
         // @ts-ignore
         messages.value = [...response.dataList]
@@ -89,6 +93,68 @@ export const useAiChat = (options: AiChatOptions = {}) => {
       console.error('Failed to fetch messages', error);
     } finally {
       loading.value = false;
+    }
+  }
+
+  function getScrollParent(node: HTMLElement | null): HTMLElement | null {
+    let parent = node?.parentElement ?? null
+    while (parent) {
+      const { overflowY } = getComputedStyle(parent)
+      if (/(auto|scroll)/.test(overflowY) && parent.scrollHeight > parent.clientHeight) {
+        return parent
+      }
+      parent = parent.parentElement
+    }
+    return document.scrollingElement as HTMLElement | null
+  }
+  const loadMoreMessages = async () => {
+    if (!conversationId.value || isLastPage.value || loadingMore.value) return;
+
+    loadingMore.value = true;
+    page.value++;
+
+    try {
+      // @ts-ignore
+      const response = await api<ApiResponse<AiChatMessage>>(
+        `api/aiChat/messages/${conversationId.value}?page=${page.value}&sort=id,desc&size=${size.value}`,
+        { method: 'GET' }
+      );
+
+      isLastPage.value = response.last;
+
+      if (response?.dataList?.length) {
+        const olderMessages = [...response.dataList]
+          .reverse() // reverse because the response is already sorted by sort=id,desc
+          .map((message) => ({
+            id: message.id,
+            role: message.aiRole,
+            content: message.content,
+            parts: [{ type: 'text', text: message.content }],
+            thinkingContent: undefined,
+            isThinkingDone: true,
+            isThinkingOpen: false,
+            avatar: message.aiRole === 'assistant'
+              ? { icon: 'hugeicons:ai-magic', color: 'primary' }
+              : undefined,
+            sources: []
+          }));
+
+        const scrollContainer = getScrollParent(options?.chatContainerRef?.value ?? null);
+        const previousScrollHeight = scrollContainer ? scrollContainer.scrollHeight : 0;
+
+        messages.value = [...olderMessages, ...messages.value] as any;
+
+        await nextTick();
+        if (scrollContainer) {
+          const currentScrollHeight = scrollContainer.scrollHeight;
+          scrollContainer.scrollTop += (currentScrollHeight - previousScrollHeight);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch more messages', error);
+      page.value--;
+    } finally {
+      loadingMore.value = false;
     }
   }
 
@@ -336,9 +402,11 @@ export const useAiChat = (options: AiChatOptions = {}) => {
     error,
     conversationId,
     loading,
+    loadingMore,
     chatAction,
     chatActionItem,
     currentChat,
+    isLastPage,
     getItemById,
     sendMessage,
     stop,
@@ -348,6 +416,7 @@ export const useAiChat = (options: AiChatOptions = {}) => {
     initialMessage,
     scrollToBottom,
     onUpdateChat,
-    onRenameChat
+    onRenameChat,
+    loadMoreMessages
   }
 }

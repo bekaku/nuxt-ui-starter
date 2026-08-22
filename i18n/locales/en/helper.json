@@ -46,6 +46,8 @@
     "cookiePolicyText": "We use first-party cookies to enhance your experience on our website.",
     "imageNotYetChoose": "No picture has been selected yet.",
     "pleaseSelectAddress": "Province,District,Sub District",
-    "emptyDescription": "It looks like you haven't added any record. Create one to get started."
+    "emptyDescription": "It looks like you haven't added any record. Create one to get started.",
+    "keyGenerateHelp": "When a new key is created, the previously created key will no longer be valid. Do you confirm that you wish to create a new key?",
+    "keyGenerateHelp2": "Key creation successful. Please copy the generated key, as it will not be accessible again."
   }
 }

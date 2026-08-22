@@ -182,8 +182,7 @@ const onCellTypeClick = (index: number) => {
       @on-keyword-search="onKeywordSearch"
       @on-search="onSearch"
     >
-      <!--
-    accessorKey or id of column can be used as slots everywhere in side BaseCrudList
+      <!-- accessorKey or id of column can be used as slots everywhere in side BaseTable
     <template #actions-cell="{ row }">
      Action slot
     </template>

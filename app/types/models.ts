@@ -8,6 +8,12 @@ export type IdType = bigint | string | null | undefined;
 export interface Id {
   id?: IdType
 }
+export interface ApiClient extends Id {
+ apiName: string
+ apiToken?: string | null
+ byPass?: boolean | null
+ status?: boolean | null
+}
 export interface AccessToken extends Id {
   ipAddredd: string;
   hostName: string;

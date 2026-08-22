@@ -15,7 +15,8 @@ const inputMessage = ref("");
 const selectedFilters = ref([]);
 const chatId = useRoute().params.id as string;
 
-const bottomAnchor = useTemplateRef("bottomAnchor");
+const bottomAnchor = useTemplateRef("chatContainerRef");
+const chatContainerRef = useTemplateRef("bottomAnchor");
 const {
   conversationId,
   currentChat,
@@ -24,6 +25,8 @@ const {
   error,
   chatAction,
   chatActionItem,
+  loadingMore,
+  isLastPage,
   getItemById,
   sendMessage,
   stop,
@@ -33,8 +36,10 @@ const {
   onPin,
   onUnPin,
   onDeleteChat,
+  loadMoreMessages,
 } = useAiChat({
   bottomAnchor,
+  chatContainerRef,
 });
 useSeoMeta({
   title: () => currentChat.value?.title || "New Chat",
@@ -221,7 +226,16 @@ const getDropdownItems = (): DropdownMenuItem[][] => [
       </UDropdownMenu>
     </template>
     <div class="flex flex-1 justify-center min-h-0">
-      <div class="w-full min-w-0 max-w-3xl flex flex-col gap-4 sm:gap-6 px-4">
+      <div
+        ref="chatContainerRef"
+        class="w-full min-w-0 max-w-3xl flex flex-col gap-4 sm:gap-6 px-4"
+      >
+        <BaseLoadmore v-if="currentChat && currentChat.id"
+          :disabled="isLastPage || loadingMore"
+          :loading="loadingMore"
+          icon="lucide:chevron-up"
+          @on-next="loadMoreMessages"
+        />
         <UChatMessages
           ref="chatRef"
           :ui="{

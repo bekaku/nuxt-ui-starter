@@ -4,21 +4,21 @@ import {
   ICrudListHeaderOptionSearchType,
   type ICrudFilterOptions,
 } from "~/types/common";
-import type { AppRole, Permission } from "~/types/models";
+import type { AppRole } from "~/types/models";
 
 definePageMeta({
-  pageName: 'model.role.table',
+  pageName: "model.role.table",
   requiresPermission: ["app_role_list"],
   // breadcrumbs: ExampleHomeBreadcrumb,
   // tabs: TabTest,
 });
+const { formatDateTime } = useDateFns();
 const UAvatar = resolveComponent("UAvatar");
 const UButton = resolveComponent("UButton");
 const UBadge = resolveComponent("UBadge");
 const UDropdownMenu = resolveComponent("UDropdownMenu");
 const UCheckbox = resolveComponent("UCheckbox");
 const { t } = useLang();
-const toast = useToast();
 const {
   dataList,
   loading,
@@ -36,7 +36,6 @@ const {
   onItemCopy,
   crudName,
   onKeywordSearch,
-  headers,
 } = useCrudList<AppRole>({
   crudName: "AppRole", //PascalCase only eg: User, AppRole
   apiEndpoint: "/api/appRole",

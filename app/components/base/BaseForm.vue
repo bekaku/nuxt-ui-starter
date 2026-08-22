@@ -698,6 +698,7 @@ const onDelete = async (event: any) => {
               type="dashed"
             />
             <div class="flex justify-center gap-4">
+              <slot name="crud-action-start"/>
               <template v-if="isHaveAddPermission || isHaveEditPermission">
                 <UButton
                   icon="lucide:save"
@@ -726,6 +727,7 @@ const onDelete = async (event: any) => {
                 @click.prevent="onDelete"
               >
               </UButton>
+              <slot name="crud-action-end"/>
             </div>
           </slot>
         </div>

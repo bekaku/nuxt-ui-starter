@@ -331,7 +331,8 @@
     "updatePasswordSub": "ตรวจสอบรหัสผ่านปัจจุบันของคุณก่อนตั้งรหัสผ่านใหม่",
     "addImagelink": "เพิ่มลิงก์รูปภาพ",
     "copyToClipboard": "คัดลอกไปยังคลิปบอร์ด",
-    "confirm": "ยืนยัน"
+    "confirm": "ยืนยัน",
+    "generateApiKey": "สร้างคีย์"
   },
   "drive": {
     "title": "ไฟล์ของฉัน",

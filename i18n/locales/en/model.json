@@ -99,6 +99,13 @@
      "ai_document_meta": {
       "table": "AI Knowledge Base",
       "metadata": "Tags"
+    },
+     "apiClient": {
+      "table": "Api client",
+      "apiName": "Api name",
+      "apiToken": "Token",
+      "byPass": "By pass",
+      "status": "Acctive"
     }
   }
 }

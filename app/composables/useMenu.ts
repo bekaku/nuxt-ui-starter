@@ -25,6 +25,12 @@ export const useMenu = () => {
         defaultOpen: true,
         children: [
           {
+            label: t("model.apiClient.table"),
+            icon: "lucide:key-round",
+            to: "/api-client",
+            permissions: ['api_client_list'],
+          },
+          {
             label: t("model_permission"),
             icon: "lucide:lock-keyhole",
             to: "/permission",

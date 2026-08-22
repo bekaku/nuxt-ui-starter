@@ -38,15 +38,6 @@
   "model_role_description": "รายละเอียด",
   "model_role_status": "สถานะ",
 
-  "model_api_client": "Api client",
-  "model_api_client_id": "id",
-  "model_api_client_api_name": "Api name",
-  "model_api_client_api_token": "Token",
-  "model_api_client_by_pass": "By pass",
-  "model_api_client_status": "status",
-  "model_api_client_created_at": "สร้างเมื่อ",
-  "model_api_client_updated_at": "แก้ไขเมื่อ",
-
   "newFolder": "โฟลเดอร์ใหม่",
   "model_folder": "โฟลเดอร์",
   "model_files_manager": "ไฟล์ของฉัน",
@@ -108,6 +99,13 @@
     "ai_document_meta": {
       "table": "คลังความรู้ AI",
       "metadata": "แท็ก"
+    },
+    "apiClient": {
+      "table": "Api client",
+      "apiName": "Api name",
+      "apiToken": "Token",
+      "byPass": "By pass",
+      "status": "เปิดใช้งาน"
     }
   }
 }

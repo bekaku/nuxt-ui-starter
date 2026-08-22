@@ -10,6 +10,7 @@ const props = withDefaults(
     whitespaceNowrap?: boolean;
     titleBold?: boolean;
     titleClass?: string;
+    descriptionClass?: string;
     to?: string;
     id?: string;
     index?: number;
@@ -87,7 +88,12 @@ const handleClick = (e: any) => {
         <div
           v-if="description"
           class="text-sm text-muted mt-0.5"
-          :class="{ 'whitespace-nowrap': whitespaceNowrap }"
+          :class="
+            cssMerge(
+              whitespaceNowrap ? 'whitespace-nowrap' : '',
+              descriptionClass,
+            )
+          "
         >
           {{ description }}
         </div>

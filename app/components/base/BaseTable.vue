@@ -225,7 +225,6 @@ const getRowActionItems = (row: Row<any>) => {
           return;
         }
         writeToClipboard(row.original.id.toString());
-        console.log("Copied to clipboard");
       },
     },
     {
@@ -238,7 +237,6 @@ const getRowActionItems = (row: Row<any>) => {
       label: t("base.view"),
       icon: "lucide:eye",
       onSelect() {
-        console.log("View row", row.index);
         if (row.index == undefined) {
           return;
         }
@@ -251,7 +249,6 @@ const getRowActionItems = (row: Row<any>) => {
       label: t("base.edit"),
       icon: "lucide:pencil",
       onSelect() {
-        console.log("Edit row", row.index);
         if (row.index == undefined) {
           return;
         }
@@ -264,7 +261,6 @@ const getRowActionItems = (row: Row<any>) => {
       label: t("base.copy"),
       icon: "lucide:copy",
       onSelect() {
-        console.log("Copy row", row.index);
         if (row.index == undefined) {
           return;
         }
@@ -466,8 +462,6 @@ const handleSearch = () => {
       return;
     }
 
-    console.log("item", item);
-
     const col = item.searchColunm;
     const op = item.searchOperation || ":"; // default operation
 
@@ -484,7 +478,7 @@ const handleSearch = () => {
 
   const queryString = queryParts.join(";");
 
-  console.log("Generated Query:", queryString, queryParts);
+  // console.log("Generated Query:", queryString, queryParts);
 
   emit("on-search", queryString);
 };
@@ -496,7 +490,6 @@ const clearFilters = () => {
   handleSearch();
 };
 const onSelect = (e: Event, row: TableRow<T>) => {
-  console.log("onSelect", row);
   /* If you decide to also select the column you can do this  */
   row.toggleSelected(!row.getIsSelected());
 };

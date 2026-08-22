@@ -71,9 +71,9 @@ const onSearch = async () => {
               <span class="text-sm text-muted">
                 {{
                   formatDistanceFromNow({
-                    dateString: item.updatedDate,
+                    date: item.updatedDate,
                     suffix: false,
-                    ios: true,
+                    iso: true,
                   })
                 }}
               </span>

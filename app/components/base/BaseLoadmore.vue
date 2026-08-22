@@ -4,6 +4,7 @@ defineProps<{
   loading?: boolean;
   loadMesage?: string;
   nomoreMessage?: string;
+  icon?: string;
 }>();
 defineEmits<{
   "on-next": [];
@@ -13,7 +14,7 @@ defineEmits<{
   <div v-bind="$attrs" class="flex w-full justify-center gap-4">
     <UButton
       class="w-fit my-4"
-      :icon="!disabled ? 'lucide:chevron-down' : ''"
+      :icon="!disabled ? icon || 'lucide:chevron-down' : ''"
       :disabled="disabled"
       :loading="loading"
       variant="soft"

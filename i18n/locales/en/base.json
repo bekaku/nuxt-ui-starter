@@ -330,7 +330,8 @@
     "updatePasswordSub": "Confirm your current password before setting a new one.",
     "addImagelink": "Add image link",
     "copyToClipboard": "Copy to clipboard",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "generateApiKey": "Generate API KEY"
   },
   "drive": {
     "title": "My Files",

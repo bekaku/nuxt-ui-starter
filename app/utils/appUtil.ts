@@ -385,3 +385,4 @@ export const getMockAvatarByIndex = (index: number = 0, size: number = 150) => {
 export const getMockAvatarById = (id: number, size: number = 150): string => {
   return `https://i.pravatar.cc/${size}?img=${id}`
 }
+
