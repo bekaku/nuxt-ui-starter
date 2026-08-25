@@ -7,7 +7,6 @@ export const useAuth = () => {
   const api = useApi();
   const { sendBroradcastChanelReload } = useAppBroadcastChannels()
   const { getDeviceId } = useAppDevice()
-  const { isServer } = useConfiguration()
   const loading = ref<boolean>(false);
   const t = nuxtApp.$i18n.t;
   const confirm = useConfirmDialog();
@@ -53,7 +52,7 @@ export const useAuth = () => {
         method: 'POST',
         body: {
             emailOrUsername: inputSanitizeHtml(req.emailOrUsername),
-            password: inputSanitizeHtml(req.password),
+            password: req.password,
             loginFrom: 'WEB',
             deviceId: deviceId,
         }
@@ -86,22 +85,23 @@ export const useAuth = () => {
   };
 
   const signoutProcess = async (): Promise<void> => {
-    console.log('signoutProcess');
     const loader = useLoader();
     loader.open();
-    const response = await api.raw<ResponseMessage>('/api/auth/logout', {
-      method: 'POST',
-    })
-    console.log('signoutProcess > response', response);
+    try {
+      const response = await api.raw<ResponseMessage>('/api/auth/logout', {
+        method: 'POST',
+      })
 
-    if (response && response.status == 200) {
-      clearAuth();
-      await sendBroradcastChanelReload();
+      if (response && response.status == 200) {
+        clearAuth();
+        await sendBroradcastChanelReload();
+        navigateTo('/auth/login', { replace: true })
+      }
+    } catch (error) {
+      console.error('Failed to signout', error);
+    } finally {
       loader.close();
-      navigateTo('/auth/login', { replace: true })
-
     }
-
   }
 
   const fetchMe = async (): Promise<AppUser | null> => {
@@ -120,13 +120,11 @@ export const useAuth = () => {
   };
 
   const onSwithUser = async (userId: number | string) => {
-    if (!isServer() || !userId) {
+    if (!userId) {
       return;
     }
     await sendBroradcastChanelReload();
-    setTimeout(() => {
-      window.location.replace('/')
-    }, 100)
+    await navigateTo('/', { external: true });
   }
   return {
     auth,

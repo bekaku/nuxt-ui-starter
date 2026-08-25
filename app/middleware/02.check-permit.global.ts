@@ -17,7 +17,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
         // console.log('isPermited', isPermited);
         //TODO implement check authorize to this page or not
         if(!isPermited){
-            abortNavigation();
             return showError({
                 statusCode: 403,
                 statusMessage: 'Forbidden'

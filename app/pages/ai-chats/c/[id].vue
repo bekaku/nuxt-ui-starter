@@ -13,10 +13,11 @@ const { t } = useLang();
 const { isDark } = useTheme();
 const inputMessage = ref("");
 const selectedFilters = ref([]);
-const chatId = useRoute().params.id as string;
+const route = useRoute();
+const chatId = computed(() => route.params.id as string);
 
-const bottomAnchor = useTemplateRef("chatContainerRef");
-const chatContainerRef = useTemplateRef("bottomAnchor");
+const  chatContainerRef= useTemplateRef("chatContainerRef");
+const bottomAnchor = useTemplateRef("bottomAnchor");
 const {
   conversationId,
   currentChat,
@@ -48,14 +49,24 @@ useSeoMeta({
 const changeNameModal = ref(false);
 const renameChat = ref<AiChat>();
 const updating = ref(false);
-onMounted(async () => {
-  if (chatId && chatId !== "new") {
-    if (isNumericOnly(chatId)) {
-      conversationId.value = chatId;
-      await initialMessage();
-    }
+const loadChatMessages = async () => {
+  const id = chatId.value;
+  if (id && id !== "new" && isNumericOnly(id)) {
+    conversationId.value = id;
+    await initialMessage();
+    scrollToBottom();
   }
-});
+};
+
+watch(
+  chatId,
+  async (newId, oldId) => {
+    if (newId !== oldId) {
+      await loadChatMessages();
+    }
+  },
+  { immediate: true },
+);
 
 const onSubmit = async () => {
   if (

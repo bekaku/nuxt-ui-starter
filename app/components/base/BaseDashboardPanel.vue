@@ -84,7 +84,7 @@ const items = [
                   </UChip>
                 </UButton>
               </UTooltip>
-              <UserMenu :show-name="false" :dropdown-ui="{content:'w-50'}" />
+              <!-- <UserMenu :show-name="false" :dropdown-ui="{content:'w-50'}" /> -->
             </slot>
           </template>
         </UDashboardNavbar>

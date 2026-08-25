@@ -95,7 +95,7 @@ export const isDate2GreaterOrEqualThanOnlyDate = (d1: Date, d2: Date) => {
   return tempDate2.getTime() >= tempDate1.getTime();
 };
 export const removeTime = (datetimeString: string) => {
-  return datetimeString ? datetimeString.split(' ')[0] : '';
+  return datetimeString ? datetimeString.split(/[T ]/)[0] : '';
 };
 
 export const formatDurationFromMillis = (ms: number): string => {

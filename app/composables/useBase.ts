@@ -116,6 +116,7 @@ export const useBase = () => {
     return new Promise((resolve) => {
       if (import.meta.server) {
         resolve(false)
+        return
       }
       confirm({
         title,
@@ -145,11 +146,23 @@ export const useBase = () => {
     );
   };
 
-  const writeToClipboard = (text: string) => {
+  const writeToClipboard = async (text: string) => {
     if (import.meta.server) {
       return;
     }
-    navigator.clipboard.writeText(text);
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (error) {
+      console.error('Failed to copy to clipboard', error);
+      if (nuxtApp.$toast) {
+        nuxtApp.$toast.add({
+          description: t('error.internalServererror'),
+          icon: 'lucide:octagon-alert',
+          color: 'error'
+        })
+      }
+      return;
+    }
     if (nuxtApp.$toast) {
       nuxtApp.$toast.add({
         description: t('success.copy'),

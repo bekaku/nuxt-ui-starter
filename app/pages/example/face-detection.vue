@@ -125,11 +125,17 @@ const submitCheckIn = async (imageBlob: Blob, url: string) => {
     };
   }
 };
+
+
+const walkThroughCapture=(imageBlob: Blob)=>{
+  console.log("multipleDetect", imageBlob);
+
+}
 </script>
 
 <template>
   <BaseDashboardPanel id="example-face-detection" title="Face detection page">
-    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
         <UCard title="Register face">
           <UForm :state="form" @submit="onRegister" class="space-y-4">
@@ -178,7 +184,7 @@ const submitCheckIn = async (imageBlob: Blob, url: string) => {
       <div>
         <UCard>
           <template #header>
-            <h2 class="text-xl font-bold">ลงเวลาเข้างาน (Face Recognition)</h2>
+            <h2 class="text-xl font-bold">{{ $t('faceDetection.modeLiveness') }}</h2>
           </template>
 
           <div v-if="scanResult" class="mt-6">
@@ -209,6 +215,7 @@ const submitCheckIn = async (imageBlob: Blob, url: string) => {
               <BaseCameraCaptureModal
                 @capture="submitCheckIn"
                 :check-liveness="true"
+                :walk-through="false"
               >
                 <template #trigger="{ open }">
                   <UButton
@@ -217,6 +224,34 @@ const submitCheckIn = async (imageBlob: Blob, url: string) => {
                     @click="open"
                   >
                     Scan
+                  </UButton>
+                </template>
+              </BaseCameraCaptureModal>
+            </div>
+          </template>
+        </UCard>
+      </div>
+      <div>
+          <UCard>
+          <template #header>
+            <h2 class="text-xl font-bold">Walk through Detech</h2>
+          </template>
+
+          <template #footer>
+            <div class="flex justify-between">
+              <BaseCameraCaptureModal
+                :check-liveness="false"
+                :autoclose="false"
+                walk-through
+                 @walk-through-capture="walkThroughCapture"
+              >
+                <template #trigger="{ open }">
+                  <UButton
+                    color="neutral"
+                    icon="i-heroicons-camera"
+                    @click="open"
+                  >
+                    Start Scan
                   </UButton>
                 </template>
               </BaseCameraCaptureModal>

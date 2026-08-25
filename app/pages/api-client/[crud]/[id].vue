@@ -179,10 +179,7 @@ loader.open();
         </BaseItem>
       </div>
 
-      <template
-        v-if="crudAction == 'edit' && crudId && crudId"
-        #crud-action-end
-      >
+      <template v-if="crudAction == 'edit' && crudId" #crud-action-end>
         <UButton
           icon="lucide:key-round"
           :label="$t('base.generateApiKey')"

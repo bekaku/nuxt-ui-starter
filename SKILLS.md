@@ -1,32 +1,56 @@
 # 🛠️ Project Skills & Technology Stack
 
-This document outlines the core technologies, architectural patterns, and coding conventions used in this repository. 
+This document outlines the core technologies, architectural patterns, and coding conventions used in this repository.
 **Note for AI Assistants (Copilot, Claude, Codex):** Please strictly adhere to these technologies and conventions when generating code, refactoring, or suggesting improvements.
 
 ## 1. Core Technologies
-* **Framework:** Nuxt 4 (SSR/SSG capabilities, Auto-imports, File-based routing)
-* **UI/Component Library:** Vue 3 & Nuxt UI
-* **Language:** TypeScript (Strict typing preferred)
-* **Styling:** Tailwind CSS (Utility Classes & Nuxt UI integration)
+* **Framework:** Nuxt 4 (`^4.5.1`) with SSR enabled, auto-imports, and file-based routing
+* **UI/Component Library:** Vue 3 + Nuxt UI v4 (Tailwind CSS v4 under the hood)
+* **Language:** TypeScript (strict typing preferred)
+* **Package Manager:** pnpm (`pnpm@11.x`)
+* **Key Modules:** `@nuxtjs/i18n` (en/th, no_prefix strategy), `@nuxt/icon`, `@nuxt/image`, `@nuxt/eslint`, `@vueuse/nuxt`, `@nuxtjs/device`
+* **Notable Libraries:** zod, date-fns, ApexCharts + Unovis (charts), CropperJS, plyr (video), vue-pdf/pdf-lib, jszip, browser-image-compression, isomorphic-dompurify
 
-## 2. Architecture & Patterns
-* **Nuxt Extensibility:** Utilizing Nuxt Layers (e.g., `layers/layer-one`) for modular and scalable project structure.
+## 2. Project Structure
+```
+app/            # Client application (Nuxt srcDir)
+├── api/        # API client composables (auto-imported)
+├── components/ # Auto-imported components grouped by feature (base/, chart/, chat/, ...)
+├── composables/# Shared composables (useApi, useAuth, useCrudForm, ...)
+├── layouts/    # default.vue, ai.vue, empty.vue, feed.vue
+├── libs/       # Constants (libs/constants.ts), Snowflake ID generator
+├── middleware/ # Numbered global route guards: 00.seo → 01.auth → 02.check-permit
+├── pages/      # File-based routing; feature folders use [crud] dynamic segments
+├── plugins/    # Client/server auth init + client-only lib registrations
+├── stores/     # (reserved) Pinia/state stores
+├── types/      # App-level TypeScript types
+└── utils/      # dateUtil, fileUtil, appUtil helpers
+server/api/     # Nitro backend routes (meta.ts + mock/ data endpoints)
+shared/types/   # Types shared between client and server
+i18n/locales/   # en/ and th/ split into namespaces: app, base, helper, model, error
+public/fonts/   # Self-hosted GoogleSans + NotoSansThaiLooped fonts
+```
+
+## 3. Architecture & Patterns
 * **Component Paradigm:** Vue 3 Composition API exclusively.
-* **State Management:** Nuxt `useState` or Pinia (if integrated).
-* **API Integration:** Centralized API fetching using the custom `useApi` composable (`api` instance) with strict TypeScript generic response mapping.
+* **State:** `useState` / composables; auth session stored in cookies configured via `runtimeConfig.public.jwtKeyName` etc.
+* **API Integration:** Centralized HTTP layer via the custom `useApi()` composable (wraps `ofetch`). It forwards cookies during SSR, attaches `Accept-Apiclient` / `Accept-Language` headers, and handles JWT refresh/logout.
+* **Auth Flow:** Cookie-based JWT with refresh token; global middlewares enforce authentication (`01.auth.global.ts`) and permissions (`02.check-permit.global.ts`).
+* **CRUD Pattern:** Generic CRUD pages use a single `[crud].vue` dynamic route per feature, driven by the `useCrudForm` / `useCrudList` / `usePaging` / `useSort` composables.
+* **Configuration:** All environment-specific values live in `runtimeConfig.public` (nuxt.config.ts) and are overridden by `.env` files (`NUXT_PUBLIC_*`).
+* **i18n:** `@nuxtjs/i18n` with `no_prefix` strategy, Thai (`th`) as default locale, locale detected via cookie. Messages split into namespace JSON files per language.
 
-## 3. 🤖 AI Code Generation Guidelines
+## 4. 🤖 AI Code Generation Guidelines
 When assisting with code generation in this project, AI agents must follow these rules:
+
 1. **Composition API:** Always use `<script setup lang="ts">`. Do not use Options API.
 2. **Nuxt UI Components:** Prefer native Nuxt UI components (e.g., `<UButton>`, `<UCard>`, `<UInput>`) over raw HTML when building UIs.
-3. **TypeScript:** Ensure all props, emits, and API responses have proper TypeScript interfaces/types defined. Avoid using `any`.
-4. **Auto-imports:** Rely on Nuxt's auto-import feature for Vue APIs and custom composables like `useApi`.
-5. **Layer Structure:** When creating new domains or large features, consider placing them in the appropriate Nuxt Layer rather than the root directory.
-6. **API Fetching Pattern:** Do NOT use native `$fetch` or `useFetch` directly for backend API communications. Always use the custom `api` client wrapped inside a `try-catch` block for robust error handling.
+3. **TypeScript:** Define proper interfaces/types for props, emits, and API responses. Avoid `any`.
+4. **Auto-imports:** Rely on Nuxt's auto-imports for Vue APIs, Nuxt UI components, and custom composables from `app/composables/` and `app/api/`.
+5. **API Fetching Pattern:** Do NOT use native `$fetch` or `useFetch` directly for backend API calls. Always use the `api` instance from `useApi()`, wrapped in a `try-catch` block:
 
-*Standard API Call Pattern:*
 ```typescript
-const api = useApi();
+const { api } = useApi();
 try {
   const data = await api<ApiResponse<Permission>>('/api/permission', {
     method: 'GET',
@@ -35,32 +59,33 @@ try {
   console.error('Failed to fetch data', error)
 }
 ```
-7. **Props Declaration:** Always use reactive destructuring with default values for `defineProps`. DO NOT use the `withDefaults` compiler macro.
 
-*Standard Props Pattern:*
+6. **Props Declaration:** Use reactive destructuring with default values for `defineProps`. Do NOT use the `withDefaults` compiler macro.
+
 ```typescript
-   const { count = 0, message = 'hello' } = defineProps<{
-     count?: number
-     message?: string
-   }>()
+const { count = 0, message = 'hello' } = defineProps<{
+  count?: number
+  message?: string
+}>()
 ```
-8. **Emits Declaration:** Always use type-based declaration with tuple syntax for defineEmits. DO NOT use runtime array or object syntax.
 
-*Standard Emits Pattern:*
+7. **Emits Declaration:** Use type-based declaration with tuple syntax. Do NOT use runtime array/object syntax.
+
 ```typescript
 const emit = defineEmits<{
-     'on-close': []
-     change: [id: number]
-     update: [value: string]
-   }>()
+  'on-close': []
+  change: [id: number]
+  update: [value: string]
+}>()
 ```
-9. **SFC Block Order:** Strictly order Vue Single-File Component blocks as follows:
- a. `<script setup lang="ts">`
- b. `<template>`
- c. `<style scoped>` (if styling is necessary)
-10. **Styling & Dark Mode:** When writing custom styles, always consider dark mode support. Use `<style scoped lang="scss">` and apply dark mode overrides by targeting the `body.body--dark` class. Rely on CSS variables for color values.
 
-*Standard Dark Mode Styling Pattern:*
+8. **SFC Block Order:** Strictly order Vue Single-File Component blocks:
+   a. `<script setup lang="ts">`
+   b. `<template>`
+   c. `<style scoped>` (if necessary)
+
+9. **Styling & Dark Mode:** Prefer Tailwind utility classes with `dark:` variants. Custom styles use plain scoped CSS (no SCSS). Consider dark mode in all styling decisions.
+
 ```html
 <!-- Preferred: Tailwind Utility Classes -->
 <template>
@@ -68,19 +93,31 @@ const emit = defineEmits<{
     <!-- Content -->
   </div>
 </template>
-<!-- Fallback: Custom SCSS -->
-<style scoped lang="scss">
-    .text-holder {
-      background-color: theme('colors.gray.100');
-    }
-
-    .dark .text-holder {
-      background-color: theme('colors.gray.900');
-    }
-</style>
 ```
 
-## 4. Infrastructure & DevOps
-* **Containerization:** Docker & Docker Compose.
-* **Environments:** Managed via standard `docker-compose.yml` (Dev) and `docker-compose-PROD.yml` (Production).
+10. **i18n:** Never hardcode user-facing strings. Add keys to the appropriate namespace file under both `i18n/locales/en/` and `i18n/locales/th/`.
 
+11. **New CRUD Feature Checklist:** When adding a new feature domain:
+    - Create page folder under `app/pages/<feature>/` with `index.vue` (list) and `[crud].vue` (create/edit/detail)
+    - Reuse `useCrudList` / `useCrudForm` composables
+    - Define types in `app/types/` (or `shared/types/` if shared with server)
+    - Add i18n keys to both locales
+
+12. **Comments:** Do not add comments unless explicitly required.
+
+## 5. Commands
+```bash
+pnpm dev          # Dev server on port 3003 (loads .env.dev)
+pnpm build        # Production build (Nitro output in .output/)
+pnpm preview      # Preview production build
+pnpm lint         # ESLint (@nuxt/eslint with stylistic rules: no comma dangle, 1tbs)
+pnpm typecheck    # nuxt typecheck
+```
+
+## 6. Infrastructure & DevOps
+* **Containerization:** Multi-stage Dockerfile (node:24 build → node:24-alpine runtime), runs Nitro via PM2 cluster mode using `ecosystem.config.cjs`.
+* **Local orchestration:** `docker-compose.yml`; build helper scripts `build-app.sh` (bash) and `build-app.ps1` (PowerShell).
+* **Environments:** `.env.example` documents all supported variables (`NUXT_PUBLIC_API_BASE`, `NUXT_PUBLIC_SITE_URL`, timeouts, version info); `.env.dev` used by the dev script.
+* **CI:** GitHub Actions workflow at `.github/workflows/ci.yml`.
+* **Dependencies:** Renovate bot enabled (`renovate.json`).
+* **Timezone:** Containers run in `Asia/Bangkok`.

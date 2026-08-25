@@ -62,9 +62,8 @@ export const useRbac = () => {
     return false;
   }
   const hasPermissionLazy = async (rbac: RBACProps | undefined): Promise<boolean> => {
-    const isHave = await isHavePermissionLazy(rbac?.permissions)
     return new Promise((resolve) => {
-      resolve(isHave);
+      resolve(hasPermission(rbac));
     })
   }
   return {

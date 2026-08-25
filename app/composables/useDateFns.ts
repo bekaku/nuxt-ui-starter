@@ -56,17 +56,17 @@ export const useDateFns = () => {
     }
 
     const difDays = getDateDiffNow(options.date);
-    if (difDays > 0 && difDays < 365) {
-      return formatDateTime({
-        date: options.date,
-        iso: options.iso,
-        format: FORMAT_DATE_DD_MM
-      });
-    } else if (difDays > 365) {
+    if (difDays >= 365) {
       return formatDateTime({
         date: options.date,
         iso: options.iso,
         format: FORMAT_DATE_DD_MM_YY
+      });
+    } else if (difDays >= 1 || difDays <= -1) {
+      return formatDateTime({
+        date: options.date,
+        iso: options.iso,
+        format: FORMAT_DATE_DD_MM
       });
     }
     return formatDateTime({
@@ -227,7 +227,7 @@ export const useDateFns = () => {
   ) => {
     return $datefns.formatDistance(
       convertStringToDate(options.date, options.iso || false, options.format || FORMAT_DATE_TIME_ALT),
-      options.date ? convertStringToDate(options.date, options.iso || false, options.format || FORMAT_DATE_TIME_ALT) : new Date(),
+      new Date(),
       {
         locale: locale.value == 'th' ? th : enUS,
         addSuffix: true

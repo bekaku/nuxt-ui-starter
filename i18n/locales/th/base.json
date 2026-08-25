@@ -494,7 +494,10 @@
     "modelLoading": "กำลังโหลดโมเดล AI...",
     "camera": "กล้องถ่ายภาพ",
     "registerFace": "ลงทะเบียนใบหน้า",
-    "detectSuccess": "ตรวจสอบบุคคลจริงสำเร็จ"
+    "detectSuccess": "ตรวจสอบบุคคลจริงสำเร็จ",
+    "cameraError": "ไม่สามารถเปิดกล้องได้",
+    "canOpenEyes": "ลืมตาขึ้นได้",
+    "livenessError": "การกะพริบตาผิดปกติ กรุณาลองอีกครั้ง"
   },
 
   "authen": {

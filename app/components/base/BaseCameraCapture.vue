@@ -49,7 +49,7 @@ const initCamera = async () => {
       devices.value = allDevices.filter((d) => d.kind === "videoinput");
     }
   } catch (err: any) {
-    error.value = t("faceDetection.cameraError") || "ไม่สามารถเปิดกล้องได้";
+    error.value = t("faceDetection.cameraError");
   } finally {
     isLoading.value = false;
   }
@@ -135,7 +135,7 @@ const detectLivenessLoop = () => {
         // 1. เริ่มจับเวลาตอนที่ตาเริ่มปิด
         eyeClosed.value = true;
         blinkStartTime = performance.now();
-        instructionText.value = 'ดีมาก! ลืมตาขึ้นได้เลย';
+        instructionText.value = t('faceDetection.canOpenEyes');
       }
       else if (isOpenEye && eyeClosed.value) {
         // 2. คํานวณระยะเวลาที่หลับตาไป
@@ -156,7 +156,7 @@ const detectLivenessLoop = () => {
           // ถ้าเวลาไม่สมเหตุสมผล ให้ Reset สถานะแล้วบังคับให้กะพริบใหม่
           eyeClosed.value = false;
           blinkStartTime = 0;
-          instructionText.value = 'การกะพริบตาผิดปกติ กรุณาลองอีกครั้ง';
+          instructionText.value = t('faceDetection.livenessError');
         }
       }
     }
@@ -164,48 +164,6 @@ const detectLivenessLoop = () => {
   animationFrameId = requestAnimationFrame(detectLivenessLoop);
 };
 
-// const detectLivenessLoop = () => {
-//   if (!videoRef.value || !isOpen.value || capturedImageUrl.value) return;
-
-//   if (faceLandmarker && videoRef.value.readyState >= 2) {
-//     const startTimeMs = performance.now();
-//     const results = faceLandmarker.detectForVideo(videoRef.value, startTimeMs);
-
-//     // ดึงค่า Blendshapes (วิเคราะห์กล้ามเนื้อหน้า)
-//     const blendshapes = results.faceBlendshapes?.[0]?.categories;
-
-//     if (blendshapes) {
-//       // ดึงคะแนนการหลับตาซ้ายและขวา (0.0 = ลืมตาสุด, 1.0 = หลับตาสนิท)
-//       const blinkLeft = blendshapes.find((b) => b.categoryName === "eyeBlinkLeft")?.score || 0;
-//       const blinkRight = blendshapes.find((b) => b.categoryName === "eyeBlinkRight")?.score || 0;
-
-//       // ปรับจูน (Tuning) Threshold ให้อ่อนลง
-//       // หลับตาแค่ 35% ก็ถือว่าตั้งใจกะพริบแล้ว (เดิมอาจจะสูงไป)
-//       const isClosed = blinkLeft > 0.35 && blinkRight > 0.35;
-//       // ลืมตากลับมาปกติ
-//       const isOpenEye = blinkLeft < 0.30 && blinkRight < 0.30;
-
-//       if (isClosed) {
-//         eyeClosed.value = true; // สถานะ: พบการหลับตา
-
-//         // เพิ่ม Feedback แจ้งให้ผู้ใช้รู้ว่าระบบจับได้แล้ว ให้ลืมตาได้
-//         instructionText.value = 'เบิกตาขึ้นอีกนิด';
-//       }
-//       else if (isOpenEye && eyeClosed.value) {
-//         // สถานะ: หลับตาไปแล้ว และลืมตากลับขึ้นมา (สมบูรณ์)
-//         livenessSuccess.value = true;
-//         instructionText.value = t('faceDetection.detectSuccess');
-
-//         // ถ่ายภาพทันที (ลดดีเลย์เหลือ 150ms เพื่อจับภาพตอนที่หน้ากำลังเป็นธรรมชาติที่สุด)
-//         setTimeout(() => {
-//           takePicture();
-//         }, 150);
-//         return; // หยุด Loop AI
-//       }
-//     }
-//   }
-//   animationFrameId = requestAnimationFrame(detectLivenessLoop);
-// };
 
 const takePicture = () => {
   if (!videoRef.value) return;

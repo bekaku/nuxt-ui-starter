@@ -495,7 +495,10 @@
     "takePictureFace": "Take a picture of a face.",
     "camera": "Camera",
     "detectSuccess": "Identity verification successful.",
-    "registerFace": "Register face"
+    "registerFace": "Register face",
+    "cameraError": "Unable to open the camera",
+    "canOpenEyes": "Can open your eyes",
+    "livenessError": "Abnormal blinking. Please try again."
   },
   "authen": {
     "login": "Login",

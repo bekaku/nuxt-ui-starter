@@ -48,13 +48,20 @@ export const useAiChat = (options: AiChatOptions = {}) => {
       return;
     }
 
+    const requestedConversationId = conversationId.value
+    page.value = 0
+    isLastPage.value = false
+    loadingMore.value = false
+    loading.value = true
+    messages.value = []
+
     try {
       // @ts-ignore
       const response = await api<ApiResponse<AiChatMessage>>(
-        `api/aiChat/messages/${conversationId.value}?page=${page.value}&sort=id,desc&size=${size.value}` as string,
+        `api/aiChat/messages/${requestedConversationId}?page=${page.value}&sort=id,desc&size=${size.value}` as string,
         { method: 'GET' }
       )
-      isLastPage.value = response.last;
+      if (conversationId.value !== requestedConversationId) return
       if (response?.dataList?.length) {
         // @ts-ignore
         messages.value = [...response.dataList]
@@ -82,8 +89,10 @@ export const useAiChat = (options: AiChatOptions = {}) => {
           }))
       }
 
+      if (conversationId.value !== requestedConversationId) return
+
       if (recentChats.value && recentChats.value.length > 0) {
-        const chat = recentChats.value.find((item) => item.id === conversationId.value);
+        const chat = recentChats.value.find((item) => item.id === requestedConversationId);
         if (chat) {
           currentChat.value = chat;
         }
@@ -92,7 +101,9 @@ export const useAiChat = (options: AiChatOptions = {}) => {
     } catch (error) {
       console.error('Failed to fetch messages', error);
     } finally {
-      loading.value = false;
+      if (conversationId.value === requestedConversationId) {
+        loading.value = false;
+      }
     }
   }
 
@@ -110,15 +121,18 @@ export const useAiChat = (options: AiChatOptions = {}) => {
   const loadMoreMessages = async () => {
     if (!conversationId.value || isLastPage.value || loadingMore.value) return;
 
+    const requestedConversationId = conversationId.value
     loadingMore.value = true;
     page.value++;
 
     try {
       // @ts-ignore
       const response = await api<ApiResponse<AiChatMessage>>(
-        `api/aiChat/messages/${conversationId.value}?page=${page.value}&sort=id,desc&size=${size.value}`,
+        `api/aiChat/messages/${requestedConversationId}?page=${page.value}&sort=id,desc&size=${size.value}`,
         { method: 'GET' }
       );
+
+      if (conversationId.value !== requestedConversationId) return
 
       isLastPage.value = response.last;
 
@@ -152,9 +166,13 @@ export const useAiChat = (options: AiChatOptions = {}) => {
       }
     } catch (error) {
       console.error('Failed to fetch more messages', error);
-      page.value--;
+      if (conversationId.value === requestedConversationId) {
+        page.value--;
+      }
     } finally {
-      loadingMore.value = false;
+      if (conversationId.value === requestedConversationId) {
+        loadingMore.value = false;
+      }
     }
   }
 
@@ -212,74 +230,84 @@ export const useAiChat = (options: AiChatOptions = {}) => {
       const reader = stream.getReader()
       const decoder = new TextDecoder('utf-8')
       let done = false
+      let buffer = ''
+
+      const processLine = (line: string) => {
+        if (!line.trim().startsWith('data:')) return
+        const jsonStr = line.replace(/^data:\s*/, '').trim()
+        if (!jsonStr) return
+
+        try {
+          const event = JSON.parse(jsonStr)
+
+          if (event.type === 'chat_id') {
+            conversationId.value = event.content
+            // router.replace(`/ai-chats/c/${event.content}`)
+            onReplaceUrl(`/ai-chats/c/${event.content}`)
+            return
+          }
+          if (event.type === 'title') {
+            chatTitle.value = event.content
+            return
+          }
+
+          const currentMsg = messages.value[aiMessageIndex]
+          if (!currentMsg) return
+
+          if (status.value !== 'streaming') status.value = 'streaming'
+
+          if (event.type === 'thinking') {
+            currentMsg.thinkingContent += event.content
+            currentMsg.isThinkingOpen = true
+          }
+          else if (event.type === 'token') {
+            if (!currentMsg.isThinkingDone) {
+              currentMsg.isThinkingDone = true
+              currentMsg.isThinkingOpen = false
+            }
+            if (!event.content.includes('<think>') && !event.content.includes('</think>')) {
+              currentMsg.content += event.content
+              currentMsg.parts = [{ type: 'text', text: currentMsg.content }]
+            }
+          }
+          else if (event.type === 'sources') {
+            currentMsg.sources = JSON.parse(event.content)
+          }
+          else if (event.type === 'done') {
+            conversationId.value = event.content
+            currentMsg.isThinkingDone = true
+            currentMsg.isThinkingOpen = false
+
+            const thinkMatch = currentMsg.content.match(/<think>([\s\S]*?)<\/think>/)
+            if (thinkMatch && thinkMatch[1]) {
+              currentMsg.thinkingContent = thinkMatch[1].trim()
+              currentMsg.content = currentMsg.content.replace(/<think>[\s\S]*?<\/think>/, '').trim()
+              currentMsg.parts = [{ type: 'text', text: currentMsg.content }]
+            }
+          }
+        } catch (e) {
+          console.warn('Failed to parse stream JSON:', jsonStr)
+        }
+      }
 
       while (!done) {
         const { value, done: readerDone } = await reader.read()
         done = readerDone
 
         if (value) {
-          const chunk = decoder.decode(value, { stream: true })
-          const lines = chunk.split('\n')
-
-          for (const line of lines) {
-            if (line.startsWith('data:')) {
-              const jsonStr = line.replace(/^data:\s*/, '').trim()
-              if (!jsonStr) continue
-
-              try {
-                const event = JSON.parse(jsonStr)
-
-                if (event.type === 'chat_id') {
-                  conversationId.value = event.content
-                  // router.replace(`/ai-chats/c/${event.content}`)
-                  onReplaceUrl(`/ai-chats/c/${event.content}`)
-                  continue
-                }
-                if (event.type === 'title') {
-                  chatTitle.value = event.content
-                  continue
-                }
-
-                const currentMsg = messages.value[aiMessageIndex]
-                if (!currentMsg) continue
-
-                if (status.value !== 'streaming') status.value = 'streaming'
-
-                if (event.type === 'thinking') {
-                  currentMsg.thinkingContent += event.content
-                  currentMsg.isThinkingOpen = true
-                }
-                else if (event.type === 'token') {
-                  if (!currentMsg.isThinkingDone) {
-                    currentMsg.isThinkingDone = true
-                    currentMsg.isThinkingOpen = false
-                  }
-                  if (!event.content.includes('<think>') && !event.content.includes('</think>')) {
-                    currentMsg.content += event.content
-                    currentMsg.parts = [{ type: 'text', text: currentMsg.content }]
-                  }
-                }
-                else if (event.type === 'sources') {
-                  currentMsg.sources = JSON.parse(event.content)
-                }
-                else if (event.type === 'done') {
-                  conversationId.value = event.content
-                  currentMsg.isThinkingDone = true
-                  currentMsg.isThinkingOpen = false
-
-                  const thinkMatch = currentMsg.content.match(/<think>([\s\S]*?)<\/think>/)
-                  if (thinkMatch && thinkMatch[1]) {
-                    currentMsg.thinkingContent = thinkMatch[1].trim()
-                    currentMsg.content = currentMsg.content.replace(/<think>[\s\S]*?<\/think>/, '').trim()
-                    currentMsg.parts = [{ type: 'text', text: currentMsg.content }]
-                  }
-                }
-              } catch (e) {
-                console.warn('Failed to parse stream JSON:', jsonStr)
-              }
-            }
-          }
+          buffer += decoder.decode(value, { stream: true })
         }
+
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+
+        for (const line of lines) {
+          processLine(line)
+        }
+      }
+
+      if (buffer.trim()) {
+        processLine(buffer)
       }
 
       if (isNewChat && conversationId.value) {
