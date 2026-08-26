@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
+import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
 import { FilesetResolver, FaceLandmarker } from "@mediapipe/tasks-vision";
 
 const props = withDefaults(
@@ -12,13 +12,16 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  capture: [file: Blob, dataUrl: string];
+  capture: [file: Blob];
   close: [];
 }>();
 
 const { t } = useLang();
 const { videoRef, startCamera, stopCamera, captureImage } = useCamera();
 const isOpen = defineModel<boolean>("open");
+
+// --- Overlay Canvas Ref ---
+const overlayCanvasRef = ref<HTMLCanvasElement | null>(null);
 
 const isLoading = ref(false);
 const error = ref<string | null>(null);
@@ -33,9 +36,14 @@ const isAiLoading = ref(false);
 const instructionText = ref(t("faceDetection.lookAtCamera"));
 const livenessSuccess = ref(false);
 const eyeClosed = ref(false);
-const blinkDetected = ref(false)
+let blinkStartTime = 0;
+
 let faceLandmarker: FaceLandmarker | null = null;
-let animationFrameId: number;
+let animationFrameId = 0;
+
+// =========================================================
+// Camera
+// =========================================================
 
 const initCamera = async () => {
   await nextTick();
@@ -48,7 +56,8 @@ const initCamera = async () => {
       const allDevices = await navigator.mediaDevices.enumerateDevices();
       devices.value = allDevices.filter((d) => d.kind === "videoinput");
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
+    console.error("Camera initialization failed:", err);
     error.value = t("faceDetection.cameraError");
   } finally {
     isLoading.value = false;
@@ -64,25 +73,145 @@ const onVideoLoaded = async () => {
 const switchCamera = async () => {
   if (devices.value.length < 2) return;
   currentDeviceIndex.value = (currentDeviceIndex.value + 1) % devices.value.length;
+  clearOverlayCanvas();
   await startCamera();
 };
 
-const calculateDistance = (p1: any, p2: any) =>
-  Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+// =========================================================
+// Face Bounds & Overlay Drawing
+// =========================================================
 
-const getEAR = (landmarks: any[], eyeIndices: [number, number, number, number]) => {
-  const p1 = landmarks[eyeIndices[0]];
-  const p2 = landmarks[eyeIndices[1]];
-  const p3 = landmarks[eyeIndices[2]];
-  const p4 = landmarks[eyeIndices[3]];
-  if (!p1 || !p2 || !p3 || !p4) return 0;
-  return calculateDistance(p2, p3) / calculateDistance(p1, p4);
+const getFaceBounds = (landmarks: Array<{ x: number; y: number }>) => {
+  if (!landmarks?.length) return null;
+
+  let minX = 1;
+  let maxX = 0;
+  let minY = 1;
+  let maxY = 0;
+
+  for (const point of landmarks) {
+    minX = Math.min(minX, point.x);
+    maxX = Math.max(maxX, point.x);
+    minY = Math.min(minY, point.y);
+    maxY = Math.max(maxY, point.y);
+  }
+
+  return {
+    minX,
+    maxX,
+    minY,
+    maxY,
+    width: maxX - minX,
+    height: maxY - minY,
+  };
 };
+
+const clearOverlayCanvas = () => {
+  if (overlayCanvasRef.value) {
+    const ctx = overlayCanvasRef.value.getContext("2d");
+    ctx?.clearRect(0, 0, overlayCanvasRef.value.width, overlayCanvasRef.value.height);
+  }
+};
+
+const drawFaceBox = (
+  bounds: { minX: number; maxX: number; minY: number; maxY: number; width: number; height: number } | null,
+  isSuccess: boolean
+) => {
+  const canvas = overlayCanvasRef.value;
+  const video = videoRef.value;
+
+  if (!canvas || !video) return;
+
+  // Sync canvas dimensions with video
+  if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+  }
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (!bounds) return;
+
+  const vw = canvas.width;
+  const vh = canvas.height;
+
+  // Padding around face
+  const padX = bounds.width * 0.15;
+  const padY = bounds.height * 0.2;
+
+  const minX = Math.max(0, bounds.minX - padX);
+  const maxX = Math.min(1, bounds.maxX + padX);
+  const minY = Math.max(0, bounds.minY - padY);
+  const maxY = Math.min(1, bounds.maxY + padY);
+
+  const boxWidth = (maxX - minX) * vw;
+  const boxHeight = (maxY - minY) * vh;
+
+  // Mirror X-axis coordinate to match video transform -scale-x-100
+  const boxX = (1 - maxX) * vw;
+  const boxY = minY * vh;
+
+  const strokeColor = isSuccess ? "#22c55e" : "#eab308"; // เขียวเมื่อผ่าน / เหลืองระหว่างตรวจจับ
+
+  ctx.save();
+  ctx.strokeStyle = strokeColor;
+  ctx.lineWidth = 3;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  // Focus Brackets (มุม 4 ด้าน)
+  const cornerLength = Math.min(boxWidth, boxHeight) * 0.2;
+
+  // Top-Left
+  ctx.beginPath();
+  ctx.moveTo(boxX, boxY + cornerLength);
+  ctx.lineTo(boxX, boxY);
+  ctx.lineTo(boxX + cornerLength, boxY);
+  ctx.stroke();
+
+  // Top-Right
+  ctx.beginPath();
+  ctx.moveTo(boxX + boxWidth - cornerLength, boxY);
+  ctx.lineTo(boxX + boxWidth, boxY);
+  ctx.lineTo(boxX + boxWidth, boxY + cornerLength);
+  ctx.stroke();
+
+  // Bottom-Left
+  ctx.beginPath();
+  ctx.moveTo(boxX, boxY + boxHeight - cornerLength);
+  ctx.lineTo(boxX, boxY + boxHeight);
+  ctx.lineTo(boxX + cornerLength, boxY + boxHeight);
+  ctx.stroke();
+
+  // Bottom-Right
+  ctx.beginPath();
+  ctx.moveTo(boxX + boxWidth - cornerLength, boxY + boxHeight);
+  ctx.lineTo(boxX + boxWidth, boxY + boxHeight);
+  ctx.lineTo(boxX + boxWidth, boxY + boxHeight - cornerLength);
+  ctx.stroke();
+
+  // Status text label
+  ctx.fillStyle = strokeColor;
+  ctx.font = "bold 14px sans-serif";
+  const label = isSuccess ? "Verified" : "Detecting...";
+  ctx.fillText(label, boxX + 6, boxY - 8 > 14 ? boxY - 8 : boxY + 20);
+
+  ctx.restore();
+};
+
+// =========================================================
+// Liveness Detection
+// =========================================================
 
 const initLivenessDetection = async () => {
   instructionText.value = `${t("ai.modelPreparing")}...`;
   livenessSuccess.value = false;
   eyeClosed.value = false;
+  blinkStartTime = 0;
+  clearOverlayCanvas();
 
   if (!faceLandmarker) {
     isAiLoading.value = true;
@@ -96,7 +225,7 @@ const initLivenessDetection = async () => {
             "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
           delegate: "GPU",
         },
-        outputFaceBlendshapes: true, // <--- เปลี่ยนจาก false เป็น true
+        outputFaceBlendshapes: true,
         runningMode: "VIDEO",
         numFaces: 1,
       });
@@ -112,8 +241,6 @@ const initLivenessDetection = async () => {
   instructionText.value = t("faceDetection.instruction1");
   detectLivenessLoop();
 };
-// เพิ่ม State สำหรับจับเวลาด้านบนสุด
-let blinkStartTime = 0;
 
 const detectLivenessLoop = () => {
   if (!videoRef.value || !isOpen.value || capturedImageUrl.value) return;
@@ -121,77 +248,90 @@ const detectLivenessLoop = () => {
   if (faceLandmarker && videoRef.value.readyState >= 2) {
     const startTimeMs = performance.now();
     const results = faceLandmarker.detectForVideo(videoRef.value, startTimeMs);
+    const landmarks = results.faceLandmarks?.[0];
     const blendshapes = results.faceBlendshapes?.[0]?.categories;
 
-    if (blendshapes) {
+    const bounds = landmarks ? getFaceBounds(landmarks) : null;
+    drawFaceBox(bounds, livenessSuccess.value);
+
+    if (blendshapes && !livenessSuccess.value) {
       const blinkLeft = blendshapes.find((b) => b.categoryName === "eyeBlinkLeft")?.score || 0;
       const blinkRight = blendshapes.find((b) => b.categoryName === "eyeBlinkRight")?.score || 0;
 
-      // ใช้ Threshold ที่ลืมตาได้สบายๆ
       const isClosed = blinkLeft > 0.45 && blinkRight > 0.45;
       const isOpenEye = blinkLeft < 0.35 && blinkRight < 0.35;
 
       if (isClosed && !eyeClosed.value) {
-        // 1. เริ่มจับเวลาตอนที่ตาเริ่มปิด
+        // 1. เริ่มจับเวลาตอนหลับตา
         eyeClosed.value = true;
         blinkStartTime = performance.now();
-        instructionText.value = t('faceDetection.canOpenEyes');
-      }
-      else if (isOpenEye && eyeClosed.value) {
-        // 2. คํานวณระยะเวลาที่หลับตาไป
+        instructionText.value = t("faceDetection.canOpenEyes");
+      } else if (isOpenEye && eyeClosed.value) {
+        // 2. คำนวณระยะเวลาหลับตา
         const blinkDuration = performance.now() - blinkStartTime;
 
-        // 3. กรองการหลอก:
-        // - กะพริบเร็วกว่า 50ms = สั่นรูป (Noise/Error)
-        // - ค้างนานกว่า 1000ms (1 วิ) = เอารูปมาจ่อแล้วปิดกล้อง หรือไม่ใช่การกะพริบธรรมชาติ
+        // 3. กรองช่วงเวลาการกะพริบตาธรรมชาติ
         if (blinkDuration > 50 && blinkDuration < 1000) {
           livenessSuccess.value = true;
-          instructionText.value = t('faceDetection.detectSuccess');
+          drawFaceBox(bounds, true);
+          instructionText.value = t("faceDetection.detectSuccess");
 
-          setTimeout(() => {
-            takePicture();
+          setTimeout(async () => {
+            await takePicture();
           }, 150);
-          return; // สแกนผ่าน
+          return;
         } else {
-          // ถ้าเวลาไม่สมเหตุสมผล ให้ Reset สถานะแล้วบังคับให้กะพริบใหม่
           eyeClosed.value = false;
           blinkStartTime = 0;
-          instructionText.value = t('faceDetection.livenessError');
+          instructionText.value = t("faceDetection.livenessError");
         }
       }
     }
   }
+
   animationFrameId = requestAnimationFrame(detectLivenessLoop);
 };
 
+// =========================================================
+// Capture & Actions
+// =========================================================
 
-const takePicture = () => {
+const takePicture = async () => {
   if (!videoRef.value) return;
-  const blob = captureImage();
+  const blob = await captureImage();
   if (blob) {
     capturedBlob.value = blob;
     capturedImageUrl.value = URL.createObjectURL(blob);
   }
+  clearOverlayCanvas();
   stopCamera();
   cancelAnimationFrame(animationFrameId);
 };
 
 const retake = async () => {
+  if (capturedImageUrl.value) {
+    URL.revokeObjectURL(capturedImageUrl.value);
+  }
   capturedBlob.value = null;
   capturedImageUrl.value = null;
+  clearOverlayCanvas();
   await initCamera();
 };
 
 const confirmAndSend = () => {
   if (capturedBlob.value && capturedImageUrl.value) {
-    emit("capture", capturedBlob.value, capturedImageUrl.value);
+    emit("capture", capturedBlob.value);
     onClose();
   }
 };
 
 const onClose = () => {
+  if (capturedImageUrl.value) {
+    URL.revokeObjectURL(capturedImageUrl.value);
+  }
   capturedBlob.value = null;
   capturedImageUrl.value = null;
+  clearOverlayCanvas();
   stopCamera();
   cancelAnimationFrame(animationFrameId);
   emit("close");
@@ -202,9 +342,17 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  onClose();
+  cancelAnimationFrame(animationFrameId);
+  stopCamera();
+  clearOverlayCanvas();
+  if (capturedImageUrl.value) {
+    URL.revokeObjectURL(capturedImageUrl.value);
+  }
+  faceLandmarker?.close();
+  faceLandmarker = null;
 });
 </script>
+
 <template>
   <div>
     <UCard>
@@ -256,7 +404,7 @@ onBeforeUnmount(() => {
           <span class="text-sm">{{ error }}</span>
         </div>
 
-        <!--  Live streaming camera -->
+        <!-- Live streaming camera -->
         <video
           v-show="!capturedImageUrl && !error && !isLoading"
           ref="videoRef"
@@ -266,6 +414,13 @@ onBeforeUnmount(() => {
           class="w-full h-full object-cover transform -scale-x-100"
         />
 
+        <!-- Focus Box Overlay Canvas -->
+        <canvas
+          v-show="checkLiveness && !capturedImageUrl && !error && !isLoading"
+          ref="overlayCanvasRef"
+          class="absolute inset-0 w-full h-full object-cover pointer-events-none z-10"
+        />
+
         <!-- Preview of photos -->
         <img
           v-if="capturedImageUrl"
@@ -273,7 +428,7 @@ onBeforeUnmount(() => {
           class="w-full h-full object-cover"
         />
 
-        <!-- Overlay for Liveness (shown only when the mode is enabled and no photos have been taken) -->
+        <!-- Overlay for Liveness Status -->
         <div
           v-if="
             checkLiveness &&

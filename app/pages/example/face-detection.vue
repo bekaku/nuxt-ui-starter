@@ -10,6 +10,7 @@ useSeoMeta({
   title: "Face detection page",
 });
 
+const { t } = useLang();
 const { onUploadChunk } = useUpload();
 const { auth } = useAuth();
 const toast = useToast();
@@ -77,10 +78,10 @@ const onRegister = async () => {
     isSubmitting.value = false;
   }
 };
-const handlePhotoCapture = (file: Blob, url: string) => {
-  console.log("handlePhotoCapture", { file, url });
+const handlePhotoCapture = (file: Blob) => {
+  console.log("handlePhotoCapture", { file, });
   capturedImageBlob.value = file;
-  capturedImage.value = url;
+  capturedImage.value = URL.createObjectURL(file);
 };
 //detect
 const scanResult = ref<{
@@ -91,7 +92,7 @@ const scanResult = ref<{
 
 const scanResultItem = ref<FaceRecognitionDetechResponse | null>(null);
 
-const submitCheckIn = async (imageBlob: Blob, url: string) => {
+const submitCheckIn = async (imageBlob: Blob) => {
   if (!imageBlob) return;
   const uniqueId = generateSnowflakeID();
   const formData = new FormData();
@@ -112,25 +113,23 @@ const submitCheckIn = async (imageBlob: Blob, url: string) => {
       scanResultItem.value = data;
       scanResult.value = {
         success: true,
-        title: "บันทึกเวลาสำเร็จ",
-        desc: `สวัสดีคุณ ${data.email} (ความแม่นยำ: ${data.similarityScore}%)`,
+        title: t("faceDetection.detectSuccess"),
+        desc: `Hello, Mr./Ms. ${data.email} (Accuracy: ${data.similarityScore}%).`,
       };
     }
   } catch (error: any) {
     scanResultItem.value = null;
     scanResult.value = {
       success: false,
-      title: "ไม่สามารถยืนยันตัวตนได้",
-      desc: error.data?.message || "ใบหน้าไม่ตรงกับระบบ",
+      title: t("faceDetection.canNotVerify"),
+      desc: error.data?.message || t("faceDetection.faceNotMatch"),
     };
   }
 };
 
-
-const walkThroughCapture=(imageBlob: Blob)=>{
+const walkThroughCapture = (imageBlob: Blob) => {
   console.log("multipleDetect", imageBlob);
-
-}
+};
 </script>
 
 <template>
@@ -184,7 +183,9 @@ const walkThroughCapture=(imageBlob: Blob)=>{
       <div>
         <UCard>
           <template #header>
-            <h2 class="text-xl font-bold">{{ $t('faceDetection.modeLiveness') }}</h2>
+            <h2 class="text-xl font-bold">
+              {{ $t("faceDetection.modeLiveness") }}
+            </h2>
           </template>
 
           <div v-if="scanResult" class="mt-6">
@@ -232,9 +233,9 @@ const walkThroughCapture=(imageBlob: Blob)=>{
         </UCard>
       </div>
       <div>
-          <UCard>
+        <UCard>
           <template #header>
-            <h2 class="text-xl font-bold">Walk through Detech</h2>
+            <h2 class="text-xl font-bold">Walk through Detection</h2>
           </template>
 
           <template #footer>
@@ -243,7 +244,7 @@ const walkThroughCapture=(imageBlob: Blob)=>{
                 :check-liveness="false"
                 :autoclose="false"
                 walk-through
-                 @walk-through-capture="walkThroughCapture"
+                @walk-through-capture="walkThroughCapture"
               >
                 <template #trigger="{ open }">
                   <UButton

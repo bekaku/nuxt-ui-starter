@@ -15,16 +15,16 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: "capture", file: Blob, dataUrl: string): void;
+  (e: "capture", file: Blob): void;
   (e: "walk-through-capture", file: Blob): void;
 }>();
 const isOpen = ref(false);
 const open = () => {
   isOpen.value = true;
 };
-const confirmAndSend = (file: Blob, url: string) => {
-  if (file && url) {
-    emit("capture", file, url);
+const confirmAndSend = (file: Blob) => {
+  if (file) {
+    emit("capture", file);
     if (props.autoclose) {
       closeModal();
     }

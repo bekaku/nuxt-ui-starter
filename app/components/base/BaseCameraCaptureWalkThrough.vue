@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   ref,
+  computed,
   onMounted,
   onBeforeUnmount,
   nextTick,
@@ -51,6 +52,9 @@ const {
 } = useCamera();
 
 const isOpen = defineModel<boolean>("open");
+
+// Overlay Canvas Ref สำหรับวาดกรอบใบหน้า
+const overlayCanvasRef = ref<HTMLCanvasElement | null>(null);
 
 // =========================================================
 // Mode
@@ -428,6 +432,120 @@ const resetFaceTracking = () => {
   faceTracks.clear();
 
   nextFaceTrackId = 1;
+
+  // Clear Canvas Overlay
+  if (overlayCanvasRef.value) {
+    const ctx = overlayCanvasRef.value.getContext("2d");
+    if (ctx) {
+      ctx.clearRect(0, 0, overlayCanvasRef.value.width, overlayCanvasRef.value.height);
+    }
+  }
+};
+
+// =========================================================
+// Draw Face Focus Boxes
+// =========================================================
+
+const drawFaceBoxes = (
+  faces: Array<{
+    bounds: ReturnType<typeof getFaceBounds>;
+    track: FaceTrack;
+  }>,
+) => {
+  const canvas = overlayCanvasRef.value;
+  const video = videoRef.value;
+
+  if (!canvas || !video) return;
+
+  if (
+    canvas.width !== video.videoWidth ||
+    canvas.height !== video.videoHeight
+  ) {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+  }
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const vw = canvas.width;
+  const vh = canvas.height;
+
+  for (const { bounds, track } of faces) {
+    const padX = bounds.width * 0.15;
+    const padY = bounds.height * 0.2;
+
+    const minX = Math.max(0, bounds.minX - padX);
+    const maxX = Math.min(1, bounds.maxX + padX);
+    const minY = Math.max(0, bounds.minY - padY);
+    const maxY = Math.min(1, bounds.maxY + padY);
+
+    const boxWidth = (maxX - minX) * vw;
+    const boxHeight = (maxY - minY) * vh;
+
+    // คำนวณแกน X แบบ Mirror ให้ตรงกับ video (-scale-x-100)
+    const boxX = (1 - maxX) * vw;
+    const boxY = minY * vh;
+
+    // แสดงสีเขียวเมื่อ Stable/Captured และสีเหลืองเมื่อกำลังจับโฟกัส
+    const isReady =
+      track.stableFrames >= REQUIRED_STABLE_FRAMES ||
+      track.captured;
+    const strokeColor = isReady ? "#22c55e" : "#eab308";
+
+    ctx.save();
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = 3;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    // วาดมุมกรอบแบบ Focus Brackets
+    const cornerLength = Math.min(boxWidth, boxHeight) * 0.2;
+
+    // Top-Left
+    ctx.beginPath();
+    ctx.moveTo(boxX, boxY + cornerLength);
+    ctx.lineTo(boxX, boxY);
+    ctx.lineTo(boxX + cornerLength, boxY);
+    ctx.stroke();
+
+    // Top-Right
+    ctx.beginPath();
+    ctx.moveTo(boxX + boxWidth - cornerLength, boxY);
+    ctx.lineTo(boxX + boxWidth, boxY);
+    ctx.lineTo(boxX + boxWidth, boxY + cornerLength);
+    ctx.stroke();
+
+    // Bottom-Left
+    ctx.beginPath();
+    ctx.moveTo(boxX, boxY + boxHeight - cornerLength);
+    ctx.lineTo(boxX, boxY + boxHeight);
+    ctx.lineTo(boxX + cornerLength, boxY + boxHeight);
+    ctx.stroke();
+
+    // Bottom-Right
+    ctx.beginPath();
+    ctx.moveTo(boxX + boxWidth - cornerLength, boxY + boxHeight);
+    ctx.lineTo(boxX + boxWidth, boxY + boxHeight);
+    ctx.lineTo(boxX + boxWidth, boxY + boxHeight - cornerLength);
+    ctx.stroke();
+
+    // Label ข้อความสถานะ
+    ctx.fillStyle = strokeColor;
+    ctx.font = "bold 14px sans-serif";
+    const label = track.captured
+      ? "Captured"
+      : `Face #${track.id}`;
+    ctx.fillText(
+      label,
+      boxX + 6,
+      boxY - 8 > 14 ? boxY - 8 : boxY + 20,
+    );
+
+    ctx.restore();
+  }
 };
 
 // =========================================================
@@ -789,6 +907,12 @@ const detectWalkThroughLoop =
       const matchedTrackIds =
         new Set<number>();
 
+      // List of faces to render in this frame
+      const currentFrameFaces: Array<{
+        bounds: ReturnType<typeof getFaceBounds>;
+        track: FaceTrack;
+      }> = [];
+
       // ===================================================
       // Process every face
       // ===================================================
@@ -864,6 +988,12 @@ const detectWalkThroughLoop =
 
         track.lastSeen = now;
 
+        // Push to frame render list
+        currentFrameFaces.push({
+          bounds,
+          track,
+        });
+
         // =================================================
         // Already captured
         // =================================================
@@ -934,6 +1064,9 @@ const detectWalkThroughLoop =
           );
         }
       }
+
+      // Draw focus overlays
+      drawFaceBoxes(currentFrameFaces);
 
       // ===================================================
       // Remove disappeared faces
@@ -1263,6 +1396,21 @@ onBeforeUnmount(() => {
           playsinline
           @loadeddata="onVideoLoaded"
           class="w-full h-full object-cover transform -scale-x-100"
+        />
+
+        <!-- ================================================= -->
+        <!-- Focus Box Overlay Canvas -->
+        <!-- ================================================= -->
+
+        <canvas
+          v-show="
+            isWalkThrough &&
+            !capturedImageUrl &&
+            !error &&
+            !isLoading
+          "
+          ref="overlayCanvasRef"
+          class="absolute inset-0 w-full h-full object-cover pointer-events-none z-10"
         />
 
         <!-- ================================================= -->
