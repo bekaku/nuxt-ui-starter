@@ -6,13 +6,12 @@ const { createFavorite, deleteFavorite } = useFavoriteMenuApi();
 
 const route = useRoute();
 const toast = useToast();
-const { appLayout } = useTheme();
 const { t } = useLang();
 const { appNavigations, addFavoriteMenus, removeFavoriteMenus } = useAuth();
 const { getFavoriteNavigations, findByUrl, getFaveroteIndex, isFaveroteExist } =
   useMenu();
 const open = ref(false);
-const { isDark } = useTheme();
+const { isDark, appLayout } = useTheme();
 const groups = computed(() => [
   {
     id: "links",
