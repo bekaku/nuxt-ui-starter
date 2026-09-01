@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import z from "zod";
-import type { LabelValue } from "~/types/common";
 import type {
   AiDocumentMeta,
   FileManager,
-  IngestionResponse,
-  Permission,
+  IngestionResponse
 } from "~/types/models";
 
 definePageMeta({

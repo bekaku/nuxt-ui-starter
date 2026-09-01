@@ -178,6 +178,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // The private keys which are only available within server-side
     apiSecret: '123',// can be overridden by NUXT_API_SECRET environment variable
+    mysqlDatabaseUrl: 'mysql://app_user:app_password@localhost:3306/nuxt4_rbac',
+    cdnDirectory: 'cdn',
     // Keys within public, will be also exposed to the client-side
     public: {
       apiDomain: 'localhost',//override by NUXT_PUBLIC_API_BASE in .env

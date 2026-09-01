@@ -669,6 +669,7 @@ const onDelete = async (event: any) => {
                     :description="field?.description"
                     :multiple="field.ui?.multiple"
                     :max-files="field.ui?.max"
+                     :accept="field.ui?.acceptFiles"
                     :disabled="field.disable || loading"
                     :icon="field.icon || 'lucide:paperclip'"
                     v-model="state[field.name]"
