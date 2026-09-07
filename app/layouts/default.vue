@@ -210,22 +210,6 @@ const onUnFav = async (e: any, item: AppNavigationMenuItem) => {
             </div>
           </template>
         </UNavigationMenu>
-
-        <!-- <UNavigationMenu
-          :collapsed="collapsed"
-          :items="links[0]"
-          orientation="vertical"
-          tooltip
-          popover
-        />
-
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="links[1]"
-          orientation="vertical"
-          tooltip
-          class="mt-auto"
-        /> -->
       </template>
 
       <template #footer="{ collapsed }">
@@ -249,6 +233,8 @@ const onUnFav = async (e: any, item: AppNavigationMenuItem) => {
     >
       <slot />
     </div>
-    <NotificationsSlideover />
+    <LazyNotificationsSlideover />
+    <LazyChatNotificationsSlideover />
+    <LazyChatMini />
   </UDashboardGroup>
 </template>

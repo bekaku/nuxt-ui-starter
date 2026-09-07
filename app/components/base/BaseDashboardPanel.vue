@@ -11,17 +11,19 @@ const props = withDefaults(
     collapseable?: boolean;
     ui?: DashboardPanelProps["ui"];
     bodyClass?: string;
+    navbarTransparent?: boolean;
   }>(),
   {
     resizable: false,
     collapseable: false,
+    navbarTransparent: false,
     ui: () => ({
       root: "gap-1",
       body: "pt-(--ui-header-height)",
     }),
   },
 );
-
+const { isChatNotificationsSlideoverOpen } = useAppChat()
 const { isNotificationsSlideoverOpen } = useDashboard();
 
 const items = [
@@ -54,7 +56,8 @@ const items = [
         <!-- class="bg-default" -->
         <UDashboardNavbar
           :title="title"
-          class="absolute top-0 inset-x-0 z-20 h-(--ui-header-height) bg-default/70 backdrop-blur-xl border-b border-default/60"
+          class="absolute top-0 inset-x-0 z-20 h-(--ui-header-height) "
+          :class="navbarTransparent ? 'bg-transparent border-0' : 'bg-default/70 backdrop-blur-xl border-b border-default/60'"
         >
           <template #leading>
             <slot name="leading">
@@ -67,9 +70,23 @@ const items = [
 
           <template #right>
             <slot name="navbarRight">
-              <!-- <BaseLangugeSwitcher /> -->
               <BaseThemeSwitcher />
-              <UTooltip text="Notifications" :shortcuts="['N']">
+              <UTooltip :text="$t('chats.chats')">
+                <UButton
+                  color="neutral"
+                  variant="ghost"
+                    @click="
+                    () => {
+                      isChatNotificationsSlideoverOpen = true;
+                    }
+                  "
+                >
+                  <UChip color="error" inset>
+                    <Icon name="lucide:message-circle" class="size-5 shrink-0" />
+                  </UChip>
+                </UButton>
+              </UTooltip>
+              <UTooltip :text="$t('nav.notifications') " :shortcuts="['N']">
                 <UButton
                   color="neutral"
                   variant="ghost"
@@ -84,7 +101,6 @@ const items = [
                   </UChip>
                 </UButton>
               </UTooltip>
-              <!-- <UserMenu :show-name="false" :dropdown-ui="{content:'w-50'}" /> -->
             </slot>
           </template>
         </UDashboardNavbar>

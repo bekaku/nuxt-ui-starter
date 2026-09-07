@@ -16,7 +16,7 @@ const selectedFilters = ref([]);
 const route = useRoute();
 const chatId = computed(() => route.params.id as string);
 
-const  chatContainerRef= useTemplateRef("chatContainerRef");
+const chatContainerRef = useTemplateRef("chatContainerRef");
 const bottomAnchor = useTemplateRef("bottomAnchor");
 const {
   conversationId,
@@ -241,7 +241,8 @@ const getDropdownItems = (): DropdownMenuItem[][] => [
         ref="chatContainerRef"
         class="w-full min-w-0 max-w-3xl flex flex-col gap-4 sm:gap-6 px-4"
       >
-        <BaseLoadmore v-if="currentChat && currentChat.id"
+        <BaseLoadmore
+          v-if="currentChat && currentChat.id"
           :disabled="isLastPage || loadingMore"
           :loading="loadingMore"
           icon="lucide:chevron-up"
@@ -327,7 +328,15 @@ const getDropdownItems = (): DropdownMenuItem[][] => [
             </UCollapsible>
 
             <!-- Main answer -->
+            <BaseContentText
+              v-if="message.role === 'user'"
+              :rows="4"
+              :content="message.content"
+              show-more
+              :urlify="false"
+            />
             <div
+              v-else
               class="prose prose-sm dark:prose-invert max-w-none prose-p:my-1.5 prose-p:first:mt-0 prose-p:last:mb-0 prose-pre:my-2 prose-ul:my-1.5 prose-ol:my-1.5"
             >
               <MdPreview
@@ -424,26 +433,57 @@ const getDropdownItems = (): DropdownMenuItem[][] => [
 .md-editor-preview h5,
 .md-editor-preview h6 {
   font-family: inherit !important;
+  font-size: inherit !important;
 }
+
 .md-editor-code-head {
   z-index: 1 !important;
 }
+
 .md-editor-preview pre,
 .md-editor-preview code {
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace !important;
 }
+
 .md-editor-preview-wrapper {
   padding: 0 !important;
 }
+
 .md-editor {
   background-color: transparent !important;
 }
+
 .md-editor-dark {
   --md-bk-color: transparent !important;
 }
 
+/* ====================================================
+   จัดการ Table ให้เลื่อน Scrollbar แนวนอนแทนการบีบคอลัมน์
+   ==================================================== */
+.md-editor-preview table {
+  display: block !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  border-collapse: collapse !important;
+}
+
+.md-editor-preview th {
+  white-space: nowrap !important;
+  padding: 8px 12px !important;
+}
+
+.md-editor-preview td {
+  min-width: 140px !important;
+  white-space: normal !important;
+  padding: 8px 12px !important;
+}
+
+/* ====================================================
+   Thinking Mode Styling
+   ==================================================== */
 .think-mode-preview .md-editor-preview {
   font-size: 0.85rem !important;
   color: #9ca3af !important;

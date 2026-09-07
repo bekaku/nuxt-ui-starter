@@ -46,7 +46,7 @@ const onClose = () => {
           :show-arrow
           :fetch="fetch"
           :images="images"
-          show-thumbnails
+          :show-thumbnails="false"
           @on-close="onClose"
         >
           <template #header-right-apppend>

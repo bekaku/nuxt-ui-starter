@@ -19,7 +19,7 @@ const schema = z.object({
   email: z.email(t("error.emailFormat")),
   password: z
     .string(t("error.passwordRequired"))
-    .min(8, t("error.requiredAmountCharacters", [8])),
+    .min(4, t("error.requiredAmountCharacters", [8])),
 });
 type Schema = z.output<typeof schema>;
 const remember = ref(false);
