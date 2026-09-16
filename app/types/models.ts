@@ -8,9 +8,18 @@ export type IdType = bigint | string | null | undefined;
 export interface Id {
   id?: IdType
 }
+export interface ApiClientSaveRequest {
+  apiName: string
+  byPass: boolean
+  status: boolean
+  appUserId: string | null
+  expiresAt: string | null
+}
 export interface ApiClient extends Id {
  apiName: string
  apiToken?: string | null
+   apiTokenMask?: string | null
+  key?: string | null
  byPass?: boolean | null
  status?: boolean | null
 }

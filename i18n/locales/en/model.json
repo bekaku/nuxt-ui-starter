@@ -96,16 +96,18 @@
       "mobilePhone": "Phone no",
       "positionName": "Position"
     },
-     "ai_document_meta": {
+    "ai_document_meta": {
       "table": "AI Knowledge Base",
       "metadata": "Tags"
     },
-     "apiClient": {
+    "apiClient": {
       "table": "Api client",
       "apiName": "Api name",
       "apiToken": "Token",
+      "appUser": "Owner",
+      "expiresAt": "Expires",
       "byPass": "By pass",
-      "status": "Acctive"
+      "status": "Active"
     }
   }
 }

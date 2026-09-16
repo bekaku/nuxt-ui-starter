@@ -48,6 +48,19 @@
     "pleaseSelectAddress": "Province,District,Sub District",
     "emptyDescription": "It looks like you haven't added any record. Create one to get started.",
     "keyGenerateHelp": "When a new key is created, the previously created key will no longer be valid. Do you confirm that you wish to create a new key?",
-    "keyGenerateHelp2": "Key creation successful. Please copy the generated key, as it will not be accessible again."
+    "keyGenerateHelp2": "Key creation successful. Please copy the generated key, as it will not be accessible again.",
+     "apiClient": {
+      "apiNameIsAcceptApiclient": "The calling server must send this exact value as the Accept-Apiclient header. A mismatch is rejected with 401.",
+      "appUserOptional": "Optional. Without an owner this client cannot authenticate with X-API-KEY; it still works as a plain client tag.",
+      "appUserLoading": "Loading active app users...",
+      "appUserEmpty": "No active app users were found.",
+      "appUserLoadMore": "Load more app users",
+      "appUserNoMore": "All active app users loaded",
+      "appUserPermissionRequired": "Selecting an owner also requires AppUser list permission.",
+      "expiresAtEndOfDay": "Optional. The key stays valid through the end of the selected day (UTC). Leave empty for no expiry.",
+      "expiresAtNever": "Never",
+      "ownerLinked": "Linked",
+      "ownerNotLinked": "Not linked"
+    }
   }
 }

@@ -104,6 +104,8 @@
       "table": "Api client",
       "apiName": "Api name",
       "apiToken": "Token",
+      "appUser": "เจ้าของ",
+      "expiresAt": "วันหมดอายุ",
       "byPass": "By pass",
       "status": "เปิดใช้งาน"
     }

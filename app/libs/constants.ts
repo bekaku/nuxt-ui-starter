@@ -6,6 +6,8 @@ export const KeywordParamiter = '_keyword';
 export const PageActionParamiter = 'crud';
 export const PageIdParamiter = 'id';
 export const BackendRootPath = undefined;
+export const SearchOperationsByLength = ['>=', '<=', '!=', '>', '<', '=', ':']
+export const SearchSeparator = ';'
 export const SearchOperation = {
   MATCH: ':',
   GREATER_THAN: '>',
