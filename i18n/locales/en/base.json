@@ -519,7 +519,7 @@
     }
   },
   "ai": {
-     "chatWithAi": "Chat with AI",
+    "chatWithAi": "Chat with AI",
     "thinking": "Thinking",
     "thinkingShow": "Show the thought process.",
     "promtLabel": "Type your message here...",
@@ -589,7 +589,10 @@
     "addProfile": "Add profile",
     "switchProfile": "Switch profile",
     "googleLogin": "Log In with Google",
-    "switchProfileConfirm": "Confirm profile switch to {name}'s profile."
+    "switchProfileConfirm": "Confirm profile switch to {name}'s profile.",
+    "addProfileDescription": "Sign in with another account to add it to this menu and switch between them without logging out.",
+    "removeProfile": "Remove an account",
+    "removeProfileConfirmDescription": "Remove {name} from your linked accounts? The account itself won't be deleted."
   },
   "http": {
     "2xx": "Successful",

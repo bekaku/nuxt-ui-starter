@@ -132,6 +132,9 @@ export interface AppUser extends Id {
   createdDate?: string
   favoriteMenus?: FavoriteMenu[]
 }
+export interface LinkedAccount extends AppUser {
+  currentUser: boolean
+}
 export interface UserProfile extends Id {
   username: string;
   fullName: string;
