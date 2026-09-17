@@ -2,6 +2,11 @@
 
 Read this file when the task calls the Spring Boot backend, changes `useApi()`, CRUD/network behavior, upload/download behavior, or SSE handling.
 
+> Backend boundary: Spring Boot lives in a SEPARATE repository (`BACKEND_NOT_ACCESSIBLE`).
+> All rules below derive from frontend source only. For backend-dependent changes,
+> record the proposed contract in the task's `External Backend Dependencies` section
+> and mark it `NOT_VERIFIED` until devtools/OpenAPI evidence exists.
+
 ### F2. API calls — `useApi()` is MANDATORY for backend
 
 - MUST call backend ONLY via `const api = useApi()` (`app/composables/useApi.ts:37-258`, wraps `$fetch.create({ baseURL: apiBase })`). `api<T>()` returns `_data`; `api.raw<T>()` returns full `FetchResponse`.

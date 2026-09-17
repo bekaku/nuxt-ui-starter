@@ -3,12 +3,21 @@
 Read this file when the task adds or changes an entity administration screen — a list
 page, a create/edit/view form, or the search/paging behaviour behind them.
 
-All frontend file:line references were verified on 2026-09-15; the backend contract in
-X7 was read from `/backend` source on 2026-09-16.
+All frontend file:line references were verified on 2026-09-15; backend-contract
+corrections applied 2026-09-17 (see docs/agent/audit-report.md).
 
-`frontend/tasks/002-fix-crud-scaffold-defects.md` (COMPLETED 2026-09-16) repaired the
-`_q` search round trip, the search paging reset, the `view`-submit mismatch and the
-ai-document-meta menu gate. X8 lists what remains.
+> Backend boundary (2026-09-17): the Spring Boot repository is NOT in this workspace.
+> Any prior claim that X7 was "read from `/backend` source" is withdrawn — the `;`
+> separator and operator rules below are frontend-observed conventions
+> (`app/libs/constants.ts`) whose backend side is `BACKEND_NOT_ACCESSIBLE` until live
+> evidence (devtools / OpenAPI) confirms it.
+
+Historical note: a prior `tasks/002-fix-crud-scaffold-defects.md` is referenced by older
+revisions of this file, but NO numbered task files exist in `tasks/` (VERIFIED
+2026-09-17 — only `README.md`). Do not treat that task ID as existing history.
+The `_q` separator/operator constants now live in `SearchSeparator` /
+`SearchOperationsByLength` (`app/libs/constants.ts`); keep them in sync with live
+backend evidence if the contract ever changes.
 
 Related: `API.md` (how `useApi` is called), `UI.md` (component/page conventions),
 `TYPES_VALIDATION.md` (zod schema rules), `../../docs/API_CONTRACT.md` (the wire format).
@@ -69,7 +78,8 @@ requiresPermission: ["app_user_list"]
 requiresPermission: ["app_user_view", "app_user_add", "app_user_edit"]
 ```
 
-Permission codes are backend-owned — verify them against `/backend`, do not invent them.
+Permission codes are backend-owned — verify them against live evidence (devtools /
+OpenAPI), never against a `/backend` directory (none exists here). Do not invent them.
 
 ---
 
@@ -96,11 +106,14 @@ does not live under `/api`.
 
 Worked example: entity `Foo`, route `/foo`, endpoint `/api/foo`.
 
-### 1. Confirm the contract against the backend
+### 1. Confirm the contract from frontend evidence (backend is external)
 
-Read the controller under `/backend` (via `/backend/SKILLS.md`) and confirm: the endpoint
-path, the response envelope (`ApiResponse<T>` vs a bare array — both are accepted, see
-X7), and the exact permission code strings. MUST NOT invent any of them.
+The backend is `BACKEND_NOT_ACCESSIBLE`. Confirm from THIS repo plus live evidence:
+the endpoint path (call sites + `docs/API_CONTRACT.md`), the response envelope
+(`ApiResponse<T>` vs a bare array — both are accepted, see X7), and the exact
+permission code strings (pages + `useMenu.ts`). For anything new, capture a devtools
+response or OpenAPI excerpt in the task file and mark it `NOT_VERIFIED` until then.
+MUST NOT invent any of them.
 
 ### 2. Add the entity type
 
@@ -351,13 +364,14 @@ GET {apiEndpoint}?page={0-based}&size={n}&sort=col,asc&sort=col2,desc&_q=<filter
 A filter term is `column<op>value`, terms joined by `;` (`BaseTable.vue:452-481`), where
 `<op>` is one of `SearchOperation` (`constants.ts:9-17`): `:` `>` `>=` `<` `<=` `=` `!=`.
 
-`;` is the **backend contract**, confirmed in source:
-`ConstantData.SEARCH_SEPARATOR_ATT = ";"` (`backend/.../util/ConstantData.java:29`),
-consumed by `ControllerUtil.getSearchCriteriaList` (`.../util/ControllerUtil.java:36-61`)
-with the regex `^([a-zA-Z0-9_.]+)(>=|<=|!=|>|<|=|:)(.+)$` — note operators are matched
-longest-first, and field names may contain `.`. So `BaseTable`'s build path is correct
-and the restore path in `useCrudList` is the side that is wrong (X8 #1).
-(`DynamicFilterSpec.java:30` splits on `,` but is dead code — referenced by nothing.)
+`;` is the frontend search-term separator (`SearchSeparator = ";"`,
+`app/libs/constants.ts:10`) and operators are matched longest-first
+(`SearchOperationsByLength`, `constants.ts:9`). The backend side of this contract
+(field charset, operator set, split behavior) is `BACKEND_NOT_ACCESSIBLE` — no
+`backend/.../ConstantData.java` or `ControllerUtil.java` paths exist in this
+workspace, and prior citations to them are withdrawn. Treat `BaseTable`'s build path
+as the frontend convention; confirm against live backend behavior before calling it
+a verified contract.
 
 `ICrudFilterOptions` on `column.meta.options` (`common.ts:335-350`):
 
@@ -392,11 +406,11 @@ column names.
 Verified defects. Do not "fix" them as a side effect of a feature task; they are recorded
 in `../../docs/FRONTEND_FOOTGUNS.md` and `../../docs/FRONTEND_OPEN_QUESTIONS.md`.
 
-> Four earlier defects — the `_q` separator mismatch, operator ambiguity, missing URL
-> encoding, and search not resetting the page — were fixed by
-> `tasks/002-fix-crud-scaffold-defects.md` (2026-09-16). The separator and operator order
-> now live in `SearchSeparator` / `SearchOperationsByLength` (`app/libs/constants.ts`);
-> keep them in sync with the backend if that contract ever changes.
+> The separator and operator order live in `SearchSeparator` /
+> `SearchOperationsByLength` (`app/libs/constants.ts`); keep them in sync with live
+> backend evidence if that contract ever changes. (Older revisions credited a
+> `tasks/002-*` file for earlier `_q` fixes — no such file exists in `tasks/`
+> as of 2026-09-17, so do not cite it as verification.)
 
 1. **A filter value containing a literal `;` cannot be expressed.** The backend splits
    terms on `;` before parsing, so no frontend encoding fixes it — it needs a backend

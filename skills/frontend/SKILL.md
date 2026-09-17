@@ -3,7 +3,8 @@
 Use this file for all frontend implementation tasks. It contains project-wide frontend
 rules and routes to narrower skills.
 
-All file:line references and counts were re-verified on 2026-09-14.
+All file:line references and counts were re-verified on 2026-09-14; boundary, layout,
+CI, toolchain, and RAG-status corrections applied 2026-09-17 (see docs/agent/audit-report.md).
 
 ## Task Routing
 
@@ -13,7 +14,9 @@ All file:line references and counts were re-verified on 2026-09-14.
 - Components/pages/theme/styling/i18n → also read `UI.md`.
 - State/forms/zod/types → also read `TYPES_VALIDATION.md`.
 - Endpoint or response contract work → also read `../../docs/API_CONTRACT.md`.
-- The backend is in this repository at `/backend`; route backend questions through `/backend/SKILLS.md` instead of guessing.
+- The Spring Boot backend lives in a SEPARATE repository and is NOT in this workspace
+  (`BACKEND_NOT_ACCESSIBLE`). NEVER reference `/backend` source paths — they do not
+  exist here. Record backend assumptions as unverified in the task file.
 
 ### F1. Project layout (Nuxt 4 `app/` srcDir) — MUST follow
 
@@ -21,9 +24,10 @@ All file:line references and counts were re-verified on 2026-09-14.
 
 - `app/app.config.ts` is the ONLY place for Nuxt UI theme/component defaults. MUST NOT scatter `ui:` overrides per page, except `:ui` prop passthroughs like `BaseTable.vue:780-787`.
 
-- `app/layouts/` holds exactly `default.vue`, `ai.vue`, `empty.vue`. Adding a layout is a deliberate change, not a convenience.
+- `app/layouts/` holds 5 layouts (VERIFIED 2026-09-17): `ai.vue`, `chat.vue`, `default.vue`, `empty.vue`, `feed.vue`. Adding a layout is a deliberate change, not a convenience.
 
-- `server/api/` is Nitro mocks + one scraper ONLY (`mock/*`, `meta.ts`). MUST NOT add backend proxy or DB logic there. Verified: 19 files, all static `eventHandler(() => ...)` except `meta.ts` (cheerio scraper). There is NO `server/database/` — the `migrate:mysql:pg` script in `package.json` is dead and will fail.
+- `server/api/` is Nitro mocks + one scraper ONLY (`mock/*`, `meta.ts`). MUST NOT add backend proxy or DB logic there. `meta.ts` is a cheerio OG scraper; `mock/*` are static `eventHandler(() => ...)` fixtures.
+- `server/database/` EXISTS (`mysql/`, `migrate/run-engine.ts`) and backs the one-off `pnpm migrate:mysql:pg` tool (VERIFIED 2026-09-17). It is migration tooling only, NOT app runtime — MUST NOT import `drizzle-orm` / `mysql2` in `app/`, and MUST NOT run the migration as part of a frontend task.
 
 - `app/stores/` is EMPTY and Pinia is NOT installed. MUST use `useState` (see F6). MUST NOT add `defineStore`.
 
@@ -62,14 +66,14 @@ pnpm typecheck   # nuxt typecheck — MUST pass (0 errors)
 
 - These two are the project's ONLY gates. MUST NOT report either as passing unless it was executed.
 
-- A typecheck error is a real error. MUST fix it; MUST NOT silence it with `@ts-ignore`. (All three historical `@ts-ignore` sites in `useAiChat.ts` turned out to be stale and were removed — do not reintroduce the pattern.)
+- A typecheck error is a real error. MUST fix it; MUST NOT silence it with `@ts-ignore`. (3 existing `@ts-ignore` sites remain in `useAiChat.ts:59,66,129` — do not add more.)
 
 - `pnpm lint` is NOT a gate. `eslint.config.mjs` still records the intended house style (F10) and MUST be followed by hand, but MUST NOT run `eslint` repo-wide as part of a task, and its exit code is not a verification result.
 
-- There is NO test runner and NO CI workflow (`.github/` does not exist). Nothing checks style for you — MUST review your own diff against these skills.
+- There is NO test runner. CI EXISTS (VERIFIED `.github/workflows/ci.yml`): on `push` it runs `pnpm install` → `pnpm run lint` → `pnpm run typecheck` (Node 22). `pnpm lint` is therefore enforced in CI — follow the house style by hand — but do NOT run `eslint` repo-wide as part of a task and do NOT treat its exit code as the task verification result. Local gates remain `pnpm build` + `pnpm typecheck`.
 
-- `typescript` is pinned to `~5.9.3` and `renovate.json` constrains it to `<6.1.0`, because `vue-tsc` still requires `typescript/lib/tsc`, which TS 7 removed; bumping past the pin breaks `pnpm typecheck`. MUST NOT change the pin, `eslint.config.mjs`, or `nuxt.config.ts` tooling config as a side effect of an unrelated task.
+- `typescript` is `^7.0.2` in `package.json` (VERIFIED 2026-09-17) with `vue-tsc ^3.3.11`; `renovate.json` does NOT constrain TypeScript. MUST NOT change the toolchain pin, `eslint.config.mjs`, or `nuxt.config.ts` tooling config as a side effect of an unrelated task.
 
-- NEVER run `mvn` / `gradle` / backend commands from `frontend/`. NEVER run `pnpm migrate:mysql:pg` — its target `server/database/migrate/run-engine.ts` does not exist.
+- NEVER run backend build commands (`mvn` / `gradle`) — the Spring Boot repo is not in this workspace. NEVER run `pnpm migrate:mysql:pg` as part of a frontend task (one-off migration tool, target `server/database/migrate/run-engine.ts` exists but is out of scope).
 
 - Docker: `Dockerfile` multi-stage `node:24` → `node:24-alpine` + PM2 (`ecosystem.config.cjs`, app name `nuxt-web`, PORT 3000, `TZ=Asia/Bangkok`); `docker-compose.yml` maps `127.0.0.1:3002 → 3000` with NO build context and NO env block — MUST pass env via host `NUXT_*` when composing.

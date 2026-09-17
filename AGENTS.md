@@ -1,218 +1,200 @@
-# Frontend AGENTS.md
+# AGENTS.md
 
-## Scope
+## 1. Project Identity
 
-Applies to all code under `frontend/`.
+Nuxt 4 admin console (`nuxt-ui-starter`): SSR web app for administrators and
+explicitly authorized staff — not end users. Every route sits behind
+authentication and RBAC; there is no public/anonymous surface. Package manager
+is pnpm. No Pinia. No test framework.
 
-Stack (verified against `package.json` / `nuxt.config.ts`):
+The Spring Boot backend lives in a separate repository and is NOT available in
+this workspace (`BACKEND_NOT_ACCESSIBLE`). There is NO `/backend` directory here
+(verified 2026-09-17). Never invent backend implementations or database
+structures. Backend-related assumptions must be explicitly documented as
+unverified.
 
-- Nuxt 4 (`app/` srcDir), SSR enabled (`ssr: true`)
-- Vue 3 Composition API, `<script setup lang="ts">`
-- TypeScript (`strict`, `noUncheckedIndexedAccess`)
-- Nuxt UI v4 + Tailwind CSS v4
-- `@nuxtjs/i18n` (`no_prefix`, default `th`)
-- pnpm
+Evidence labels:
 
-Read `/AGENTS.md` first.
+- `VERIFIED` — confirmed directly from accessible source code in this repo.
+- `INFERRED` — supported by source code, but not directly verified.
+- `UNKNOWN` — cannot be determined from accessible evidence.
+- `BACKEND_NOT_ACCESSIBLE` — requires inspection of the separate Spring Boot repository.
 
----
+## 2. Verified Technology Stack
 
-## Routing — what to read next
+| Layer | Technology (verified in `package.json`, `nuxt.config.ts`) |
+|---|---|
+| Framework | Nuxt `^4.5.2` (`app/` srcDir), SSR enabled (`ssr: true`) |
+| UI | Nuxt UI `^4.11.0` + Tailwind CSS `^4.3.3` |
+| Language | Vue `^3.5.42` Composition API, `<script setup lang="ts">`, TypeScript `^7.0.2` |
+| API | External Spring Boot REST API via `useApi()` (`app/composables/useApi.ts`); `server/api/` holds Nitro mocks + one scraper only |
+| Validation | Zod `^4.5.4` (per-page client `UForm` validation only) |
+| Auth | Cookie JWT (`_session_` / `_slid_`, HttpOnly), `useAuth` + global route guards + `v-rbac` (presentation only) |
+| i18n | `@nuxtjs/i18n ^10.6.0`, locales `th` (default) / `en`, `no_prefix` strategy |
+| Realtime | SSE over `POST /api/aiChat/stream` (`useAiChat.ts`, RAG test harness — not product UI) |
+| Tooling | pnpm `11.9.0` (`pnpm-workspace.yaml`, `pnpm-lock.yaml`), `vue-tsc ^3.3.11` |
 
-```text
-/AGENTS.md                  repository rules (always)
-/frontend/AGENTS.md         this file (always, for frontend work)
-/frontend/SKILLS.md         router → load ONLY the skill files it points to
-/frontend/TASK_TEMPLATE.md  only when creating a new frontend task
-```
+## 3. Architecture Overview
 
-Do not load every file under `skills/frontend/` or `docs/` by default. `SKILLS.md`
-maps task area → file.
+- `app/` — Nuxt client: `pages/`, `components/`, `composables/` (28 files), `api/useFavoriteMenuApi.ts` (auto-imported), `middleware/00|01|02.*.global.ts`, `layouts/` (5 files: `ai`, `chat`, `default`, `empty`, `feed`), `plugins/`, `types/`, `utils/` + `libs/`.
+- `server/api/` — Nitro mocks (`mock/*`) + OG scraper (`meta.ts`); `server/database/` is a one-off `migrate:mysql:pg` tool, not app runtime — never import `drizzle-orm` / `mysql2` in `app/`.
+- `shared/types/` — effectively empty; canonical types live in `app/types/` (`common.ts`, `models.ts`, `props.ts`, `chart.ts`, `index.d.ts`).
+- `i18n/locales/{en,th}/` — UI strings (`app`, `base`, `helper`, `model`, `error` namespaces).
+- Auth boundary: authorization is server-owned. Client `v-rbac` / route middleware / `requiresPermission` is UX only. Do not weaken a backend authorization rule because this console's users are admins.
+- The backend API has at least two consumers (this console and the external client), so a contract change is never "frontend-only". The presence of an API call (e.g. `GET /api/appUser/currentUserData`) proves a frontend expectation only — `docs/API_CONTRACT.md` records the contract as consumed by this frontend, reconstructed from call sites; live network evidence wins on conflict.
 
-### Non-authoritative files — do not use as guidance
+## 4. Required Reading
 
-- `docs/REVIEW_CODE_BASE_PROMT.md` is the **prompt** that generated the original
-  frontend review, not project guidance. It describes a standalone starter repo and
-  states the backend is inaccessible — that is no longer true (the backend lives at
-  `/backend` in this repository). Do not follow its instructions as rules.
-- `docs/SPLIT_MAP.md` is a historical map of how the original monolithic `SKILLS.md`
-  was split. Reference only.
+1. Read this file (`AGENTS.md`) first.
+2. Identify the task type and load only the matching skill(s) from `.agents/skills/`
+   (see `docs/agent/skills-index.md`). Read supporting references only when needed.
+3. Inspect the affected source files before modifying them.
 
----
+## 5. Repository Navigation
 
-## What This Application Is
+- Pages: `app/pages/<kebab-case>/index.vue` (list) + `app/pages/<kebab-case>/[crud]/[id].vue` (form); reference modules: `app-user/`, `app-role/`, `permission/`, `api-client/`.
+- Client API helper: `app/api/useFavoriteMenuApi.ts` (via `useApi()`); core wrapper: `app/composables/useApi.ts`.
+- CRUD scaffolding: `app/composables/useCrudList.ts` / `useCrudForm.ts` / `usePagefecth.ts` (note the `usePagefecth` spelling is intentional, do not "fix" it).
+- AuthN/Z helpers: `app/composables/useAuth.ts`, `app/composables/useRbac.ts`, `app/plugins/rbac.ts` (`v-rbac`), `app/middleware/01.auth.global.ts`, `02.check-permit.global.ts`.
+- Types: `app/types/{common,models,props}.ts`. ID type: `IdType = bigint | string | null | undefined` (`models.ts:7`).
+- RAG chat harness: `app/composables/useAiChat.ts` (`ChatStatus`: `ready | submitted | streaming | error`).
+- Agent skills: `.agents/skills/` (canonical); `skills/frontend/` (detailed domain references, preserved).
+- Task specs: `tasks/<id>-<short-name>.md` (canonical template: `tasks/TASK_TEMPLATE.md`).
+- Open questions: `docs/FRONTEND_OPEN_QUESTIONS.md`. Known traps: `docs/FRONTEND_FOOTGUNS.md`.
+- Agent architecture docs: `docs/agent/`.
+- Provenance only (not rules): `docs/REVIEW_CODE_BASE_PROMT.md`, `docs/SPLIT_MAP.md`.
 
-This frontend is the platform's **internal administration console** for the backend.
+## 6. Coding Conventions
 
-- Its audience is administrators and explicitly authorized staff — **not** end users.
-  Every route is behind authentication and RBAC; there is no public/anonymous surface.
-- Its job is managing backend state: users, roles, permissions, API clients, the AI
-  knowledge base, documents, and operational triggers.
+- Inspect existing code first; follow the conventions of the files you touch.
+- Reuse existing utilities, components, and composables; do not reinvent them.
+- Make the smallest change that satisfies the task; modify only relevant files.
+- Preserve backward compatibility (API shapes, permission codes, i18n keys) unless asked.
+- Naming: components PascalCase domain-grouped (`base/Base*.vue`); composables
+  `use*.ts` (keep the `usePagefecth.ts` typo as-is); page dirs kebab-case;
+  permission codes `<snake_entity>_<action>` with action in
+  `list|view|add|edit|delete`; API paths `/api/<camelCaseEntity>`;
+  cookies `_session_` / `_slid_` / `_sid` (from runtime config, never hardcode).
+- Snowflake IDs may exceed the JS safe-integer range: never coerce them to
+  `number`; keep comparisons and route construction precision-safe
+  (`app/utils/snowflake.ts` for client-generated IDs; `app/libs/Snowflake.ts` is legacy).
+- Style: 2-space indent, LF, `commaDangle: never`, 1tbs braces, max 3 attributes
+  per single-line element, kebab-case custom events. No new `any`
+  (legacy `any` exists — do not add more), no new `@ts-ignore`
+  (3 existing sites, all in `useAiChat.ts`).
 
-Consequences for any task:
+## 7. Frontend Rules
 
-- The backend API has at least two consumers (this console and the external client), so
-  a contract change is never "frontend-only". Treat contract work as cross-stack and
-  use `/TASK_TEMPLATE.md`.
-- Do not weaken a backend authorization rule because this console's users are admins.
-  Authorization stays server-owned.
+- `<script setup lang="ts">` first, `<template>` second; never Options API
+  (`generic="T"` for generic components).
+- Shared client state via namespaced `useState` (never Pinia, never
+  `provide`/`inject` for app state). Two-way binding via `defineModel`.
+- Protected requests go through `useApi()` (silent refresh, SSR cookie forward);
+  never bare `$fetch` / `useFetch` against backend paths; always relative
+  `'/api/...'` resolved against `runtimeConfig.public.apiBase`.
+- Gate UI with `v-rbac` / `BaseTable` permission props (UX only, never security).
+- Pages declare `definePageMeta({ pageName, requiresPermission })`;
+  keep middleware order `00.seo → 01.auth → 02.check-permit`.
+- Every user-facing string goes to both `i18n/locales/en/*.json` and `th/*.json`
+  via `useLang()`/`t()` in script and `$t()` in template.
+- SSR-safe code (`import.meta.client` / `import.meta.server` guards); no browser
+  globals in SSR paths.
+- Never silently swallow API errors, and never add manual toasts the wrapper
+  already raises.
+- RAG chat (`useAiChat.ts`) is a test harness: preserve partial output on
+  disconnect, stable message identity, `abortController` guards, intentional
+  scroll behavior; never fabricate citations — render only the `sources` event.
+- Ingestion is async on the backend: never treat an accepted upload as RAG-ready;
+  the backend status enum is `BACKEND_NOT_ACCESSIBLE` — propose it in the task
+  file and mark `NOT_VERIFIED` until live evidence exists.
 
-## Frontend Responsibilities
+## 8. API Integration Rules (External Backend)
 
-The frontend owns:
+- The backend is authoritative but NOT in this repository. Before changing
+  frontend DTOs/types: (1) inspect `app/composables/useApi.ts` + `app/types/`;
+  (2) capture live evidence (devtools response or OpenAPI spec); (3) reuse the
+  `ApiResponse<T>` vs bare `T[]` dual-shape convention (callers must handle both,
+  see `docs/API_CONTRACT.md` C2); (4) never invent fields, status codes, or
+  permissions; (5) label the rest `UNKNOWN` / `BACKEND_NOT_ACCESSIBLE`.
+- For cross-repository work, fill the task template's `External Backend
+  Dependencies` section — a proposed contract, never a claim of verified backend
+  behavior. Do not mark integration verified without actual evidence.
 
-- user / role / permission / API-client administration (`app/pages/app-user/`, `app-role/`, `permission/`, `api-client/`)
-- generic CRUD scaffolding (`useCrudList` / `useCrudForm` / `usePagefecth`)
-- typed API clients and the hand-maintained contract types in `app/types/`
-- composables and page/component state
-- validation for user experience
-- loading/empty/error states
-- accessibility, responsive behavior and i18n (`en` + `th`)
+## 9. Security Rules
 
-The frontend does **not** own authoritative authorization or tenant isolation.
-Permission gating in the UI (`v-rbac`, `requiresPermission`) is presentation only.
+- Client-side RBAC is never a security boundary; authorization stays server-owned.
+- Never expose credentials, tokens, or secrets in code, logs, or responses.
+- Never read token cookies (`_session_` / `_slid_`) in JS.
+- Do not duplicate backend business rules in the frontend.
 
-## Nuxt / Vue Rules
+## 10. Testing and Verification
 
-Prefer:
+- No test framework exists; do not add one without an explicit task.
+- Canonical gates: `pnpm typecheck` (0 errors) plus `pnpm build` for
+  runtime-affecting changes. Neither may be reported as passing unless executed.
+  A typecheck error is real — fix it, never suppress with `@ts-ignore`.
+- CI (`.github/workflows/ci.yml`): on `push`, `pnpm install` → `pnpm run lint` →
+  `pnpm run typecheck` (Node 22). Follow `eslint.config.mjs` house style by hand
+  so CI stays green, but do not run `eslint` repo-wide as part of a task.
+- Verify affected code and report any checks that could not be executed.
 
-- `<script setup lang="ts">` (`generic="T"` for generic components)
-- explicit TypeScript types
-- `useApi()` — the only sanctioned backend client
-- Nuxt UI components over raw HTML
-- SSR-safe code (`import.meta.client` / `import.meta.server` guards)
-- small focused components; `computed` for derived state; composables for reuse
+## 11. Forbidden Operations
 
-Avoid:
+- No backend search/clone/modification (separate repository, not accessible).
+- No fabricated controllers, services, entities, schemas, or validation rules.
+- No application source changes for docs/agent-config tasks.
+- No `.env` modifications; no credential exposure.
+- No database operations, deployments, or destructive cleanup.
+- No silent dependencies, frameworks, or architectural patterns.
+- No weakening auth/RBAC/error-handling behavior documented as intentional
+  (see `docs/FRONTEND_FOOTGUNS.md`).
 
-- `any` (see `skills/frontend/TYPES_VALIDATION.md` — legacy `any` exists; do not add more)
-- `@ts-ignore` (5 existing sites, all in `useAiChat.ts` — do not add more)
-- duplicating backend business rules
-- browser globals in SSR paths without guards
-- bare `$fetch` / `useFetch` against backend paths
-- silently swallowing API errors, or adding manual toasts the wrapper already raises
-- hard-coded backend hosts — always relative `'/api/...'` against `runtimeConfig.public.apiBase`
+## 12. Standard Agent Workflow
 
----
+1. Read `AGENTS.md` and discover skills (section 14).
+2. Load only the relevant `SKILL.md` file(s); read references on demand.
+3. Inspect affected source files; plan the minimal change.
+4. Implement, reusing existing utilities/components and preserving conventions.
+5. Verify (`pnpm typecheck`, plus `pnpm build` when runtime-affected).
+6. Review the diff; confirm only relevant files changed and no secrets leaked.
+7. Stop when success criteria pass; report unverifiable checks and residual risks.
 
-## API Contract Rule
+## 13. Task Management Rules
 
-Backend contracts are authoritative, and the backend is **in this repository**
-(`/backend`). Unlike the original standalone-starter review, you can and should
-verify against real backend source.
+Task specifications live in `tasks/<id>-<short-name>.md`, created from the
+canonical `tasks/TASK_TEMPLATE.md` (take the next free number: `001`, `002`,
+…). A task file's existence does not mean it is implemented — its checklists,
+checkpoints, and handoff state are the source of truth and must be verified
+against repository state. Never delete task history, reset checkpoints, or
+renumber IDs. Do not duplicate the full template inside `AGENTS.md`.
 
-Before changing frontend DTOs/types:
+When creating a new task:
 
-1. inspect the existing frontend wrapper/types (`app/composables/useApi.ts`, `app/types/`);
-2. inspect the backend controller/DTO under `/backend` (see `/backend/SKILLS.md`);
-3. reuse existing response-envelope conventions;
-4. do not invent fields, status codes or permissions.
+1. Read `tasks/TASK_TEMPLATE.md`.
+2. Follow `.agents/skills/task-planning/SKILL.md`.
+3. Discover relevant domain skills (via `SKILLS.md` + `docs/agent/skills-index.md`).
+4. Generate the task from the template.
+5. Verify the generated task (all sections, valid skill paths, index updated in `tasks/README.md`).
 
-`docs/API_CONTRACT.md` records the contract **as this frontend consumes it**. It is
-reconstructed from call sites, not read from the backend — when they disagree, the
-backend source wins and `docs/API_CONTRACT.md` must be corrected.
+When executing a task:
 
----
+1. Read the task file.
+2. Follow `.agents/skills/task-execution/SKILL.md`.
+3. Read required domain skills.
+4. Follow checkpoints (CP0–CP4).
+5. Update task status and evidence.
+6. Maintain handoff context.
 
-## Snowflake ID Rule
+## 14. Skill Discovery and Selection
 
-Backend IDs are Snowflake IDs and may exceed JavaScript's safe integer range.
+1. Read `AGENTS.md`.
+2. Skim skill descriptions in `docs/agent/skills-index.md`
+   (or the `description` frontmatter of each `.agents/skills/*/SKILL.md`).
+3. Load only the `SKILL.md` files relevant to the task.
+4. Read supporting `skills/frontend/` and `docs/agent/` files only when necessary.
+5. Inspect affected source files.
+6. Plan and implement the requested changes.
+7. Verify the result per the skill's Verification section.
 
-- Do not coerce Snowflake IDs to JS `number`.
-- Use the existing `IdType = bigint | string | null | undefined` (`app/types/models.ts`).
-- Keep ID comparisons and API route construction precision-safe.
-- For client-generated IDs use `app/utils/snowflake.ts`; `app/libs/Snowflake.ts` is legacy.
-
----
-
-## RAG Chat Test Harness
-
-`useAiChat.ts` is the single RAG chat client in this repository, and it is a **test
-harness** (see above), not the product chat UI. Its `status` values are:
-
-```text
-idle | submitting | streaming | completed | failed
-```
-
-Streaming is SSE over `POST /api/aiChat/stream` with `responseType: 'stream'`.
-Event types consumed today: `chat_id`, `title`, `thinking`, `token`, `sources`, `done`
-(see `docs/API_CONTRACT.md` § C6).
-
-When touching chat:
-
-- preserve partial assistant output on disconnect;
-- keep message identity stable (`id` per message);
-- guard against duplicate submissions (`abortController`);
-- preserve intentional scroll behavior;
-- never fabricate citations/sources — render only what the `sources` event carries.
-
----
-
-## Ingestion UI
-
-Ingestion is asynchronous on the backend. Ingestion *monitoring* is an administrative
-concern, so it can legitimately live in this console. When such UI is built, distinguish:
-
-```text
-upload accepted
-QUEUED/PENDING
-PROCESSING
-COMPLETED
-FAILED
-UNCHANGED
-```
-
-Do not treat a successful upload as equivalent to RAG-ready.
-Use backend-provided status rather than inferring it locally.
-Confirm the actual status enum against the backend before coding it — no frontend
-status type for this exists yet.
-
----
-
-## Verification
-
-The project gates are:
-
-```bash
-pnpm build       # nuxt build     — MUST pass
-pnpm typecheck   # nuxt typecheck — MUST pass (0 errors)
-```
-
-Both must pass for any runtime-affecting change, and neither may be reported as passing
-unless it was actually executed. A typecheck error is a real error — fix it, never
-suppress it with `@ts-ignore`.
-
-`pnpm lint` is **not** a project gate. `eslint.config.mjs` still records the intended
-house style (`skills/frontend/SKILL.md` § F10) and you should follow it by hand, but do
-not run `eslint` repo-wide as part of a task and do not treat its exit code as a
-verification result.
-
-There is no test runner and no CI workflow in this repository, so `pnpm build` plus
-`pnpm typecheck` are the only automated checks. Style and convention adherence is on
-you — follow `skills/frontend/` and keep changes small enough to review by eye.
-
-`typescript` is pinned to `~5.9.3` in `package.json`, and `renovate.json` constrains it
-to `<6.1.0`, because `vue-tsc` (which powers `pnpm typecheck`) still requires
-`typescript/lib/tsc`, a subpath TypeScript 7 removed. Bumping past the pin breaks the
-typecheck gate. Leave it alone unless a task is explicitly about the toolchain.
-
-Never run backend build commands (`mvn`, `gradle`) from `frontend/`, and never run
-`pnpm migrate:mysql:pg` — its target file does not exist.
-
----
-
-## Tasks
-
-Frontend task specifications live in:
-
-```text
-frontend/tasks/<number>-<short-name>.md
-```
-
-Use `/frontend/TASK_TEMPLATE.md` to create one. List `frontend/tasks/` first and take
-the next free number. A task file's existence does not mean it is implemented — its
-`Progress Checklist` and `Resume State` are the implementation-state source of truth
-and must be verified against repository state.
-
-For work that changes a backend contract, use the root `/TASK_TEMPLATE.md` instead —
-it has the cross-stack contract sections.
+If the agent does not support automatic skill discovery, read the relevant
+`SKILL.md` files directly by path. Do not load every skill by default.
