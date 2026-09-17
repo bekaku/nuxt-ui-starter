@@ -54,7 +54,7 @@ const loginWithGoogle = () => {
 };
 
 const forgotPassword = () => {
-  navigateTo("/forgot-password");
+  navigateTo("/auth/forgot-password");
 };
 
 onBeforeUnmount(() => {
