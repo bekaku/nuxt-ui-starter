@@ -182,8 +182,21 @@ When executing a task:
 2. Follow `.agents/skills/task-execution/SKILL.md`.
 3. Read required domain skills.
 4. Follow checkpoints (CP0–CP4).
-5. Update task status and evidence.
-6. Maintain handoff context.
+5. Update the task file incrementally at each phase — never batch all
+   updates at completion:
+   - Before touching code: set `Status` to `IN_PROGRESS` (with `Updated`
+     date), set the active checkpoint to `IN_PROGRESS`, append a
+     `Progress Log` entry, and set `Handoff / Next Action` to the intended
+     first edit.
+   - During implementation: after each `Implementation Plan` step or changed
+     file, tick its checkbox, append checkpoint evidence (`Files Changed`,
+     partial notes), refresh `Handoff` (`Completed Work` / `Remaining Work`
+     / `Next Action`), and log meaningful progress or blockers immediately
+     (switch to `BLOCKED` + §12 entry when blocked).
+   - After implementation: run verification, fill `Verification Results`,
+     resolve CP3–CP4 with evidence, then set the final status
+     (`REVIEW` / `DONE` / `BLOCKED`) plus `Handoff` and `Final Summary`.
+6. Maintain handoff context so a new agent can resume without chat history.
 
 ## 14. Skill Discovery and Selection
 
