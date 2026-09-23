@@ -3,9 +3,9 @@
 ## 1. Project Identity
 
 Nuxt 4 admin console (`nuxt-ui-starter`): SSR web app for administrators and
-explicitly authorized staff — not end users. Every route sits behind
-authentication and RBAC; there is no public/anonymous surface. Package manager
-is pnpm. No Pinia. No test framework.
+explicitly authorized staff — not end users. Admin routes use authentication
+and RBAC; auth entry and configured guard-exempt routes are handled separately.
+Package manager is pnpm. No Pinia. No test framework.
 
 The Spring Boot backend lives in a separate repository and is NOT available in
 this workspace (`BACKEND_NOT_ACCESSIBLE`). There is NO `/backend` directory here
@@ -36,7 +36,7 @@ Evidence labels:
 
 ## 3. Architecture Overview
 
-- `app/` — Nuxt client: `pages/`, `components/`, `composables/` (28 files), `api/useFavoriteMenuApi.ts` (auto-imported), `middleware/00|01|02.*.global.ts`, `layouts/` (5 files: `ai`, `chat`, `default`, `empty`, `feed`), `plugins/`, `types/`, `utils/` + `libs/`.
+- `app/` — Nuxt client: `pages/`, `components/`, `composables/`, `api/` (`useAuthApi.ts`, `useFavoriteMenuApi.ts`, auto-imported), `middleware/00|01|02.*.global.ts`, `layouts/` (`ai`, `chat`, `default`, `empty`, `feed`), `plugins/`, `types/`, `utils/` + `libs/`.
 - `server/api/` — Nitro mocks (`mock/*`) + OG scraper (`meta.ts`); `server/database/` is a one-off `migrate:mysql:pg` tool, not app runtime — never import `drizzle-orm` / `mysql2` in `app/`.
 - `shared/types/` — effectively empty; canonical types live in `app/types/` (`common.ts`, `models.ts`, `props.ts`, `chart.ts`, `index.d.ts`).
 - `i18n/locales/{en,th}/` — UI strings (`app`, `base`, `helper`, `model`, `error` namespaces).
@@ -53,7 +53,7 @@ Evidence labels:
 ## 5. Repository Navigation
 
 - Pages: `app/pages/<kebab-case>/index.vue` (list) + `app/pages/<kebab-case>/[crud]/[id].vue` (form); reference modules: `app-user/`, `app-role/`, `permission/`, `api-client/`.
-- Client API helper: `app/api/useFavoriteMenuApi.ts` (via `useApi()`); core wrapper: `app/composables/useApi.ts`.
+- Domain API helpers: `app/api/useAuthApi.ts` and `useFavoriteMenuApi.ts` (both via `useApi()`); core wrapper: `app/composables/useApi.ts`.
 - CRUD scaffolding: `app/composables/useCrudList.ts` / `useCrudForm.ts` / `usePagefecth.ts` (note the `usePagefecth` spelling is intentional, do not "fix" it).
 - AuthN/Z helpers: `app/composables/useAuth.ts`, `app/composables/useRbac.ts`, `app/plugins/rbac.ts` (`v-rbac`), `app/middleware/01.auth.global.ts`, `02.check-permit.global.ts`.
 - Types: `app/types/{common,models,props}.ts`. ID type: `IdType = bigint | string | null | undefined` (`models.ts:7`).
@@ -90,8 +90,9 @@ Evidence labels:
 - Shared client state via namespaced `useState` (never Pinia, never
   `provide`/`inject` for app state). Two-way binding via `defineModel`.
 - Protected requests go through `useApi()` (silent refresh, SSR cookie forward);
-  never bare `$fetch` / `useFetch` against backend paths; always relative
-  `'/api/...'` resolved against `runtimeConfig.public.apiBase`.
+  never bare `$fetch` / `useFetch` against backend paths. Use relative paths
+  resolved against `runtimeConfig.public.apiBase`; preserve the existing upload
+  path spelling until live contract evidence supports changing it.
 - Gate UI with `v-rbac` / `BaseTable` permission props (UX only, never security).
 - Pages declare `definePageMeta({ pageName, requiresPermission })`;
   keep middleware order `00.seo → 01.auth → 02.check-permit`.

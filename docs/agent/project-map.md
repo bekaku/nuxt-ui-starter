@@ -1,6 +1,6 @@
 # Project Map — Nuxt Admin Console
 
-> Status: `VERIFIED` means confirmed directly from source code in this repo. Audited 2026-09-17.
+> `VERIFIED` means confirmed directly from source code in this repo. Structure checked 2026-09-23; inspect current source before relying on old line numbers in linked references.
 
 ## 1. Verified Overview
 
@@ -15,27 +15,26 @@
 
 ```text
 app/                 main srcDir
-  api/               domain API clients (auto-imported via imports.dirs: ['api'])
-                     currently 1 file: useFavoriteMenuApi.ts
-  components/        auto-imported components (base/* ~40 files + chat/*, chart/*, ...)
-  composables/       real application layer (28 files: useApi, useAuth, useCrud*, usePagefecth, ...)
+  api/               domain API helpers (auto-imported via imports.dirs: ['api']):
+                     useAuthApi.ts, useFavoriteMenuApi.ts
+  components/        auto-imported components (base/*, chat/*, chart/*, ...)
+  composables/       application behavior (useApi, useAuth, useCrud*, usePagefecth, ...)
   layouts/           5 files: ai.vue, chat.vue, default.vue, empty.vue, feed.vue
   middleware/        00.seo.global.ts → 01.auth.global.ts → 02.check-permit.global.ts
   pages/             file-based routes (ai-chats, ai-document-meta, api-client,
                      app-role, app-user, auth, chats, example, my-drive,
                      permission, settings, test + index.vue)
-  plugins/           9 files (00.auth.server/client, apexchart, cropperjs, datefns,
-                     pdfVue, plyr, rbac, toast)
-  types/             hand-maintained contract types (common.ts ~768 lines,
+  plugins/           00.auth.server/client, apexchart, cropperjs, datefns,
+                     pdfVue, plyr, rbac, toast
+  types/             hand-maintained frontend types (common.ts,
                      models.ts, props.ts, chart.ts, index.d.ts)
   utils/ / libs/     helpers (two snowflake variants, constants, appUtil, dateUtil, fileUtil)
-  stores/            empty — do not use Pinia (INFERRED: no pinia dependency)
-server/api/          Nitro mocks + scraper (mock/*, meta.ts) + migration tooling
-  mock/              dashboard, chart, chat, file, members, mails, notifications
+server/api/          local Nitro handlers, separate from Spring Boot
+  mock/              customers, mails, members, notifications
   meta.ts            cheerio OG scraper
 server/database/     exists (mysql/, migrate/run-engine.ts) — one-off tooling for
                      `pnpm migrate:mysql:pg` only, not app runtime
-shared/types/        empty placeholder — real types live in app/types/
+shared/types/        placeholder — frontend types live in app/types/
 i18n/locales/        en/ + th/ x (app, base, helper, model, error).json
 skills/frontend/     SKILL.md, API.md, AUTH.md, CRUD.md, UI.md, TYPES_VALIDATION.md
 tasks/               README.md + TASK_TEMPLATE.md (no numbered tasks yet)
@@ -47,20 +46,31 @@ docs/agent/          this report set (English)
 
 1. **Entry & config**: `nuxt.config.ts` (modules, runtimeConfig, fonts, routeRules, imports.dirs), `app/app.vue`, `app/app.config.ts`, `app/layouts/*`.
 2. **Routing & guards**: `definePageMeta({ pageName, requiresPermission })` → `00.seo` → `01.auth` (checks `useState('auth:user')`, redirects `/auth/login?continue=...`) → `02.check-permit` (checks `requiresPermission` via `isHavePermissionLazy`, 403 → `showError`).
-3. **CRUD scaffold**: `useCrudList` + `useCrudForm` wrapping `usePagefecth` → `useApi` → backend → `BaseTable` / `BaseForm` render; query string `?page,size,sort,_q,_keyword` synced via URL.
-4. **API layer**: `useApi()` only (`$fetch.create({ baseURL: apiBase })`, headers `Accept-Apiclient` + `Accept-Language`, `credentials: 'include'`, SSR cookie forwarding, auto toast, single 401→refresh→retry).
+3. **CRUD scaffold**: list pages use `useCrudList` → `usePagefecth`; form pages use `useCrudForm`. Both call `useApi()` and usually render through `BaseTable` / `BaseForm`. Search, paging, and sort state can be reflected in the URL.
+4. **API layer**: `useApi()` (`$fetch.create({ baseURL: apiBase })`, headers `Accept-Apiclient` + `Accept-Language`, `credentials: 'include'`, SSR cookie forwarding, auto toast, single 401→refresh→retry). Domain helpers in `app/api/` wrap it; `useAuthApi.ts` covers linked-account requests.
 5. **State**: namespaced `useState` keys (`auth:user`, `auth:navigations`, `ai:recent`, …) — no Pinia, no provide/inject.
 6. **Validation**: per-page zod (`UForm :schema` / `BaseForm :zod-schema` + `.describe(uiConfig(...))`) — client-side validation only, not a shared backend contract.
 7. **i18n**: `useLang()` / `$t()`; every key must exist in both `en` and `th`.
 
-## 4. Inspection Limits
+## 4. Implementation Findings
 
-- UI files (~40 `Base*` components) reviewed by sampling, not line by line — deep prop/slot details are `INFERRED`.
-- `useAiChat.ts` (450 lines): first 80 lines read + targeted grep — `ChatStatus` and the endpoint are verified; SSE event details follow `docs/API_CONTRACT.md`.
-- `pnpm build` / `pnpm typecheck` were not run in this docs-only mission (application source must not be touched) — build verification is `NOT_VERIFIED` for this round.
+| Area | Finding | Agent action |
+|---|---|---|
+| Route access | `01.auth.global.ts` uses `auth:user` and `AuthNoFilterPage`; `02.check-permit.global.ts` applies `requiresPermission` only when the metadata is an array. This is client presentation, not backend authorization. | Inspect both guards and the route metadata before adding a protected screen. |
+| Standard CRUD | Lists use `useCrudList`/`usePagefecth`; forms use `useCrudForm`. Their `apiEndpoint` options have different meanings. | Read `skills/frontend/CRUD.md` X2–X3 and the relevant composable before wiring URLs or permission codes. |
+| ID precision | `IdType` allows bigint/string, while legacy `useCrudForm.ts` reads `crudId` through `getParam<number>`. | Keep new ID handling precision-safe; inspect route parsing if changing form behavior. |
+| Network | `useApi()` owns cookie credentials, SSR forwarding, 401 refresh, and common notifications. `app/api/` contains small domain wrappers. | Add endpoint-specific logic to the caller or domain helper; change the wrapper only for cross-cutting behavior. |
+| Local server | `server/api/mock/` contains four local mock handlers; `server/api/meta.ts` is an OG scraper. Spring Boot source is absent. | Treat API types and call sites as frontend expectations and verify backend shapes with live evidence. |
+| References | `app/pages/example/`, `app/pages/test/`, and `app/components/Temp.vue` are demos. | Prefer `app-user/`, `app-role/`, or another production route as the implementation example. |
+
+## 5. Inspection Limits
+
+- Deep prop/slot details of every component have not been rechecked; inspect the affected component before implementation.
+- SSE event details require inspection of `useAiChat.ts` and live backend evidence for integration claims.
+- This map is documentation, not a substitute for `pnpm build` / `pnpm typecheck` when app runtime changes.
 - All backend behavior is `BACKEND_NOT_ACCESSIBLE` (see `backend-integration.md`).
 
-## 5. Primary References
+## 6. Primary References
 
 - `/AGENTS.md`, `/SKILLS.md`, `tasks/TASK_TEMPLATE.md`
 - `skills/frontend/*.md` (6 files)

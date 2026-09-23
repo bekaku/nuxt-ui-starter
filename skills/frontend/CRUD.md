@@ -3,8 +3,8 @@
 Read this file when the task adds or changes an entity administration screen — a list
 page, a create/edit/view form, or the search/paging behaviour behind them.
 
-All frontend file:line references were verified on 2026-09-15; backend-contract
-corrections applied 2026-09-17 (see docs/agent/audit-report.md).
+This is a detailed reference for the existing scaffold. Its line references were
+recorded in September 2026; reopen the current source before making a change.
 
 > Backend boundary (2026-09-17): the Spring Boot repository is NOT in this workspace.
 > Any prior claim that X7 was "read from `/backend` source" is withdrawn — the `;`
@@ -12,9 +12,6 @@ corrections applied 2026-09-17 (see docs/agent/audit-report.md).
 > (`app/libs/constants.ts`) whose backend side is `BACKEND_NOT_ACCESSIBLE` until live
 > evidence (devtools / OpenAPI) confirms it.
 
-Historical note: a prior `tasks/002-fix-crud-scaffold-defects.md` is referenced by older
-revisions of this file, but NO numbered task files exist in `tasks/` (VERIFIED
-2026-09-17 — only `README.md`). Do not treat that task ID as existing history.
 The `_q` separator/operator constants now live in `SearchSeparator` /
 `SearchOperationsByLength` (`app/libs/constants.ts`); keep them in sync with live
 backend evidence if the contract ever changes.
@@ -22,13 +19,17 @@ backend evidence if the contract ever changes.
 Related: `API.md` (how `useApi` is called), `UI.md` (component/page conventions),
 `TYPES_VALIDATION.md` (zod schema rules), `../../docs/API_CONTRACT.md` (the wire format).
 
+Read X1–X3 for scaffold selection and endpoint naming; X4 for a new module; X5–X7
+for option/search details; X8–X9 when changing scaffold behavior or components.
+
 ---
 
 ## X1. When to use the scaffold
 
-- Every admin entity screen MUST be built on `useCrudList` + `useCrudForm`
-  (`app/composables/`). MUST NOT hand-roll list fetching, paging, sorting, search, or
-  form submit — `usePagefecth` already does all of it.
+- For a standard entity list/form, start with `useCrudList` and `useCrudForm`
+  (`app/composables/`). Use only the composable relevant to the screen. Reuse
+  `usePagefecth` for list paging/search rather than duplicating it; inspect its
+  contract before using it on a specialized screen.
 - The five reference implementations are `app/pages/app-user/`, `app-role/`,
   `permission/`, `api-client/` and `ai-document-meta/`. `app-user` and `app-role` are the
   best models to copy.
@@ -247,12 +248,12 @@ is the newer convention used by `app-role`, `api-client` and `ai-document-meta`.
 style (`model_user`, `model_permission`) is legacy; do not start new entities on it.
 `pageName` MUST be the entity title key and MUST match on the list and form pages.
 
-### 6. Register the menu entry — required, easy to forget
+### 6. Register the menu entry when the feature belongs in navigation
 
 The sidebar is a **hardcoded array**, not backend-driven: `appNavs` in
 `app/composables/useMenu.ts:9-195`. `initialAppNav()` filters it through
 `isPermitted(item.permissions)` and writes `appNavigations`; it runs from
-`app/plugins/00.auth.server.ts`. The feature does not appear in the sidebar until you add:
+`app/plugins/00.auth.server.ts`. The feature does not appear in the sidebar until you add an entry when one is needed:
 
 ```ts
 {
@@ -403,18 +404,18 @@ column names.
 
 ## X8. CRUD footguns
 
-Verified defects. Do not "fix" them as a side effect of a feature task; they are recorded
-in `../../docs/FRONTEND_FOOTGUNS.md` and `../../docs/FRONTEND_OPEN_QUESTIONS.md`.
+These are observed frontend behaviors to inspect when relevant. Fix one when the
+requested work requires it; record unrelated defects in
+`../../docs/FRONTEND_FOOTGUNS.md` or `../../docs/FRONTEND_OPEN_QUESTIONS.md`.
 
 > The separator and operator order live in `SearchSeparator` /
 > `SearchOperationsByLength` (`app/libs/constants.ts`); keep them in sync with live
-> backend evidence if that contract ever changes. (Older revisions credited a
-> `tasks/002-*` file for earlier `_q` fixes — no such file exists in `tasks/`
-> as of 2026-09-17, so do not cite it as verification.)
+> backend evidence if that contract ever changes.
 
-1. **A filter value containing a literal `;` cannot be expressed.** The backend splits
-   terms on `;` before parsing, so no frontend encoding fixes it — it needs a backend
-   contract change.
+1. **A filter value containing a literal `;` is ambiguous in the frontend search
+   format.** `useCrudList` joins terms with `SearchSeparator=';'`. Whether the backend
+   can handle an escaped value is `BACKEND_NOT_ACCESSIBLE`; verify the live contract
+   before changing encoding or declaring a backend fix necessary.
 2. **`onPageChange` / `onPerPageChange` ignore their arguments**
    (`usePagefecth.ts:183-191`); they work only because `v-model:paging` already mutated
    `pages`. Calling them programmatically changes nothing.
@@ -438,6 +439,9 @@ in `../../docs/FRONTEND_FOOTGUNS.md` and `../../docs/FRONTEND_OPEN_QUESTIONS.md`
 9. **Typos are the public API** — reproduce verbatim: `usePagefecth`, `fectchDataOnLoad`,
     `apiEnpoint`, `SearchParamiter`, `KeywordParamiter`, `searchColunm`, `sortColunm`,
     `GREATER_THAN_EQUA`, `LESS_THAN_EQUA`, `EQUA`, `NOT_EQUA`.
+10. **Route ID precision needs inspection.** `useCrudForm` currently reads `crudId`
+    through `getParam<number>`; do not copy this numeric pattern for Snowflake IDs.
+    Trace route parsing and endpoint construction when modifying the form scaffold.
 
 ---
 

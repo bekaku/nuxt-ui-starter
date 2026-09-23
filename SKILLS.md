@@ -1,29 +1,12 @@
-# SKILLS.md
+# Project skills
 
-Canonical skills: `.agents/skills/` (Agent Skills spec). Load only what the task needs.
+Read `AGENTS.md`, then use [the skills index](docs/agent/skills-index.md) to choose only the skill needed for the current work.
 
-## Skills
+| Canonical skill | File | Use when |
+|---|---|---|
+| `nuxt-frontend` | `.agents/skills/nuxt-frontend/SKILL.md` | Implementing or changing Nuxt UI, state, forms, or i18n |
+| `api-integration` | `.agents/skills/api-integration/SKILL.md` | Touching the external backend network contract |
+| `task-planning` | `.agents/skills/task-planning/SKILL.md` | Creating a numbered task specification |
+| `task-execution` | `.agents/skills/task-execution/SKILL.md` | Working from an existing numbered task |
 
-- Task creation (new task files from the canonical template):
-  - `.agents/skills/task-planning/SKILL.md`
-
-- Task execution, resume, and status/evidence updates:
-  - `.agents/skills/task-execution/SKILL.md`
-
-- Nuxt pages, components, composables, state, UI, types, i18n:
-  - `.agents/skills/nuxt-frontend/SKILL.md`
-
-- External Spring Boot API via `useApi()` (auth, cookies, refresh, SSR, SSE):
-  - `.agents/skills/api-integration/SKILL.md`
-
-## References
-
-- `AGENTS.md` (canonical rules)
-- `docs/agent/skills-index.md` (task-to-skill mapping)
-- `docs/agent/project-map.md` (architecture)
-- `docs/agent/backend-integration.md` (frontend-observed API contract)
-- `docs/FRONTEND_OPEN_QUESTIONS.md`
-- `docs/FRONTEND_FOOTGUNS.md`
-
-Read only what the current task needs. Legacy `skills/frontend/` files are
-detailed domain references preserved for the canonical skills above.
+`skills/frontend/SKILL.md` routes to detailed CRUD, API, auth, UI, and types references. Open only the matching reference. `docs/agent/project-map.md` helps locate code; current source is authoritative.

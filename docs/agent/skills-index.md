@@ -1,42 +1,22 @@
-# Skills Index
+# Project skills index
 
-Canonical skills live in `.agents/skills/` (Agent Skills spec: each skill is a
-directory with `SKILL.md` containing `name` + `description` frontmatter).
-Skill `name` always matches its directory. Load only the skills a task needs.
+Read `AGENTS.md` first. Canonical skills are `.agents/skills/<name>/SKILL.md`; `skills/frontend/*.md` are detailed references opened only for the affected domain. Inspect current source before implementing because reference counts and line numbers can age.
 
-| Skill | Purpose | Activation |
+| Request | Canonical skill | Additional reference |
 |---|---|---|
-| `task-planning` | New task files from `tasks/TASK_TEMPLATE.md` | Creating a task |
-| `task-execution` | Task execution, resume, status/evidence updates | Working a `tasks/<id>-*.md` file |
-| `nuxt-frontend` | Nuxt 4 pages, components, composables, state, UI, types, i18n | Task touches `app/` or `i18n/` |
-| `api-integration` | External Spring Boot API via `useApi()` (auth, cookies, refresh, SSR, SSE) | Task touches the network contract |
+| Implement or change `app/` UI, state, form, route, styling, or i18n | `nuxt-frontend` | `skills/frontend/CRUD.md`, `UI.md`, or `TYPES_VALIDATION.md` as relevant |
+| Change/debug external API calls, DTOs, auth request flow, upload/download, or SSE | `api-integration` | `skills/frontend/API.md`; `AUTH.md` for session/RBAC work |
+| Create a numbered `tasks/<id>-*.md` specification | `task-planning` | `tasks/TASK_TEMPLATE.md` |
+| Execute, resume, or update an existing numbered task | `task-execution` plus the affected domain skill | References listed by that task |
+| Change both UI and its network contract | `nuxt-frontend` and `api-integration` | Only the affected references |
 
-Related skills: `task-planning` feeds `task-execution`; `nuxt-frontend` pairs
-with `api-integration` when a screen changes its endpoint; both pair with the
-detailed references under `skills/frontend/` (CRUD, API, AUTH, UI,
-TYPES_VALIDATION), which are preserved — not canonical skills, but required
-reading selected per task.
+A normal implementation request does not require creating a task file. `task-execution` applies when a numbered task already exists. A docs or agent-config edit need not load a frontend implementation skill unless it changes app behavior.
 
-## Example Task → Skill Mapping
+## Route to source
 
-- "Fix user list sorting" → `nuxt-frontend` (+ `api-integration` if the endpoint changes).
-- "Add avatar to profile page" → `nuxt-frontend` (+ `api-integration` if the endpoint changes).
-- "New `project` CRUD module" → `task-planning`, then `nuxt-frontend` + `api-integration`.
-- "Login fails after expiry" → `api-integration` (+ `nuxt-frontend` if the login page changes).
-- "Add `deadline` column to a list" → `nuxt-frontend` (type + columns + i18n).
-- "Typecheck fails in BaseTable usage" → `nuxt-frontend`.
-- "Slow user search" → `api-integration` + `nuxt-frontend`.
+- Standard admin CRUD: `app/pages/app-user/`, `app/pages/app-role/`, `app/composables/useCrudList.ts`, `useCrudForm.ts`, `usePagefecth.ts` (spelling is intentional).
+- API boundary: `app/composables/useApi.ts`; domain helpers in `app/api/useAuthApi.ts` and `useFavoriteMenuApi.ts`; frontend contract record in `docs/API_CONTRACT.md`.
+- Auth/RBAC: `app/composables/useAuth.ts`, `useRbac.ts`, `app/middleware/00.seo.global.ts`, `01.auth.global.ts`, `02.check-permit.global.ts`, `app/plugins/rbac.ts`.
+- UI/i18n: `app/components/`, `app/layouts/`, `app/app.config.ts`, `app/assets/css/main.css`, and paired `i18n/locales/{en,th}/` files.
 
-## Loading Rules
-
-1. Always read `/AGENTS.md` first, then skim this index.
-2. Load additional domain files (`skills/frontend/*`) **only** for the task at hand.
-3. Never load backend skills — none exist in this repo, and Spring Boot/JPA/Hibernate skills must not be created here.
-4. Frontmatter: the legacy `skills/frontend/` files have no frontmatter (plain Markdown) — treat as `NOT_APPLICABLE`, not an error.
-
-## Deliberately Not Created
-
-- Standalone `nuxt-ssr` → covered by `nuxt-frontend` + SSR guards.
-- Standalone `frontend-authentication` → covered by `skills/frontend/AUTH.md` + `api-integration`.
-- `testing-debugging` → no test runner; verification lives in each skill plus `docs/FRONTEND_FOOTGUNS.md`.
-- `fullstack-feature` / `nitro-backend` / `drizzle-database` → backend is `BACKEND_NOT_ACCESSIBLE`; cross-repo work uses template section 11 instead.
+The Spring Boot backend is in another repository (`BACKEND_NOT_ACCESSIBLE`). `server/api/` here contains local Nitro handlers, and `server/database/` contains migration tooling. Do not choose a backend implementation skill from this project or claim backend verification from a frontend call site.

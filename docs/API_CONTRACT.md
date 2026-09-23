@@ -4,7 +4,7 @@ This is reference documentation, not a global coding skill. Read it only when en
 
 ## PART 2 — API Contract (as consumed by this frontend)
 
-> NOTE: reconstructed SOLELY from how this frontend calls/consumes the API. NOT confirmed backend behavior. If a SKILLS.md or equivalent exists in the backend (Spring Boot) repo, a human MUST reconcile that file with this section in a session where both repos are accessible. When the backend contract changes, re-verify this section against live network responses (browser devtools) or an OpenAPI spec — NEVER assume it is still accurate.
+> Reconstructed from frontend call sites. This is not confirmed backend behavior. Re-verify a changed endpoint against live network responses or OpenAPI before treating its shape as verified.
 
 ### C1. The single correct call pattern
 
@@ -21,6 +21,10 @@ This is reference documentation, not a global coding skill. Read it only when en
   - `POST /api/auth/logout` no body → `ResponseMessage` (`useAuth.ts:91`)
 
   - `GET /api/appUser/currentUserData` → `AppUser` (`useAuth.ts:109`)
+
+  - `POST /api/auth/linkedAccounts` → `LinkedAccount[]`; `POST /api/auth/linkAccount` with `LoginRequest` → `RefreshTokenResponse` (`app/api/useAuthApi.ts`)
+
+  - `POST /api/auth/switchAccount/{targetUserId}` and `POST /api/auth/removeLinkAccount/{targetUserId}` with no body; callers check response status, including successful empty bodies (`app/api/useAuthApi.ts`, `useAuth.ts`)
 
   - `GET <dynamic pageParam>` (`usePagefecth.ts:70`, `useCrudList.ts`) with query `?page,size,sort,search…` built from `SearchOperation` constants → `ApiResponse<T> | T[]` (dual-shape!)
 
@@ -42,15 +46,15 @@ This is reference documentation, not a global coding skill. Read it only when en
 
   - `POST /api/auth/refreshToken` via `api.raw` in `pages/test/index.vue:13` is a DEBUG page — MUST NOT copy into production code.
 
-- NO OpenAPI/Swagger/postman/`.http`/generated client exists in repo (glob verified empty). Manual types in `app/types/` are the ONLY contract source — keep them in sync by hand.
+- No OpenAPI/generated client was found in this workspace. Manual types in `app/types/` describe frontend expectations; they are not a verified backend contract.
 
 ### C2. Request/response shape conventions (observed)
 
-- Field case: camelCase EVERYWHERE (`createdDate`, `avatarFileId`, `selectedRoles`, `authenticationToken`). SOLE snake_case exception is the EXTERNAL HackerNews passthrough `FeedItem { time_ago, comments_count }` (`app/types/index.d.ts:69-70`, `example/feed/index.vue:256`) — NEVER apply snake_case to backend DTOs. `snakeToCamel` helpers exist (`appUtil.ts:148-151`) but are NEVER applied to responses.
+- Field names at the observed call sites are generally camelCase (`createdDate`, `avatarFileId`, `authenticationToken`). Preserve each endpoint's actual wire spelling; do not normalize fields without backend evidence.
 
 - Pagination envelope (standard): `ApiResponse<T> { dataList: T[]; totalPages: number; totalElements: number; last: boolean; currentPage?: number }` (`common.ts:164-172`). BUT several list endpoints return BARE ARRAYS (`Permission[]`, `AppRole[]`, `FeedItem[]`). Callers MUST handle both, copying `usePagefecth.loadData` (`usePagefecth.ts:107-140`): `if (isListResponse(data)) { ...data.dataList... } else if (isArray(data)) { ... }`. When adding a list, VERIFY via devtools which shape the endpoint returns — do not assume.
 
-- Dates: ALWAYS `string`, mixed formats (`'2026-04-20 15:45:12'` in chat mocks vs `new Date().toISOString()` in `useAiChat.ts:317`). `dateUtil.ts` formatters accept both (`removeTime` splits on `/[T ]/`). Send ISO strings; parse defensively.
+- Current API date types are strings, with mixed observed/example formats. Check the affected endpoint's format before sending or parsing dates; do not assume an ISO-only backend rule.
 
 - Nullables are INCONSISTENT (`field?: X | null` vs `field?: X` vs required): e.g. `AppUser.avatar?: ImageDto | null`. MUST guard with `isEmpty`/`isEmptyVal` (`appUtil.ts:124-141`) and optional chaining, not with type assumptions.
 
@@ -70,7 +74,7 @@ This is reference documentation, not a global coding skill. Read it only when en
 
 - `ServerException` and `ResponseEntity<T>` are DEAD (defined, never matched) — MUST NOT branch on them.
 
-- Consequence: MUST NOT add manual error toasts for `AppException`/`ResponseMessage` (double-toast footgun). `catch` blocks MUST only `console.error` + return `null`/fallback (canonical: `useAuth.signin:68-72`, `usePagefecth.loadDataProcess:77-80`). `fetchMe` MUST keep its `!isAppException(response._data)` guard before `setAuth` (`useAuth.ts:112`).
+- Consequence: avoid a second toast for an `AppException`/`ResponseMessage` already reported by the wrapper. Handle failures at the responsible boundary: show the screen's error state, return a documented fallback, or propagate the error as appropriate. `fetchMe` keeps its `!isAppException(response._data)` guard before `setAuth` (`useAuth.ts`).
 
 - Contract-drift flag: error `status` is `string` in `AppException` but `number|string` in `ServerException` — if a new endpoint returns numeric `status` with `error`+`path` keys, it will NOT toast; normalize it to `AppException` handling and flag to the backend team.
 

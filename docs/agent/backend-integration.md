@@ -22,6 +22,7 @@
 | Refresh | `POST /api/auth/refreshToken` with `{}` + cookies (`useApi.ts:160-169`) — the empty body is intentional; do not "fix" it to send a refreshToken. |
 | Logout | `POST /api/auth/logout` → on 200 `clearAuth()` + broadcast reload + `navigateTo('/auth/login')`. |
 | Session | `GET /api/appUser/currentUserData` → `AppUser` + `!isAppException` guard before `setAuth` (`useAuth.ts:107-120`). |
+| Linked accounts | `app/api/useAuthApi.ts` wraps list, link, switch, and remove requests; `useAuth.ts` reloads after a successful session change. Empty 200 responses are accepted for switch/remove. |
 | Cookies | `_session_` / `_slid_` are HttpOnly (INFERRED — no `useCookie` token reads in the repo); JS may only read `_sid` (`useAppCookie.ts`) + `locale`. |
 | SSR bootstrap | `app/plugins/00.auth.server.ts` (`fetchMe` + `initialAppNav`); `00.auth.client.ts` is a no-op. |
 | Guards | `01.auth.global` (checks `useState`, not cookies) → `02.check-permit` (`requiresPermission` ANY-match, empty = allow, 403 → `showError`). |
@@ -35,6 +36,10 @@
 | `POST /api/auth/refreshToken` | `{}` + cookies | `RefreshTokenResponse` | cookie | `useApi.ts:160` |
 | `POST /api/auth/logout` | — | `ResponseMessage` | cookie | `useAuth.ts:91` |
 | `GET /api/appUser/currentUserData` | — | `AppUser` | cookie | `useAuth.ts:109` |
+| `POST /api/auth/linkedAccounts` | — | `LinkedAccount[]` (frontend type) | cookie | `app/api/useAuthApi.ts` |
+| `POST /api/auth/linkAccount` | `LoginRequest` | `RefreshTokenResponse` (frontend type) | cookie | `app/api/useAuthApi.ts` |
+| `POST /api/auth/switchAccount/{targetUserId}` | — | status 200, body may be empty | cookie | `app/api/useAuthApi.ts` |
+| `POST /api/auth/removeLinkAccount/{targetUserId}` | — | status 200, empty body expected by caller | cookie | `app/api/useAuthApi.ts` |
 | `GET <dynamic pageParam>` (`usePagefecth`) | `?page,size,sort,_q,_keyword` | `ApiResponse<T> \| T[]` (dual!) | cookie | `usePagefecth.ts:70` |
 | `GET <fetchDataLink>` / `POST\|PUT <endpoint>` / `DELETE <endpoint>[/id]` | `body: data` | per entity | cookie | `useCrudForm.ts`, `useCrudList.ts` |
 | `GET /api/permission/findAllPermission` | — | `Permission[]` (bare array) | cookie | `app-role/[crud]/[id].vue` |
@@ -45,13 +50,13 @@
 | `GET <downloadUrl>` (`baseURL: cdnBase`, `responseType: 'stream'`) | `?chunkSize` | stream | cookie | `useDownload.ts:140` |
 | `POST /api/aiChat/stream` (`Accept: text/event-stream`, `signal`) | `{ message, conversationId, filterNames }` | `ReadableStream`/SSE | cookie | `useAiChat.ts:216` |
 
-No OpenAPI/Swagger/postman/`.http`/generated client exists in the repo (VERIFIED) — the types in `app/types/` are the single contract source.
+No OpenAPI/generated client was found in this workspace. Types in `app/types/` are hand-maintained frontend expectations, not a verified backend contract.
 
 ## 4. Conventions (frontend-observed)
 
-- Case: camelCase everywhere (`createdDate`, `authenticationToken`) — the only exception is the HackerNews passthrough `FeedItem { time_ago, comments_count }`; never copy that style to backend DTOs.
+- Case: observed request/response fields are generally camelCase (`createdDate`, `authenticationToken`). Preserve the affected endpoint's wire spelling; do not infer a universal backend convention.
 - Pagination: `ApiResponse<T> { dataList, totalPages, totalElements, last, currentPage? }`, but several endpoints return bare arrays — callers must handle both (`usePagefecth.loadData`).
-- Dates: always `string` (never type API dates as `Date`); send ISO, parse defensively.
+- Current frontend API date types are strings. Verify the affected endpoint's wire format before assuming ISO input or output.
 - Nullables are inconsistent — use `isEmpty`/`isEmptyVal` + optional chaining.
 - Errors: only `AppException { status: string; message; errors? }` + `ResponseMessage` drive toasts; `ServerException`/`ResponseEntity` are dead (never branch on them).
 - IDs: Snowflake — use `IdType`, never `Number(id)`; new IDs via `app/utils/snowflake.ts`.
@@ -63,7 +68,7 @@ No OpenAPI/Swagger/postman/`.http`/generated client exists in the repo (VERIFIED
 - Refresh: deduped via `nuxtApp._refreshPromise`, single retry, on failure → `navigateTo('/auth/login')` (client only).
 - 401: toasts suppressed; never add per-page handlers (they double-fire).
 - 403: never refreshed; route level reports `showError 403`.
-- SSE: `POST /api/aiChat/stream` is the only stream; event details (`chat_id/title/thinking/token/sources/done` in `docs/API_CONTRACT.md` § C6) are frontend-observed — backend event semantics are `BACKEND_NOT_ACCESSIBLE`.
+- SSE: `POST /api/aiChat/stream` is parsed by `useAiChat.ts`; event names seen in that frontend parser do not verify backend event semantics (`BACKEND_NOT_ACCESSIBLE`).
 
 ## 6. Limitations and Items Requiring Verification (`BACKEND_NOT_ACCESSIBLE`)
 
