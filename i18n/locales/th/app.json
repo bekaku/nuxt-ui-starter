@@ -97,6 +97,7 @@
   "crudPermission": "สิทธิ์เพิ่มลบแก้ไข",
   "reportPermission": "สิทธิ์รายงาน",
   "otherPermission": "สิทธิ์อื่นๆ",
+  "permissionGrant": "สิทธิ์สำหรับกลุ่มผู้ใช้นี้",
   "permissionNotFound": "ยังไม่มีสิทธิ์การใช้งาน",
   "userRoleNotFound": "ยังไม่มีกลุ่มผู้ใช้งาน",
   "userRoleSelected": "กลุ่มผู้ใช้งานที่ถูกเลือก",
@@ -104,6 +105,7 @@
   "weeks": "{week} สัปดาห์",
   "month1": "1 เดือน",
   "months": "{week} เดือน",
+  "manageCompanyUser": "จัดการผู้ใช้",
   "deletedFlag": "ข้อมูลนี้จะถูกลบเมื่อทำการบันทึก",
   "contactInfo": "ข้อมูลติดต่อ"
 }

@@ -26,7 +26,7 @@ Evidence labels:
 |---|---|
 | Framework | Nuxt `^4.5.2` (`app/` srcDir), SSR enabled (`ssr: true`) |
 | UI | Nuxt UI `^4.11.0` + Tailwind CSS `^4.3.3` |
-| Language | Vue `^3.5.42` Composition API, `<script setup lang="ts">`, TypeScript `^7.0.2` |
+| Language | Vue `^3.5.42` Composition API, `<script setup lang="ts">`, TypeScript `~6.0.3` |
 | API | External Spring Boot REST API via `useApi()` (`app/composables/useApi.ts`); `server/api/` holds Nitro mocks + one scraper only |
 | Validation | Zod `^4.5.4` (per-page client `UForm` validation only) |
 | Auth | Cookie JWT (`_session_` / `_slid_`, HttpOnly), `useAuth` + global route guards + `v-rbac` (presentation only) |
@@ -90,8 +90,10 @@ Evidence labels:
 - Shared client state via namespaced `useState` (never Pinia, never
   `provide`/`inject` for app state). Two-way binding via `defineModel`.
 - Protected requests go through `useApi()` (silent refresh, SSR cookie forward);
-  never bare `$fetch` / `useFetch` against backend paths. Use relative paths
-  resolved against `runtimeConfig.public.apiBase`; preserve the existing upload
+  never bare `$fetch` / `useFetch` against backend paths. Calling `useApi()`
+  directly in a page/component/composable is fine — an `app/api/*` helper is
+  optional and only worth adding when the call is shared by several files.
+  Use relative paths resolved against `runtimeConfig.public.apiBase`; preserve the existing upload
   path spelling until live contract evidence supports changing it.
 - Gate UI with `v-rbac` / `BaseTable` permission props (UX only, never security).
 - Pages declare `definePageMeta({ pageName, requiresPermission })`;
@@ -136,7 +138,10 @@ Evidence labels:
   A typecheck error is real — fix it, never suppress with `@ts-ignore`.
 - CI (`.github/workflows/ci.yml`): on `push`, `pnpm install` → `pnpm run lint` →
   `pnpm run typecheck` (Node 22). Follow `eslint.config.mjs` house style by hand
-  so CI stays green, but do not run `eslint` repo-wide as part of a task.
+  so CI stays green.
+- Never run `pnpm lint` / `pnpm lint:fix` / `eslint` anywhere in this project
+  (project-wide rule, not only task verification); lint is CI-only. Record lint
+  as `NOT_RUN` (project rule) in reports and task files.
 - Verify affected code and report any checks that could not be executed.
 
 ## 11. Forbidden Operations

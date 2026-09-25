@@ -25,6 +25,9 @@
   "model_permission_status": "Status",
   "model_permission_description": "Description",
   "model_permission_frontEnd": "Frontend",
+  "model_app_table": "System tables",
+  "model_app_table_app_table_name": "Table name",
+  "model_app_table_description": "Description",
 
   "model_role": "Role",
   "model_role_name": "Name",
@@ -69,6 +72,7 @@
   "model_page_category_top_cate": "Top cate",
   "model_page_category_column_cate": "Column cate",
   "model_page_category_status": "Status",
+  "model_page_category_description": "Category description",
 
   "model_app_language": "Language",
   "model_app_language_id": "Id",
@@ -79,6 +83,7 @@
   "model_app_language_sort_order": "Sort order",
   "model_app_language_status": "Status",
   "model_app_language_default_locale": "Default language",
+  "model_app_language_default_locale_no": "Not the default language",
   "model_files_directory": "Folder",
   "model_files_directory_id": "Id",
   "model_files_directory_name": "Folder name",

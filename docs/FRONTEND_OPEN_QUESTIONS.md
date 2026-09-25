@@ -12,7 +12,9 @@ These are unresolved repository questions/technical-debt items. They are not man
 
 - `server/database/*` (drizzle + mysql) is only used by `pnpm migrate:mysql:pg` one-off script — should it move to `devDependencies` or a separate tool?
 
-- `pnpm lint` currently FAILS on clean checkout: `typescript-eslint does not support TS 7.0` (`@typescript-eslint/parser\@8.68.0` vs `typescript\@7.0.2`, verified 2026-09-09). Pin TS <7 or upgrade typescript-eslint before trusting CI lint results.
+- RESOLVED (toolchain) 2026-09-25: `pnpm lint` failed with `typescript-eslint does not support TS 7.0`. No TS 7–compatible typescript-eslint exists yet (latest `8.70.1` and canary both peer `typescript >=4.8.4 <6.1.0`), so `typescript` is pinned to `~6.0.3` (devDependency); the installed `@typescript-eslint/parser\@8.68.0` now resolves against `typescript\@6.0.3`. Lint itself was NOT run — agents never run `pnpm lint` in this project (AGENTS.md §10); the first CI run is the real verification. Keep the `~6.0.x` pin until typescript-eslint widens its TS peer range.
+
+- RESOLVED 2026-09-25: `pnpm typecheck` crashed because `vue-tsc\@3.3.11` (still the latest) requires `typescript/lib/tsc`, which TS 7 no longer exports. Fixed by pinning `typescript ~6.0.3`; that surfaced 39 pre-existing errors, all fixed the same day: `import type` in 10 `server/api/mock/*` files (TS1484), mock `FileManager` `id` → string and `fileSize` → bytes `2097152` in `file/imageItemsData.ts` / `pdfItemsData.ts` (TS2322), and `dateString`/`ios` → `date`/`iso` in `app/components/base/BaseVideoPlayerDetail.vue` (TS2353 — previously passed `undefined` as the date at runtime). `pnpm typecheck` now exits 0 with 0 errors and `pnpm build` passes (VERIFIED).
 
 - No Prettier config file despite `prettier` + `eslint-plugin-prettier` installed — adopt a `.prettierrc` or remove the deps?
 

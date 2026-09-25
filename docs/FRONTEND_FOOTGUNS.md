@@ -24,7 +24,7 @@ Read this document when implementing or debugging behavior related to these know
 
 - `crudName` MUST be PascalCase or permission keys mismatch (`app-user/index.vue:34`).
 
-- `useCrudForm` currently reads route IDs through `getParam<number>`; inspect precision before using Snowflake IDs from route parameters. Do not copy numeric coercion into new code.
+- `useCrudForm` types route IDs as `number` via `getParam<number>`, but this is only a TypeScript cast — the runtime value is still the route string, so precision survives. `useBase().getParamNumber()` really coerces (`+val`) and MUST NOT be used for Snowflake IDs. Do not copy either numeric typing into new code.
 
 - `uploadChunkApi`/`mergeChunkApi` paths lack a leading slash — adding one changes resolution against `baseURL`; copy verbatim.
 

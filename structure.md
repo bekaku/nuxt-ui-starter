@@ -21,13 +21,15 @@ Skill catalogue: `docs/agent/skills-index.md`.
 │       │   └── SKILL.md             # Create task files from tasks/TASK_TEMPLATE.md
 │       ├── task-execution/
 │       │   └── SKILL.md             # Execute/resume tasks per CP0–CP4
+│       ├── crud-module/
+│       │   └── SKILL.md             # Entity list + [crud]/[id] form screens
 │       ├── nuxt-frontend/
-│       │   └── SKILL.md             # app/ work: pages, components, SSR, UI, i18n
+│       │   └── SKILL.md             # Other app/ work: pages, components, SSR, UI, i18n
 │       └── api-integration/
 │           └── SKILL.md             # External Spring Boot API via useApi()
 ├── skills/
 │   └── frontend/                    # DETAILED domain references (preserved)
-│       ├── SKILL.md                 # Core: layout, style, config, verification
+│       ├── SKILL.md                 # Router to the reference files below
 │       ├── CRUD.md                  # Entity admin screens, search/paging
 │       ├── API.md                   # useApi() rules, upload/download, SSE
 │       ├── AUTH.md                  # Login, session, guards, RBAC
@@ -51,24 +53,24 @@ Skill catalogue: `docs/agent/skills-index.md`.
 | Layer | Location | Format | Role |
 |---|---|---|---|
 | Router | `SKILLS.md` | Pointer list | Maps task areas to canonical skills |
-| Canonical | `.agents/skills/*/SKILL.md` | YAML frontmatter (`name` = directory) + 10 sections | Task workflows (`task-planning`, `task-execution`) and technical domains (`nuxt-frontend`, `api-integration`) |
+| Canonical | `.agents/skills/*/SKILL.md` | YAML frontmatter (`name` = directory) + fixed sections (below) | Task workflows (`task-planning`, `task-execution`) and technical domains (`crud-module`, `nuxt-frontend`, `api-integration`) |
 | Domain detail | `skills/frontend/*.md` | Plain Markdown (no frontmatter) | In-depth references loaded on demand by the canonical skills |
 | Adapters | `CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md` | 10-line pointers | Point vendor agents to `AGENTS.md` + `.agents/skills/`; duplicate no rules |
 
 ## Canonical Skill Format
 
-Every `.agents/skills/*/SKILL.md` contains:
+Every `.agents/skills/*/SKILL.md` follows the same order so an agent can scan it quickly:
 
-1. `Purpose`
-2. `When to Use`
-3. `When Not to Use`
-4. `Required Reading`
-5. `Repository Evidence` (real source paths with line numbers)
-6. `Workflow`
-7. `Implementation Rules`
-8. `Anti-Patterns`
-9. `Verification`
-10. `Completion Criteria`
+1. Frontmatter `description` — what the skill covers, when to use it, and when not to.
+2. One-paragraph purpose.
+3. `When to use` (including when to pick another skill).
+4. `Read first` — the minimum files, in order.
+5. A decision table (`Where does the change go?`, `Choose the call style`, name-derivation table) and/or step-by-step `Recipe`.
+6. `Rules` — MUST / MUST NOT bullets.
+7. `Common mistakes` — symptom → cause → fix table (skipped for task workflow skills).
+8. `Done checklist` — checkboxes that double as the Verification / Completion criteria.
+
+Use real repository paths and symbol names; avoid line numbers in canonical skills (they drift).
 
 ## Loading Order
 
@@ -84,7 +86,7 @@ Every `.agents/skills/*/SKILL.md` contains:
   backend lives in a separate repository (`BACKEND_NOT_ACCESSIBLE`); cross-repo
   work uses section 11 of `tasks/TASK_TEMPLATE.md` instead.
 - Standalone `nuxt-ssr`, `frontend-authentication`, `testing-debugging` — covered
-  by `nuxt-frontend`, `skills/frontend/AUTH.md`, and each skill's Verification
-  section (no test runner exists in this repo).
+  by `nuxt-frontend`, `skills/frontend/AUTH.md`, and each skill's Done checklist
+  (no test runner exists in this repo).
 - Skill copies under vendor directories — adapters reference the canonical
   `.agents/skills/` by path (no symlinks, nothing to drift).

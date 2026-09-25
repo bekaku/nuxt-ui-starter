@@ -1,6 +1,7 @@
 {
   "base": {
     "appCookiepolicy": "NuxtUI Fullstack Starter Website Use cookies to give you a better experience.",
+    "welcome": "Welcome {0}",
     "welcomeText": "Welcome to NuxtUI Fullstack Starter",
     "by": "By",
     "login": "Login",
@@ -121,8 +122,10 @@
     "all": "All",
     "created_user": "Created user",
     "created_at": "Created date",
+    "created_date": "Created date",
     "updated_user": "Updated user",
     "updated_at": "Updated date",
+    "updated_date": "Updated date",
     "commingsoon": "Coming soon",
     "themeSetting": "Theme Settings",
     "themeSettingTitle": "Style of theme",
@@ -465,6 +468,7 @@
     "favorite": "Favorite",
     "unfavorite": "Unfavorite",
     "newChat": "New Chat",
+    "addNewChat": "Add new chat",
     "recent": "Recent",
     "searchChat": "Search chats",
     "typeMessage": "Type your message",

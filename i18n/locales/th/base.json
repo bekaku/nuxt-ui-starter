@@ -122,8 +122,10 @@
     "all": "ทั้งหมด",
     "created_user": "ผู้บันทึก",
     "created_date": "วันที่บันทึก",
+    "created_at": "วันที่บันทึก",
     "updated_user": "ผู้แก้ไข",
     "updated_date": "วันที่แก้ไข",
+    "updated_at": "วันที่แก้ไข",
     "commingsoon": "เร็วๆ นี้",
     "themeSetting": "ตั้งค่าธีม",
     "themeSettingTitle": "เปลี่ยนสไตล์ของระบบ",
@@ -416,7 +418,9 @@
     "th": "ไทย",
     "lang_th": "ภาษาไทย",
     "en": "English",
-    "lang_en": "English"
+    "lang_en": "English",
+    "ch": "中文",
+    "lang_ch": "中文"
   },
   "date": {
     "year": "ปี",
@@ -561,6 +565,7 @@
     "password": "รหัสผ่าน",
     "currentPassword": "รหัสผ่านปัจจุบัน",
     "newPassword": "รหัสผ่านใหม่",
+    "loginPassword": "รหัสผ่าน",
     "confirmPassword": "ยืนยันรหัสผ่าน",
     "forgetPassword": "ลืมรหัสผ่าน?",
     "createAccount": "สร้างบัญชีใหม่",
@@ -570,6 +575,7 @@
     "verification": "ยืนยันตัวตน",
     "verificationCode": "รหัสยืนยัน",
     "setPassword": "กำหนดรหัสผ่านใหม่",
+    "register": "ลงทะเบียน",
     "logoutAll": "ออกจากระบบทุกอุปกรณ์",
     "login_main_helper5": "หากไม่พบที่กล่องข้อความเข้าเป็นไปได้ว่าอาจจะอยู่ในกล่องขยะ",
     "login_main_helper6": "รหัสยืนยันมีอายุ 15 นาที",

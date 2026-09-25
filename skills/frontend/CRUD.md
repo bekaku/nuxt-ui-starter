@@ -1,7 +1,8 @@
 # Frontend CRUD Skill
 
-Read this file when the task adds or changes an entity administration screen — a list
-page, a create/edit/view form, or the search/paging behaviour behind them.
+Detailed reference for `.agents/skills/crud-module/SKILL.md`. Start with that skill — it has
+the step-by-step recipe, naming table, and common-mistakes table. Open this file for
+option-level detail (X5–X7), footguns (X8), or component props/slots (X9).
 
 This is a detailed reference for the existing scaffold. Its line references were
 recorded in September 2026; reopen the current source before making a change.
@@ -33,7 +34,7 @@ for option/search details; X8–X9 when changing scaffold behavior or components
 - The five reference implementations are `app/pages/app-user/`, `app-role/`,
   `permission/`, `api-client/` and `ai-document-meta/`. `app-user` and `app-role` are the
   best models to copy.
-- The file layout is fixed (see `UI.md` F4): `app/pages/<kebab-name>/index.vue` for the
+- The file layout is fixed: `app/pages/<kebab-name>/index.vue` for the
   list and `app/pages/<kebab-name>/[crud]/[id].vue` for the form. `[crud]` and `[id]` are
   the literal route params `PageActionParamiter` and `PageIdParamiter`
   (`app/libs/constants.ts:6-7`).
@@ -172,9 +173,8 @@ const columns = ref<TableColumn<Foo>[]>([
 ]);
 ```
 
-MUST parameterize with the entity's own type. `ai-document-meta/index.vue:39,51` uses
-`useCrudList<AppUser>` / `TableColumn<AppUser>` while rendering `AiDocumentMeta` rows —
-typecheck does not catch it. Do not copy that.
+MUST parameterize with the entity's own type (`useCrudList<Foo>`, `TableColumn<Foo>`) —
+typecheck does not catch a wrong one. All five reference pages do this correctly now.
 
 Template — this 11-event block is byte-identical across all five features:
 
@@ -265,12 +265,11 @@ The sidebar is a **hardcoded array**, not backend-driven: `appNavs` in
 ```
 
 The `permissions` key MUST be present and MUST match the page's `requiresPermission`.
-Omitting it shows the menu item to everyone and then 403s them on click — the bug
-currently live for `ai-document-meta` (`useMenu.ts:48-51`).
+Omitting it shows the menu item to everyone and then 403s them on click.
 
 ### 7. Verify
 
-`pnpm build` and `pnpm typecheck` (see `SKILL.md` F11). Then exercise the screen: list,
+`pnpm typecheck` and `pnpm build` (see `AGENTS.md` §10). Then exercise the screen: list,
 search, sort, page, create, edit, delete.
 
 ---
@@ -340,12 +339,14 @@ The `crudAction` lifecycle — `route.params.crud` MUST be one of `new | copy | 
 | `new` (id `0`) | none | `POST /api/foo` | POST | true | no |
 | `copy` | by id, then clears `id` (`:103-105`) | `POST /api/foo` | POST | true | no |
 | `edit` | by id | `PUT /api/foo/{entity.id}` | `methodPut` | true | yes |
-| `view` | by id | ⚠ collection URL, no id | PUT | false | yes |
+| `view` | by id | — (submit is a no-op) | — | false | yes |
 
-⚠ `view` + submit is a live trap: the URL branch keys on `EDIT` only
-(`useCrudForm.ts:44`) while the method branch keys on `VIEW || EDIT` (`:138`), so
-submitting straight from a view screen issues `PUT /api/foo` with no id. Always call
-`onEnableEditForm()` (which flips `crudAction` to `edit`, `:39-41`) first.
+In `view` mode `BaseForm` receives `:edit-mode="false"` and renders the whole `UForm`
+`disabled` (read-only), hides Save, and — when the user has `<entity>_edit` and `editButton`
+is true — shows an Edit button that emits `on-edit-enable`; the page's `onEnableEditForm()`
+flips `crudAction` to `edit`, which re-enables the fields and switches submit to PUT.
+`onSubmit()` also returns early for `view` as a safety guard. Delete from the form is offered
+only in `edit` mode (`BaseForm` delete button condition).
 
 Note the PUT URL uses `entity.value.id` while DELETE uses the route's `crudId`
 (`:47` vs `:58`) — if the GET response omits `id`, the PUT URL becomes `/api/foo/undefined`.
@@ -433,15 +434,16 @@ requested work requires it; record unrelated defects in
    (`:108-112`). A request resolving after unmount writes into cleared state.
 7. **`headers` is a `shallowRef`** (`useCrudList.ts:39`) — replace the array, do not
     mutate entries.
-8. **`:edit-mode` and `@on-edit-enable` are dead wiring.** All five form pages pass them,
-    but `BaseForm` declares no `editMode` prop and never emits `on-edit-enable` (declared
-    `BaseForm.vue:55`, but the only emits are `on-submit`, `on-delete`, `on-back`).
+8. **`:edit-mode` / `@on-edit-enable` must stay wired.** Without `:edit-mode` a view screen
+    stays editable (default `editMode = true`); without `@on-edit-enable` the Edit button
+    shown in view mode does nothing.
 9. **Typos are the public API** — reproduce verbatim: `usePagefecth`, `fectchDataOnLoad`,
     `apiEnpoint`, `SearchParamiter`, `KeywordParamiter`, `searchColunm`, `sortColunm`,
     `GREATER_THAN_EQUA`, `LESS_THAN_EQUA`, `EQUA`, `NOT_EQUA`.
-10. **Route ID precision needs inspection.** `useCrudForm` currently reads `crudId`
-    through `getParam<number>`; do not copy this numeric pattern for Snowflake IDs.
-    Trace route parsing and endpoint construction when modifying the form scaffold.
+10. **Route ID typing is misleading.** `useCrudForm` types `crudId` as `number` via
+    `getParam<number>`, but that is only a cast — the runtime value stays the route string,
+    so precision survives. `getParamNumber()` really coerces; never use it for IDs, and do not
+    copy the `number` typing into new code.
 
 ---
 
@@ -479,12 +481,13 @@ props — `permission/index.vue:161-173` is the lone outlier and its codes dupli
 
 Props (`:9-50`): `crudName`, the four `*Permission` props, `byPassPermission`, `title`,
 `description`, `icon`, `loading`, `showBack` (true), `showDelete`, `showEdit`,
-`crudAction`, `showActionText` (true), `editButton` (true), `deleteButton` (true),
+`crudAction`, `showActionText` (true), `editButton` (true — Edit button in view mode),
+`editMode` (true — false disables the whole form), `deleteButton` (true),
 `copyButton` (false), `canSubmit` (true), `crudEntity`, `zodSchema`, `orientation`
 (default `horizontal`), `variant`. Model: `defineModel<Partial<Schema>>()` (`:63`).
 
-Emits (`:51-57`): `on-back`, `on-submit`, `on-delete`, `on-edit-enable`, `on-item-click`
-— only the first three are ever emitted.
+Emits: `on-back`, `on-submit`, `on-delete`, `on-edit-enable` (Edit button in view mode),
+`on-item-click` (declared, never emitted).
 
 Slots, in render order: `#header`, `#heder-start` (sic, `:319`), `#header-end` (`:350`),
 `#prepend-fields` (`:362`), `#auto-fields` (`:364` — overriding it replaces automatic

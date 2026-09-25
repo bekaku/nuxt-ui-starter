@@ -84,6 +84,7 @@
   "flipVorizontal": "Flip Vertical",
   "rotateLeft": "Rotate Left",
   "rotateRight": "Rotate Right",
+  "chooseFileImage": "Please choose an image file to upload",
   "currentAvatar": "Current avatar",
   "cropAvatar": "Crop your new profile picture",
   "minimize": "Minimize",

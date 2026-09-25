@@ -17,9 +17,9 @@ const getViews = computed(() => readableNumber(file.view || 0));
     <div class="flex items-center gap-2 p-2">
       <span v-if="file.createdDate" class="text-sm text-muted">{{
         formatDistanceFromNow({
-          dateString: file.createdDate,
+          date: file.createdDate,
           suffix: true,
-          ios: false,
+          iso: false,
         })
       }}</span>
 

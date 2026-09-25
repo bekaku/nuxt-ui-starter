@@ -48,6 +48,7 @@ export const useMenu = () => {
             label: t('model.ai_document_meta.table'),
             icon: "lucide:brain-circuit",
             to: "/ai-document-meta",
+            permissions: ['ai_document_meta_list'],
           },
           {
             label: t("nav.userRole"),

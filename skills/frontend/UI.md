@@ -5,7 +5,7 @@ Use for production pages, components, layouts, styling, and locale text. Inspect
 ## Structure and components
 
 - Place Nuxt client code under `app/`; use `<script setup lang="ts">` before `<template>` in Vue SFCs. Keep page directories kebab-case and reusable components PascalCase. `app/api/` is auto-imported through `nuxt.config.ts`.
-- For entity screens, inspect `app/pages/app-user/` or `app/pages/app-role/` and read `CRUD.md`. Use `BaseTable` and `BaseForm` where their props and slots fit. For other screens, reuse nearby Nuxt UI components and layouts instead of forcing a CRUD shape.
+- For entity screens, follow `.agents/skills/crud-module/SKILL.md` (reference modules `app/pages/permission/`, `app-role/`, `app-user/`). Use `BaseTable` and `BaseForm` where their props and slots fit. For other screens, reuse nearby Nuxt UI components and layouts instead of forcing a CRUD shape.
 - Declare `definePageMeta({ pageName, requiresPermission })` for protected admin screens using verified permission codes. Check callers and emitted events before changing a shared component.
 - Browser-only libraries and globals need a client boundary (`.client.vue`, client plugin, or `import.meta.client`) because SSR is enabled.
 
@@ -17,6 +17,6 @@ Use for production pages, components, layouts, styling, and locale text. Inspect
 
 ## i18n
 
-- User-facing text belongs in both `i18n/locales/en/<namespace>.json` and `i18n/locales/th/<namespace>.json` (`app`, `base`, `helper`, `model`, or `error`). Follow the existing key family rather than creating a parallel namespace.
+- User-facing text belongs in both `i18n/locales/en/<file>.json` and `i18n/locales/th/<file>.json` (`app`, `base`, `helper`, `model`, or `error`). The files are merged into one message tree — the file name is not a key prefix — so put a key in the file that already holds its top-level family (`nav.*` → `app.json`, `success.*` → `helper.json`, `model.*` → `model.json`). Root `i18n/locales/en.json` / `th.json` are not loaded.
 - In script, use `useLang()` / `t()`; in templates, use `$t()`. Confirm both locales render the new label and any validation or empty-state message.
 - The default locale is Thai and the routing strategy is `no_prefix` (`nuxt.config.ts`). `useApi()` derives `Accept-Language` from the locale cookie; do not set that header in pages.

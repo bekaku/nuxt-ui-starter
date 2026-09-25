@@ -8,7 +8,7 @@
 - Framework: Nuxt `^4.5.2` (`app/` is the `srcDir`), `ssr: true` (`nuxt.config.ts:29`).
 - UI: Nuxt UI `^4.11.0` + Tailwind CSS `^4.3.3`, Vue `^3.5.42`, `<script setup lang="ts">`.
 - i18n: `@nuxtjs/i18n ^10.6.0`, `strategy: 'no_prefix'`, `defaultLocale: 'th'`, locales `en` + `th`.
-- Tooling: pnpm `11.9.0`, TypeScript `^7.0.2`, `vue-tsc ^3.3.11`, ESLint (`@nuxt/eslint`), CI `.github/workflows/ci.yml`.
+- Tooling: pnpm `11.9.0`, TypeScript `~6.0.3`, `vue-tsc ^3.3.11`, ESLint (`@nuxt/eslint`), CI `.github/workflows/ci.yml`.
 - Backend: external (separate Spring Boot repo, `BACKEND_NOT_ACCESSIBLE`) — this workspace has **no** `/backend` and **no** `frontend/` subdirectory.
 
 ## 2. Real Directory Layout (VERIFIED)
@@ -30,13 +30,17 @@ app/                 main srcDir
                      models.ts, props.ts, chart.ts, index.d.ts)
   utils/ / libs/     helpers (two snowflake variants, constants, appUtil, dateUtil, fileUtil)
 server/api/          local Nitro handlers, separate from Spring Boot
-  mock/              customers, mails, members, notifications
+  mock/              customers, mails, members, notifications + chart/, chat/,
+                     dashboard/, file/ subfolders (demo data for example pages)
   meta.ts            cheerio OG scraper
 server/database/     exists (mysql/, migrate/run-engine.ts) — one-off tooling for
                      `pnpm migrate:mysql:pg` only, not app runtime
 shared/types/        placeholder — frontend types live in app/types/
-i18n/locales/        en/ + th/ x (app, base, helper, model, error).json
-skills/frontend/     SKILL.md, API.md, AUTH.md, CRUD.md, UI.md, TYPES_VALIDATION.md
+i18n/locales/        en/ + th/ x (app, base, helper, model, error).json — merged into one
+                     message tree (file name is not a key prefix); root en.json/th.json are not loaded
+.agents/skills/      canonical skills: crud-module, nuxt-frontend, api-integration,
+                     task-planning, task-execution
+skills/frontend/     reference docs: SKILL.md (router), API.md, AUTH.md, CRUD.md, UI.md, TYPES_VALIDATION.md
 tasks/               README.md + TASK_TEMPLATE.md (no numbered tasks yet)
 docs/                API_CONTRACT.md, FRONTEND_FOOTGUNS.md, FRONTEND_OPEN_QUESTIONS.md
 docs/agent/          this report set (English)
@@ -57,10 +61,10 @@ docs/agent/          this report set (English)
 | Area | Finding | Agent action |
 |---|---|---|
 | Route access | `01.auth.global.ts` uses `auth:user` and `AuthNoFilterPage`; `02.check-permit.global.ts` applies `requiresPermission` only when the metadata is an array. This is client presentation, not backend authorization. | Inspect both guards and the route metadata before adding a protected screen. |
-| Standard CRUD | Lists use `useCrudList`/`usePagefecth`; forms use `useCrudForm`. Their `apiEndpoint` options have different meanings. | Read `skills/frontend/CRUD.md` X2–X3 and the relevant composable before wiring URLs or permission codes. |
-| ID precision | `IdType` allows bigint/string, while legacy `useCrudForm.ts` reads `crudId` through `getParam<number>`. | Keep new ID handling precision-safe; inspect route parsing if changing form behavior. |
-| Network | `useApi()` owns cookie credentials, SSR forwarding, 401 refresh, and common notifications. `app/api/` contains small domain wrappers. | Add endpoint-specific logic to the caller or domain helper; change the wrapper only for cross-cutting behavior. |
-| Local server | `server/api/mock/` contains four local mock handlers; `server/api/meta.ts` is an OG scraper. Spring Boot source is absent. | Treat API types and call sites as frontend expectations and verify backend shapes with live evidence. |
+| Standard CRUD | Lists use `useCrudList`/`usePagefecth`; forms use `useCrudForm`. Their `apiEndpoint` options have different meanings. | Follow `.agents/skills/crud-module/SKILL.md`; `skills/frontend/CRUD.md` has the option-level detail. |
+| ID precision | `IdType` allows bigint/string. `useCrudForm.ts` types `crudId` as `number` via `getParam<number>`, but that is only a cast — the runtime value stays the route string. `getParamNumber()` does coerce (`+val`). | Keep IDs as strings/`IdType`; never use `getParamNumber` or `Number()` on an ID. |
+| Network | `useApi()` owns cookie credentials, SSR forwarding, 401 refresh, and common notifications. `app/api/` contains small domain wrappers. | Call `useApi()` directly at the caller by default; an `app/api/` helper is optional (only for calls shared by several files). Change the wrapper only for cross-cutting behavior. |
+| Local server | `server/api/mock/` contains local demo handlers (top-level files plus `chart/`, `chat/`, `dashboard/`, `file/`); `server/api/meta.ts` is an OG scraper. Spring Boot source is absent. | Treat API types and call sites as frontend expectations and verify backend shapes with live evidence. |
 | References | `app/pages/example/`, `app/pages/test/`, and `app/components/Temp.vue` are demos. | Prefer `app-user/`, `app-role/`, or another production route as the implementation example. |
 
 ## 5. Inspection Limits

@@ -16,6 +16,7 @@ const {
   showBack = true,
   showActionText = true,
   editButton = true,
+  editMode = true,
   deleteButton = true,
   canSubmit = true,
   copyButton = false,
@@ -39,6 +40,8 @@ const {
   crudAction?: ICrudAction;
   showActionText?: boolean;
   editButton?: boolean;
+  // false renders every field read-only (view mode); pages pass `isEditMode` from useCrudForm
+  editMode?: boolean;
   deleteButton?: boolean;
   copyButton?: boolean;
   canSubmit?: boolean;
@@ -355,6 +358,7 @@ const onDelete = async (event: any) => {
       <UForm
         :schema="zodSchema"
         :state="state"
+        :disabled="!editMode"
         class="space-y-4 p-4"
         @submit="onSubmit"
       >
@@ -700,7 +704,20 @@ const onDelete = async (event: any) => {
             />
             <div class="flex justify-center gap-4">
               <slot name="crud-action-start"/>
-              <template v-if="isHaveAddPermission || isHaveEditPermission">
+              <UButton
+                v-if="editButton && crudAction == 'view' && isHaveEditPermission"
+                :loading
+                icon="lucide:pencil"
+                :label="$t('base.edit')"
+                color="primary"
+                @click.prevent="emit('on-edit-enable')"
+              />
+              <template
+                v-if="
+                  crudAction != 'view' &&
+                  (isHaveAddPermission || isHaveEditPermission)
+                "
+              >
                 <UButton
                   icon="lucide:save"
                   :disabled="!canSubmit"

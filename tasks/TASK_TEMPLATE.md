@@ -208,9 +208,8 @@ Rules:
 
 - [ ] Update relevant documentation if behavior changes.
 
-Also complete the layer-specific checklist in each loaded `SKILL.md`
-(Verification / Completion Criteria sections) instead of duplicating
-project rules here.
+Also complete the `Done checklist` in each loaded `SKILL.md` instead of
+duplicating project rules here.
 
 Remove non-applicable checklist items before execution.
 
@@ -380,8 +379,8 @@ Allowed results:
 Never invent test commands or results.
 
 CI (`.github/workflows/ci.yml`) additionally runs `pnpm run lint` on push —
-follow `eslint.config.mjs` house style by hand; do not run `eslint` repo-wide
-as task verification. No test runner exists in this repository; record unit-test
+follow `eslint.config.mjs` house style by hand; never run `pnpm lint` /
+`eslint` in this project (AGENTS.md §10) — record lint as `NOT_RUN`. No test runner exists in this repository; record unit-test
 rows as `NOT_APPLICABLE` with that reason.
 
 If a check is not applicable, explain why.
