@@ -1,12 +1,13 @@
 <script lang="ts" setup>
-import type { ChartMode, ChartPosition, ChartThemePalete, Strokestyle } from '~/types/chart';
+import VChart from 'vue-echarts'
+import type { EChartsCoreOption } from 'echarts/core'
+import type { ChartMode, ChartPosition, ChartThemePalete, Strokestyle } from '~/types/chart'
 
 const {
   chartId = 'chart-pie-id',
   height = 'auto',
   width = 'auto',
   showLegend = true,
-  legendUseSeriesColors = true,
   legendPosition = 'bottom',
   type = 'pie',
   mode = 'light',
@@ -15,7 +16,6 @@ const {
   colors,
   showDataLabels = true,
   categories,
-  strokestyle = 'smooth',
   strokeWidth = 1,
   dark = false
 } = defineProps<{
@@ -40,105 +40,85 @@ const {
 }>()
 
 const { isDark } = useTheme()
-const chartSeries = ref(series)
-const options = ref<any>()
-const watchTimeout = ref<any>()
-const chartPieRef = useTemplateRef<any>('chartPieRef')
-// watchEffect(() => {
-//   if (series && series.length > 0) {
-//     chartSeries.value = series;
-//   }
-// });
+
+const option = ref<EChartsCoreOption>({})
+const themeTimer = ref<ReturnType<typeof setTimeout> | undefined>()
+const effectiveDark = computed(() => resolveEchartDark(dark, mode, isDark.value))
+const resolvedColors = computed(() => resolveEchartColors(colors, palette))
+const parsedHeight = computed(() => parseEchartSize(height, '350px'))
+const parsedWidth = computed(() => (width === 'auto' ? '100%' : width))
+
+const buildOption = (darkMode: boolean): EChartsCoreOption => {
+  const tooltipBase = echartTooltipBase(darkMode)
+  const data = series.map((value, index) => ({
+    value,
+    name: categories[index] ?? `S${index + 1}`
+  }))
+  return {
+    backgroundColor: 'transparent',
+    animationDuration: 800,
+    color: resolvedColors.value,
+    legend: buildEchartLegend(legendPosition, showLegend, darkMode),
+    tooltip: {
+      show: true,
+      trigger: 'item',
+      ...tooltipBase
+    },
+    series: [
+      {
+        type: 'pie',
+        data,
+        radius: type === 'donut' ? ['42%', '70%'] : '65%',
+        center: ['50%', showLegend && (legendPosition === 'top' || legendPosition === 'bottom') ? '46%' : '50%'],
+        label: { show: showDataLabels },
+        labelLine: { show: showDataLabels },
+        itemStyle: {
+          borderWidth: strokeWidth,
+          borderColor: darkMode ? '#18181b' : '#ffffff'
+        },
+        emphasis: { scale: true, scaleSize: 4 }
+      }
+    ]
+  }
+}
+
+const refresh = (darkMode: boolean) => {
+  option.value = buildOption(darkMode)
+}
+
+refresh(effectiveDark.value)
+
 onUnmounted(() => {
-  options.value = undefined
-  chartSeries.value = []
-  if (watchTimeout.value) {
-    clearTimeout(watchTimeout.value)
-    watchTimeout.value = undefined
+  if (themeTimer.value) {
+    clearTimeout(themeTimer.value)
+    themeTimer.value = undefined
   }
 })
 
-onMounted(() => {
-  chartSetup()
-})
-const updateTheme = (darkMode: boolean) => {
-  if (chartPieRef.value) {
-    chartPieRef.value.updateOptions({
-      theme: {
-        mode: darkMode ? 'dark' : 'light'
-      }
-    })
+watch(effectiveDark, (darkMode) => {
+  if (themeTimer.value) {
+    clearTimeout(themeTimer.value)
   }
-}
-watch(isDark, state => {
-  watchTimeout.value = setTimeout(() => {
-    updateTheme(state)
+  themeTimer.value = setTimeout(() => {
+    refresh(darkMode)
   }, 50)
 })
-const chartSetup = () => {
-  if (series.length > 0) {
-    options.value = {
-      // series: series.value,
-      // series: series,
-      chart: {
-        id: chartId,
-        background: 'transparent',
-        width,
-        height,
-        type,
-        toolbar: {
-          show: false
-        },
-        animations: {
-          enabled: true,
-          easing: 'easein', // linear, easeout, easein, easeinout, swing, bounce, elastic
-          speed: 800
-        }
-      },
-      theme: {
-        mode: dark ? 'dark' : mode,
-        palette
-      },
-      plotOptions: {},
-      colors: colors && colors.length > 0 ? colors : undefined,
-      labels: categories,
-      stroke: {
-        width: strokeWidth,
-        curve: strokestyle
-      },
-      fill: {
-        opacity: 1,
-        type: 'gradient'
-      },
-      legend: {
-        show: showLegend,
-        position: legendPosition, // whether to position legends in 1 of 4
-        // direction - top, bottom, left, right
-        horizontalAlign: 'center', // when position top/bottom, you can
-        // specify whether to align legends
-        // left, right or center
-        verticalAlign: 'middle',
-        labels: {
-          colors: '#8E8E93',
-          useSeriesColors: legendUseSeriesColors
-        }
-      },
-      dataLabels: {
-        enabled: showDataLabels
-      },
-      responsive: []
-    }
-  }
-}
+
+watch(
+  () => [series, categories, colors, palette, type, showLegend, legendPosition, showDataLabels, strokeWidth],
+  () => {
+    refresh(effectiveDark.value)
+  },
+  { deep: true }
+)
 </script>
 <template>
-    <apexchart
-      v-if="options"
-      v-bind="$attrs"
-      ref="chartPieRef"
-      :height="height"
-      :type="type"
-      :options="options"
-      :series="chartSeries"
-    />
+  <VChart
+    :id="chartId"
+    v-bind="$attrs"
+    :option="option"
+    :update-options="{ replaceMerge: ['series'] }"
+    autoresize
+    :style="{ height: parsedHeight, width: parsedWidth }"
+  />
 </template>

@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import type { ChartMode, ChartPosition, ChartThemePalete, GridPadding } from '~/types/chart';
+import VChart from 'vue-echarts'
+import type { EChartsCoreOption } from 'echarts/core'
+import type { ChartMode, ChartPosition, ChartThemePalete, GridPadding } from '~/types/chart'
 
 const {
   chartId = 'chart-radial-id',
@@ -10,12 +12,6 @@ const {
   series,
   colors,
   categories,
-  gridPadding = {
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0
-  },
   showLegend = true,
   legendUseSeriesColors = true,
   legendFloating = false,
@@ -31,12 +27,8 @@ const {
   startAngle = 0,
   endAngle = 360,
   stokeLineCap = 'round',
-  semi = false,
-  hollowBg = true,
-  hollowSize = '55%',
   trackBackgroud = '#f0f0f0',
   trackBackgroudDark = '#383a42',
-  fillType = 'gradient',
   valUnit,
   dark = false
 } = defineProps<{
@@ -74,215 +66,134 @@ const {
   trackBackgroudDark?: string
   dark?: boolean
 }>()
-const chartSeries = ref(series)
-const options = ref<any>()
+
 const { isDark } = useTheme()
-const watchTimeout = ref<any>()
-const chartRadialRef = useTemplateRef<any>('chartRadialRef')
-// watchEffect(() => {
-//   if (series && series.length > 0) {
-//     chartSeries.value = series;
-//   }
-// });
+
+const option = ref<EChartsCoreOption>({})
+const themeTimer = ref<ReturnType<typeof setTimeout> | undefined>()
+const effectiveDark = computed(() => resolveEchartDark(dark, mode, isDark.value))
+const resolvedColors = computed(() => resolveEchartColors(colors, palette))
+const parsedHeight = computed(() => parseEchartSize(height, '300px'))
+const parsedWidth = computed(() => (width === 'auto' ? '100%' : width))
+
+const toFontSize = (value: string, fallback: number): number => {
+  const parsed = Number.parseInt(value, 10)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+const buildOption = (darkMode: boolean): EChartsCoreOption => {
+  const tooltipBase = echartTooltipBase(darkMode)
+  const paletteColors = resolvedColors.value
+  const trackColor = darkMode ? trackBackgroudDark : trackBackgroud
+  const isSingle = series.length <= 1
+  const hasSideLegend = showLegend && !isSingle && (legendPosition === 'left' || legendPosition === 'right')
+  const gaugeCenterX = hasSideLegend ? (legendPosition === 'right' ? '38%' : '62%') : '50%'
+  const gaugeRadiusScale = hasSideLegend ? 0.78 : 1
+  const maxValue = Math.max(100, ...series)
+  const ringWidth = series.length > 1 ? Math.max(8, Math.min(16, Math.floor(72 / series.length))) : 16
+
+  const gaugeSeries = series.map((value, index) => {
+    const ringIndex = index
+    const outer = (92 - ringIndex * (ringWidth + 6)) * gaugeRadiusScale
+    const color = paletteColors?.[index % paletteColors.length]
+    return {
+      type: 'gauge' as const,
+      name: categories[index] ?? `S${index + 1}`,
+      startAngle,
+      endAngle,
+      min: 0,
+      max: maxValue,
+      radius: `${Math.max(28, outer)}%`,
+      center: [gaugeCenterX, '55%'],
+      progress: {
+        show: true,
+        width: ringWidth,
+        roundCap: stokeLineCap === 'round',
+        itemStyle: color ? { color } : undefined
+      },
+      axisLine: {
+        roundCap: stokeLineCap === 'round',
+        lineStyle: { width: ringWidth, color: [[1, trackColor]] }
+      },
+      axisTick: { show: false },
+      splitLine: { show: false },
+      axisLabel: { show: false },
+      pointer: { show: false },
+      anchor: { show: false },
+      title: {
+        show: showDataLabels && showDataLabelsName && isSingle,
+        fontSize: toFontSize(dataLabelsSize, 14),
+        color: echartAxisLabelColor(darkMode),
+        offsetCenter: [0, '-30%']
+      },
+      detail: {
+        show: showDataLabels && showDataLabelsValue && isSingle,
+        fontSize: toFontSize(dataValueSize, 18),
+        fontWeight: 'bold' as const,
+        color: darkMode ? '#fafafa' : '#18181b',
+        offsetCenter: [0, dataLabelsValueOfsetY ? `${dataLabelsValueOfsetY}%` : '0%'],
+        formatter: `{value}${valUnit ?? ''}`
+      },
+      data: [{ value, name: categories[index] ?? `S${index + 1}` }]
+    }
+  })
+
+  return {
+    backgroundColor: 'transparent',
+    animationDuration: 800,
+    color: paletteColors,
+    legend: buildEchartLegend(legendPosition, showLegend && series.length > 1, darkMode),
+    tooltip: {
+      show: true,
+      trigger: 'item',
+      formatter: (params: { name?: string; value?: number | string }) => {
+        const label = params.name ?? ''
+        const value = params.value ?? ''
+        return `${label}: ${value}${valUnit ?? ''}`
+      },
+      ...tooltipBase
+    },
+    series: gaugeSeries
+  }
+}
+
+const refresh = (darkMode: boolean) => {
+  option.value = buildOption(darkMode)
+}
+
+refresh(effectiveDark.value)
+
 onUnmounted(() => {
-  options.value = undefined
-  chartSeries.value = []
-  if (watchTimeout.value) {
-    clearTimeout(watchTimeout.value)
-    watchTimeout.value = undefined
+  if (themeTimer.value) {
+    clearTimeout(themeTimer.value)
+    themeTimer.value = undefined
   }
 })
 
-onMounted(() => {
-  chartSetup()
-})
-const updateTheme = (darkMode: boolean) => {
-  if (chartRadialRef.value) {
-    chartRadialRef.value.updateOptions({
-      theme: {
-        mode: darkMode ? 'dark' : 'light'
-      },
-      plotOptions: {
-        radialBar: {
-          hollow: {
-            background: darkMode ? 'transparent' : '#fff',
-            dropShadow: {
-              enabled: !semi && !darkMode
-            }
-          },
-          track: {
-            background: !darkMode ? trackBackgroud : trackBackgroudDark
-          },
-          dataLabels: {
-            value: {
-              color: darkMode ? '#fff' : '#000'
-            }
-          }
-        }
-      }
-    })
+watch(effectiveDark, (darkMode) => {
+  if (themeTimer.value) {
+    clearTimeout(themeTimer.value)
   }
-}
-watch(isDark, state => {
-  watchTimeout.value = setTimeout(() => {
-    updateTheme(state)
+  themeTimer.value = setTimeout(() => {
+    refresh(darkMode)
   }, 50)
 })
-const chartSetup = () => {
-  if (series.length > 0) {
-    options.value = {
-      // series: series.value,
-      chart: {
-        id: chartId,
-        background: 'transparent',
-        width,
-        height,
-        type: 'radialBar',
-        toolbar: {
-          show: false
-        },
-        animations: {
-          enabled: true,
-          easing: 'easein', // linear, easeout, easein, easeinout, swing, bounce, elastic
-          speed: 800
-        }
-        // sparkline: {
-        //   enabled: sparkline || semi,
-        // },
-        // offsetY: semi ? -20 : 0,
-      },
-      theme: {
-        mode: dark ? 'dark' : mode,
-        palette
-      },
-      plotOptions: {
-        radialBar: {
-          offsetY: 0,
-          startAngle,
-          endAngle,
-          hollow: {
-            margin: 0,
-            size: hollowSize,
-            background: mode === 'dark' || !hollowBg || semi ? 'transparent' : '#fff',
-            position: 'front',
-            dropShadow: {
-              enabled: true,
-              top: 3,
-              left: 0,
-              blur: 3,
-              opacity: 0.15
-            }
-          },
-          track: {
-            background: dark ? trackBackgroudDark : trackBackgroud,
-            strokeWidth: '100%',
-            margin: 2, // margin is in pixels
-            dropShadow: {
-              enabled: false,
-              top: 2,
-              left: 0,
-              color: '#999',
-              opacity: 1,
-              blur: 2
-            }
-          },
 
-          dataLabels: {
-            show: showDataLabels,
-            name: {
-              offsetY: semi ? -30 : 0,
-              show: showDataLabelsName,
-              // color: dark ? '#fff' : '#000',
-              fontSize: dataLabelsSize,
-              fontWeight: 400
-            },
-            value: {
-              show: showDataLabelsValue,
-              offsetY: dataLabelsValueOfsetY > 0 ? dataLabelsValueOfsetY : semi ? -20 : 5,
-              formatter(val: any) {
-                return val + (valUnit || '')
-              },
-              // color: dark ? '#fff' : '#000',
-              fontSize: dataValueSize
-            }
-          }
-        }
-      },
-      colors: colors && colors.length > 0 ? colors : undefined,
-      stroke: {
-        // lineCap: semi ? 'butt' : stokeLineCap,
-        lineCap: stokeLineCap
-      },
-      fill: {
-        type: fillType, // fill, gradient
-        gradient: {
-          shade: 'light',
-          type: 'horizontal',
-          shadeIntensity: 0.5,
-          inverseColors: true,
-          opacityFrom: 1,
-          opacityTo: 1,
-          stops: [0, 100]
-        }
-      },
-      labels: categories,
-      legend: {
-        show: showLegend,
-        floating: legendFloating,
-        fontSize: '16px',
-        offsetX: legendOffsetX,
-        offsetY: legendOffsetY,
-        position: legendPosition, // whether to position legends in 1 of 4
-        // direction - top, bottom, left, right
-        horizontalAlign: 'center', // when position top/bottom, you can
-        // specify whether to align legends
-        // left, right or center
-        verticalAlign: 'middle',
-        labels: {
-          colors: '#8E8E93',
-          useSeriesColors: legendUseSeriesColors
-        }
-      },
-      grid: {
-        padding: gridPadding
-      },
-      tooltip: {
-        y: {
-          formatter(val: any) {
-            return val
-          }
-        }
-      },
-      responsive: [
-        // {
-        //   breakpoint: 480,
-        //   options: {
-        //     chart: {
-        //       width: 200,
-        //     },
-        //     legend: {
-        //       position: 'bottom',
-        //     },
-        //   },
-        // },
-      ]
-    }
-    // chart.value = new ApexCharts(
-    //   document.querySelector('#' + chartId),
-    //   options
-    // );
-    // chart.value.render();
-  }
-}
+watch(
+  () => [series, categories, colors, palette, showLegend, legendUseSeriesColors, legendFloating, legendOffsetX, legendOffsetY, legendPosition, showDataLabels, showDataLabelsName, showDataLabelsValue, startAngle, endAngle, stokeLineCap, valUnit],
+  () => {
+    refresh(effectiveDark.value)
+  },
+  { deep: true }
+)
 </script>
 <template>
-    <apexchart
-      v-if="options"
-      v-bind="$attrs"
-      ref="chartRadialRef"
-      :height="height"
-      type="radialBar"
-      :options="options"
-      :series="chartSeries"
-    />
+  <VChart
+    :id="chartId"
+    v-bind="$attrs"
+    :option="option"
+    :update-options="{ replaceMerge: ['series'] }"
+    autoresize
+    :style="{ height: parsedHeight, width: parsedWidth }"
+  />
 </template>

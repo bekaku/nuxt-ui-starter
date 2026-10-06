@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import type { ChartMode, ChartPosition, ChartThemePalete, IChartSeries, Strokestyle } from '~/types/chart';
+import VChart from 'vue-echarts'
+import type { EChartsCoreOption } from 'echarts/core'
+import type { ChartMode, ChartPosition, ChartThemePalete, IChartSeries, Strokestyle } from '~/types/chart'
 
 const {
-  chartId = "chartId",
-  height = "auto",
-  width = "auto",
+  chartId = 'chartId',
+  height = 'auto',
+  width = 'auto',
   showLegend = true,
   legendUseSeriesColors = true,
-  legendPosition = "bottom",
-  type = "area",
-  mode = "light",
-  palette = "palette1",
+  legendPosition = 'bottom',
+  type = 'area',
+  mode = 'light',
+  palette = 'palette1',
   series = [],
   colors = [],
   dark = false,
@@ -22,7 +24,7 @@ const {
   xaxisDecimalsInFloat = 0,
   yaxisDecimalsInFloat = 0,
   categories,
-  strokestyle = "smooth",
+  strokestyle = 'smooth',
   strokeWidth = 1,
   sparkline = false,
   annotationsYaxis = [],
@@ -32,7 +34,7 @@ const {
   showToolbar = false,
   zoom = false,
   horizontal = false,
-  opacity = 1,
+  opacity
 } = defineProps<{
   chartId?: string
   height?: string
@@ -58,212 +60,199 @@ const {
   strokestyle?: Strokestyle
   strokeWidth?: number
   sparkline?: boolean
-  annotationsYaxis?: any[]
-  annotationsXaxis?: any[]
+  annotationsYaxis?: Array<Record<string, unknown>>
+  annotationsXaxis?: Array<Record<string, unknown>>
   minYVal?: number
   maxYVal?: number
   showToolbar?: boolean
   zoom?: boolean
   horizontal?: boolean
   opacity?: number
-}>();
-const { isDark } = useTheme();
-const chartSeries = ref(series);
-const options = ref<any>();
-const watchTimeout = ref<any>();
-const chartAreaRef = useTemplateRef<any>("chartAreaRef");
-const initial = ref(false);
-const gridBorder = {
-  dark: "#3f3f46",
-  light: "#e4e4e7",
-};
-// watchEffect(() => {
-// if (series && series.length > 0) {
-//   chartSeries.value = series;
-// }
-// if (initial.value && options.value !=undefined && chartSeries.value.length>0) {
-//   updateTheme(dark)
-// }
-// });
-onUnmounted(() => {
-  options.value = undefined;
-  chartSeries.value = [];
-  if (watchTimeout.value) {
-    clearTimeout(watchTimeout.value);
-    watchTimeout.value = undefined;
-  }
-});
+}>()
 
-onMounted(async () => {
-  if (import.meta.server) {
-    return;
+const { isDark } = useTheme()
+
+const option = ref<EChartsCoreOption>({})
+const themeTimer = ref<ReturnType<typeof setTimeout> | undefined>()
+const isHorizontal = computed(() => horizontal && type === 'bar')
+const effectiveDark = computed(() => resolveEchartDark(dark, mode, isDark.value))
+const resolvedColors = computed(() => resolveEchartColors(colors, palette))
+const parsedHeight = computed(() => parseEchartSize(height, '350px'))
+const parsedWidth = computed(() => (width === 'auto' ? '100%' : width))
+const categoryInterval = computed(() => {
+  if (xaxisTickamount <= 0 || categories.length === 0) {
+    return 'auto' as const
   }
-  await chartSetup();
-  initial.value = true;
-});
-const updateTheme = (darkMode: boolean) => {
-  options.value = {
-    theme: {
-      mode: darkMode ? "dark" : "light",
-    },
-    grid: {
-      borderColor: darkMode ? gridBorder.dark : gridBorder.light, // transparent
-    },
-  };
-  // if (chartAreaRef.value) {
-  //   chartAreaRef.value.updateOptions({
-  //     theme: {
-  //       mode: darkMode ? 'dark' : 'light',
-  //     },
-  //   });
-  // }
-};
-watch(isDark, (state) => {
-  watchTimeout.value = setTimeout(() => {
-    updateTheme(state);
-  }, 50);
-});
-const chartSetup = () => {
-  if (series && series.length > 0) {
-    options.value = {
-      chart: {
-        id: chartId,
-        background: "transparent",
-        width,
-        height,
-        type,
-        toolbar: {
-          show: showToolbar,
-          tools: {
-            download: true,
-            selection: true,
-            zoom: true,
-            zoomin: true,
-            zoomout: true,
-            pan: true,
-            customIcons: [],
-          },
-        },
-        zoom: {
-          enabled: zoom,
-        },
-        animations: {
-          enabled: true,
-          easing: "easein", // linear, easeout, easein, easeinout, swing, bounce, elastic
-          speed: 800,
-        },
-        sparkline: {
-          enabled: sparkline,
-        },
-      },
-      theme: {
-        mode: dark ? "dark" : mode,
-        palette,
-      },
-      plotOptions: {
-        bar: {
-          //   borderRadius: 4,
-          //   borderRadiusApplication: "end",
-          horizontal,
-          // columnWidth: "55%",
-          borderRadius: 3,
-          borderRadiusApplication: "end",
-        },
-      },
-      colors: colors && colors.length > 0 ? colors : undefined,
-      xaxis: {
-        labels: {
-          rotate: labelRotate,
-        },
-        categories,
-        decimalsInFloat: xaxisDecimalsInFloat,
-        tickAmount: xaxisTickamount > 0 ? xaxisTickamount : undefined,
-      },
-      yaxis: {
-        show: yaxisShow,
-        tickAmount: yaxisTickamount,
-        decimalsInFloat: yaxisDecimalsInFloat,
-        min: minYVal,
-        // max: maxYVal != undefined ? maxYVal : undefined
-      },
-      annotations: {
-        yaxis: annotationsYaxis,
-        xaxis: annotationsXaxis,
-      },
-      stroke: {
-        width: strokeWidth,
-        curve: strokestyle,
-      },
-      fill: {
-        opacity,
-      },
-      legend: {
-        show: showLegend,
-        position: legendPosition, // whether to position legends in 1 of 4
-        // direction - top, bottom, left, right
-        horizontalAlign: "center", // when position top/bottom, you can
-        // specify whether to align legends
-        // left, right or center
-        verticalAlign: "middle",
-        labels: {
-          colors: "#8E8E93",
-          useSeriesColors: legendUseSeriesColors,
-        },
-      },
-      grid: {
-        borderColor: dark ? gridBorder.dark : gridBorder.light, // transparent
-        // row: {
-        //   colors: [dark ? '#353537' : '#e9ebec', 'transparent'], // takes an array which will be repeated on columns
-        //   opacity: 0.2,
-        // },
-      },
-      tooltip: {
-        y: {
-          formatter(val: any) {
-            return val;
-          },
-        },
-      },
-      dataLabels: {
-        enabled: showDataLabels,
-      },
-      responsive: [
-        // {
-        //   breakpoint: 480,
-        //   options: {
-        //     chart: {
-        //       width: 200,
-        //     },
-        //     legend: {
-        //       position: 'bottom',
-        //     },
-        //   },
-        // },
-      ],
-    };
-    if (maxYVal != undefined) {
-      options.value.yaxis.max = maxYVal;
+  return Math.max(0, Math.ceil(categories.length / xaxisTickamount) - 1)
+})
+
+const toFixedNumber = (value: number | string, digits: number): string => {
+  const num = typeof value === 'number' ? value : Number(value)
+  if (!Number.isFinite(num)) {
+    return String(value)
+  }
+  return num.toFixed(digits)
+}
+
+const buildMarkLineData = () => {
+  const data: Array<Record<string, unknown>> = []
+  for (const item of annotationsYaxis) {
+    const y = (item as { y?: number }).y
+    if (typeof y === 'number') {
+      const label = (item as { label?: { text?: string } }).label
+      data.push({ yAxis: y, label: { formatter: label?.text ?? String(y) } })
     }
-
-    // chart.value = new ApexCharts(
-    //   document.querySelector('#' + chartId),
-    //   options
-    // );
-    // chart.value.render();
   }
-  return new Promise((resolve) => {
-    resolve(true);
-  });
-};
+  for (const item of annotationsXaxis) {
+    const x = (item as { x?: number | string }).x
+    if (typeof x === 'number' || typeof x === 'string') {
+      const label = (item as { label?: { text?: string } }).label
+      data.push({ xAxis: x, label: { formatter: label?.text ?? String(x) } })
+    }
+  }
+  return data
+}
+
+const buildSeriesOption = (darkMode: boolean): EChartsCoreOption['series'] => {
+  const markLineData = buildMarkLineData()
+  return (series ?? []).map((s, index) => {
+    const base = {
+      name: s.name,
+      data: [...s.data]
+    }
+    if (type === 'bar') {
+      return {
+        ...base,
+        type: 'bar' as const,
+        barMaxWidth: 42,
+        itemStyle: { borderRadius: 3, opacity: opacity ?? 1 },
+        label: { show: showDataLabels, position: isHorizontal.value ? 'right' : 'top' as const, color: echartAxisLabelColor(darkMode) },
+        markLine: markLineData.length > 0 ? { data: markLineData, symbol: 'none' } : undefined
+      }
+    }
+    const color = resolvedColors.value?.[index] ?? '#008FFB'
+    return {
+      ...base,
+      type: 'line' as const,
+      smooth: strokestyle === 'smooth',
+      step: strokestyle === 'stepline' ? ('middle' as const) : false,
+      showSymbol: false,
+      symbol: 'circle',
+      symbolSize: 6,
+      lineStyle: { width: strokeWidth },
+      areaStyle: type === 'area'
+        ? {
+            opacity: opacity ?? 0.25,
+            color: {
+              type: 'linear',
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color },
+                { offset: 1, color: 'transparent' }
+              ]
+            }
+          }
+        : undefined,
+      label: { show: showDataLabels, position: 'top' as const, color: echartAxisLabelColor(darkMode) },
+      markLine: markLineData.length > 0 ? { data: markLineData, symbol: 'none' } : undefined
+    }
+  })
+}
+
+const buildOption = (darkMode: boolean): EChartsCoreOption => {
+  const splitColor = echartSplitLineColor(darkMode)
+  const labelColor = echartAxisLabelColor(darkMode)
+  const tooltipBase = echartTooltipBase(darkMode)
+  const categoryAxis = {
+    type: 'category' as const,
+    data: [...categories],
+    show: !sparkline,
+    axisLine: { lineStyle: { color: splitColor } },
+    axisTick: { show: false },
+    axisLabel: {
+      color: labelColor,
+      rotate: labelRotate,
+      hideOverlap: true,
+      interval: categoryInterval.value,
+      formatter: (value: string) => xaxisDecimalsInFloat > 0 ? toFixedNumber(value, xaxisDecimalsInFloat) : value
+    }
+  }
+  const valueAxis = {
+    type: 'value' as const,
+    show: sparkline ? false : yaxisShow,
+    min: minYVal,
+    max: maxYVal,
+    splitNumber: yaxisTickamount > 0 ? yaxisTickamount : 5,
+    splitLine: { lineStyle: { color: splitColor } },
+    axisLabel: {
+      color: labelColor,
+      formatter: (value: number) => yaxisDecimalsInFloat > 0 ? toFixedNumber(value, yaxisDecimalsInFloat) : String(value)
+    }
+  }
+
+  return {
+    backgroundColor: 'transparent',
+    animationDuration: 800,
+    color: resolvedColors.value,
+    legend: sparkline ? { show: false } : buildEchartLegend(legendPosition, showLegend, darkMode),
+    grid: { left: 8, right: 12, top: showLegend && !sparkline ? 32 : 12, bottom: showLegend && !sparkline ? 32 : 12, containLabel: true },
+    tooltip: {
+      show: true,
+      trigger: 'axis',
+      axisPointer: { type: type === 'bar' ? 'shadow' : 'line' },
+      valueFormatter: (value: unknown) => (typeof value === 'number' || typeof value === 'string' ? String(value) : ''),
+      ...tooltipBase
+    },
+    xAxis: isHorizontal.value ? valueAxis : categoryAxis,
+    yAxis: isHorizontal.value ? categoryAxis : valueAxis,
+    dataZoom: zoom && !sparkline ? [{ type: 'inside' }, { type: 'slider', height: 20 }] : undefined,
+    toolbox: showToolbar && !sparkline
+      ? { show: true, feature: { saveAsImage: { show: true }, dataZoom: { show: true }, restore: { show: true } } }
+      : { show: false },
+    series: buildSeriesOption(darkMode)
+  } as EChartsCoreOption
+}
+
+const refresh = (darkMode: boolean) => {
+  option.value = buildOption(darkMode)
+}
+
+refresh(effectiveDark.value)
+
+onUnmounted(() => {
+  if (themeTimer.value) {
+    clearTimeout(themeTimer.value)
+    themeTimer.value = undefined
+  }
+})
+
+watch(effectiveDark, (darkMode) => {
+  if (themeTimer.value) {
+    clearTimeout(themeTimer.value)
+  }
+  themeTimer.value = setTimeout(() => {
+    refresh(darkMode)
+  }, 50)
+})
+
+watch(
+  () => [series, categories, colors, palette, type, strokestyle, strokeWidth, horizontal, sparkline, showLegend, legendUseSeriesColors, legendPosition, showDataLabels, labelRotate, yaxisShow, yaxisTickamount, xaxisTickamount, minYVal, maxYVal, showToolbar, zoom, opacity],
+  () => {
+    refresh(effectiveDark.value)
+  },
+  { deep: true }
+)
 </script>
 <template>
-  <apexchart
-    v-if="options"
+  <VChart
+    :id="chartId"
     v-bind="$attrs"
-    ref="chartAreaRef"
-    :height="height"
-    :type="type"
-    :options="options"
-    :series="chartSeries"
+    :option="option"
+    :update-options="{ replaceMerge: ['series'] }"
+    autoresize
+    :style="{ height: parsedHeight, width: parsedWidth }"
   />
 </template>

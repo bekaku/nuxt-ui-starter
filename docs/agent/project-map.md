@@ -24,7 +24,7 @@ app/                 main srcDir
   pages/             file-based routes (ai-chats, ai-document-meta, api-client,
                      app-role, app-user, auth, chats, example, my-drive,
                      permission, settings, test + index.vue)
-  plugins/           00.auth.server/client, apexchart, cropperjs, datefns,
+  plugins/           00.auth.server/client, echarts, cropperjs, datefns,
                      pdfVue, plyr, rbac, toast
   types/             hand-maintained frontend types (common.ts,
                      models.ts, props.ts, chart.ts, index.d.ts)

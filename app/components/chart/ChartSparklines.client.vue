@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import type { ChartMode, ChartThemePalete, GridPadding, IChartSeries, Strokestyle } from '~/types/chart';
+import VChart from 'vue-echarts'
+import type { EChartsCoreOption } from 'echarts/core'
+import type { ChartMode, ChartThemePalete, GridPadding, IChartSeries, Strokestyle } from '~/types/chart'
 
 const {
   chartId = 'chart-radar-id',
@@ -10,12 +12,6 @@ const {
   series,
   colors,
   categories,
-  gridPadding = {
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0
-  },
   strokeWidth = 1.5,
   opacity = 0.3,
   tooltipEnable = true,
@@ -40,147 +36,130 @@ const {
   dark?: boolean
   type?: 'area' | 'line' | 'bar'
 }>()
-const chartSeries = ref(series)
-const options = ref<any>()
+
 const { isDark } = useTheme()
-const watchTimeout = ref<any>()
-const chartSparkLinesRef = useTemplateRef<any>('chartSparkLinesRef')
 
-// watchEffect(() => {
-//   if (series && series.length > 0) {
-//     chartSeries.value = series;
-//   }
-// });
-onUnmounted(() => {
-  options.value = undefined
-  chartSeries.value = []
-  if (watchTimeout.value) {
-    clearTimeout(watchTimeout.value)
-    watchTimeout.value = undefined
-  }
-})
+const option = ref<EChartsCoreOption>({})
+const themeTimer = ref<ReturnType<typeof setTimeout> | undefined>()
+const effectiveDark = computed(() => resolveEchartDark(dark, mode, isDark.value))
+const resolvedColors = computed(() => resolveEchartColors(colors, palette))
+const parsedHeight = computed(() => parseEchartSize(height, '120px'))
+const parsedWidth = computed(() => (width === 'auto' ? '100%' : width))
 
-onMounted(() => {
-  chartSetup()
-})
+const buildOption = (darkMode: boolean): EChartsCoreOption => {
+  const tooltipBase = echartTooltipBase(darkMode)
+  const pointCount = Math.max(categories.length, ...series.map((item) => item.data.length))
+  const axisCategories = Array.from(
+    { length: pointCount },
+    (_, index) => categories[index] ?? String(index + 1)
+  )
 
-const updateTheme = (darkMode: boolean) => {
-  if (chartSparkLinesRef.value) {
-    chartSparkLinesRef.value.updateOptions({
-      theme: {
-        mode: darkMode ? 'dark' : 'light'
+  return {
+    backgroundColor: 'transparent',
+    animationDuration: 800,
+    color: resolvedColors.value,
+    grid: { left: 2, right: 2, top: 4, bottom: 2 },
+    tooltip: {
+      show: tooltipEnable,
+      trigger: 'axis',
+      axisPointer: { type: type === 'bar' ? 'shadow' : 'line' },
+      formatter: (params: unknown) => {
+        const list = Array.isArray(params) ? params : [params]
+        const first = list[0] as { dataIndex?: number; seriesName?: string; value?: number | string } | undefined
+        const dataIndex = first?.dataIndex ?? 0
+        const label = categories[dataIndex] ?? '-'
+        const value = first?.value ?? ''
+        return `${label}: ${String(value)}`
+      },
+      ...tooltipBase
+    },
+    xAxis: {
+      type: 'category',
+      show: false,
+      data: axisCategories,
+      boundaryGap: type === 'bar'
+    },
+    yAxis: { type: 'value', show: false, min: 0 },
+    series: series.map((s, index) => {
+      if (type === 'bar') {
+        return {
+          name: s.name,
+          type: 'bar' as const,
+          data: [...s.data],
+          barMaxWidth: 8,
+          itemStyle: { borderRadius: 2, opacity: 1 }
+        }
+      }
+      return {
+        name: s.name,
+        type: 'line' as const,
+        data: [...s.data],
+        smooth: strokestyle === 'smooth',
+        step: strokestyle === 'stepline' ? ('middle' as const) : false,
+        showSymbol: false,
+        symbol: 'circle',
+        symbolSize: 5,
+        lineStyle: { width: strokeWidth },
+        areaStyle: type === 'area'
+          ? {
+              opacity,
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [
+                  { offset: 0, color: resolvedColors.value?.[index] ?? '#008FFB' },
+                  { offset: 1, color: 'transparent' }
+                ]
+              }
+            }
+          : undefined
       }
     })
   }
 }
-watch(isDark, state => {
-  watchTimeout.value = setTimeout(() => {
-    updateTheme(state)
+
+const refresh = (darkMode: boolean) => {
+  option.value = buildOption(darkMode)
+}
+
+refresh(effectiveDark.value)
+
+onUnmounted(() => {
+  if (themeTimer.value) {
+    clearTimeout(themeTimer.value)
+    themeTimer.value = undefined
+  }
+})
+
+watch(effectiveDark, (darkMode) => {
+  if (themeTimer.value) {
+    clearTimeout(themeTimer.value)
+  }
+  themeTimer.value = setTimeout(() => {
+    refresh(darkMode)
   }, 50)
 })
-const getCateByIndex = (index: number) => (categories?.length > 0 ? categories[index] : '-')
-const chartSetup = () => {
-  if (series && series.length > 0) {
-    options.value = {
-      // series: series.value,
-      // series: series,
-      chart: {
-        background: 'transparent',
-        id: chartId,
-        width,
-        height,
-        type,
-        toolbar: {
-          show: false
-        },
-        animations: {
-          enabled: true,
-          easing: 'easein', // linear, easeout, easein, easeinout, swing, bounce, elastic
-          speed: 800
-        },
-        sparkline: {
-          enabled: true
-        }
-      },
-      theme: {
-        mode: dark ? 'dark' : mode,
-        palette
-      },
-      plotOptions: {},
-      colors: colors && colors.length > 0 ? colors : undefined,
-      stroke: {
-        width: type == 'bar' ? 0 : strokeWidth,
-        curve: strokestyle
-      },
-      fill: {
-        // opacity: type == "bar" ? 1 : 0.3,
-        opacity
-      },
-      xaxis: {
-        crosshairs: {
-          width: 1
-        }
-      },
-      yaxis: {
-        min: 0
-      },
-      grid: {
-        padding: gridPadding
-      },
-      tooltip: {
-        enabled: tooltipEnable,
-        fixed: {
-          enabled: false
-        },
-        x: {
-          show: false,
-          formatter(value: any, options: any) {
-            return getCateByIndex(options.dataPointIndex) || '-'
-          }
-        },
-        // y: {
-        //   title: {
-        //     formatter(seriesName: any) {
-        //       return seriesName || '-';
-        //     },
-        //   },
-        // },
-        marker: {
-          show: false
-        }
-      },
-      responsive: [
-        // {
-        //   breakpoint: 480,
-        //   options: {
-        //     chart: {
-        //       width: 200,
-        //     },
-        //     legend: {
-        //       position: 'bottom',
-        //     },
-        //   },
-        // },
-      ]
-    }
-    // chart.value = new ApexCharts(
-    //   document.querySelector('#' + chartId),
-    //   options
-    // );
-    // chart.value.render();
-  }
-}
+
+watch(
+  () => [series, categories, colors, palette, strokeWidth, strokestyle, opacity, tooltipEnable, type],
+  () => {
+    refresh(effectiveDark.value)
+  },
+  { deep: true }
+)
 </script>
 <template>
   <ClientOnly>
-    <apexchart
-      v-if="options"
+    <VChart
+      :id="chartId"
       v-bind="$attrs"
-      ref="chartSparkLinesRef"
-      :height="height"
-      :type="type"
-      :options="options"
-      :series="chartSeries"
+      :option="option"
+      :update-options="{ replaceMerge: ['series'] }"
+      autoresize
+      :style="{ height: parsedHeight, width: parsedWidth }"
     />
   </ClientOnly>
 </template>

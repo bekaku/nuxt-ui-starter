@@ -14,7 +14,7 @@ A production-ready full-stack admin dashboard starter built with **Nuxt 4** and 
 - **Generic CRUD pattern** — single `[crud].vue` dynamic route per feature, driven by reusable `useCrudList` / `useCrudForm` composables
 - **Authentication & authorization** — global route guards (`auth`, `check-permit`), JWT access/refresh cookies, permission-aware UI via `useRbac`
 - **Internationalization** — `en` / `th` locales with namespaced message files and browser-language detection
-- **Rich media support** — charts (ApexCharts, Unovis), image cropping (CropperJS), video playback (Plyr), PDF viewing/manipulation, file upload with compression
+- **Rich media support** — charts (ECharts, Unovis), image cropping (CropperJS), video playback (Plyr), PDF viewing/manipulation, file upload with compression
 - **Self-hosted fonts** (Google Sans, Noto Sans Thai Looped) served locally via `@nuxt/fonts`
 - **Mock API layer** — Nitro server routes under `server/api/mock/` for dashboard, chart, chat, and file endpoints
 
@@ -74,7 +74,7 @@ This is a Nuxt 4 (Vue 3) admin/dashboard starter built on `@nuxt/ui` v4, designe
 
 5. **Components** (`app/components/base/`, `chat/`)
    - ~45 `Base*` primitives (Table, Form, Modal, FileUpload, PdfView, ImageCropper, CameraCapture, InfiniteScroll, etc.) wrapping Nuxt UI. Pages compose these rather than raw UI lib components.
-   - Plugins in `app/plugins/` register client-only libs (apexcharts, plyr, cropperjs, pdf) as lazy components and provide `$datefns`.
+   - Plugins in `app/plugins/` register client-only libs (plyr, cropperjs, pdf) as lazy components and provide `$datefns`.
 
 6. **Backend contract**
    - Real API is external: endpoints derived by convention `/api/{camelCaseEntity}` (+ `/generate/{id}` style actions), JWT in cookies (`_session_`/`_slid_`).
