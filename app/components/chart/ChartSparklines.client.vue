@@ -4,7 +4,7 @@ import type { EChartsCoreOption } from 'echarts/core'
 import type { ChartMode, ChartThemePalete, GridPadding, IChartSeries, Strokestyle } from '~/types/chart'
 
 const {
-  chartId = 'chart-radar-id',
+  chartId = 'chart-sparkline-id',
   height = '160',
   width = 'auto',
   mode = 'light',
@@ -39,12 +39,10 @@ const {
 
 const { isDark } = useTheme()
 
-const option = ref<EChartsCoreOption>({})
-const themeTimer = ref<ReturnType<typeof setTimeout> | undefined>()
 const effectiveDark = computed(() => resolveEchartDark(dark, mode, isDark.value))
 const resolvedColors = computed(() => resolveEchartColors(colors, palette))
 const parsedHeight = computed(() => parseEchartSize(height, '120px'))
-const parsedWidth = computed(() => (width === 'auto' ? '100%' : width))
+const parsedWidth = computed(() => parseEchartSize(width, '100%'))
 
 const buildOption = (darkMode: boolean): EChartsCoreOption => {
   const tooltipBase = echartTooltipBase(darkMode)
@@ -81,6 +79,7 @@ const buildOption = (darkMode: boolean): EChartsCoreOption => {
     },
     yAxis: { type: 'value', show: false, min: 0 },
     series: series.map((s, index) => {
+      const color = pickEchartColor(resolvedColors.value, index)
       if (type === 'bar') {
         return {
           name: s.name,
@@ -99,67 +98,22 @@ const buildOption = (darkMode: boolean): EChartsCoreOption => {
         showSymbol: false,
         symbol: 'circle',
         symbolSize: 5,
-        lineStyle: { width: strokeWidth },
-        areaStyle: type === 'area'
-          ? {
-              opacity,
-              color: {
-                type: 'linear',
-                x: 0,
-                y: 0,
-                x2: 0,
-                y2: 1,
-                colorStops: [
-                  { offset: 0, color: resolvedColors.value?.[index] ?? '#008FFB' },
-                  { offset: 1, color: 'transparent' }
-                ]
-              }
-            }
-          : undefined
+        itemStyle: { color },
+        lineStyle: { width: strokeWidth, color },
+        areaStyle: type === 'area' ? { opacity, color: echartAreaGradient(color) } : undefined
       }
     })
   }
 }
 
-const refresh = (darkMode: boolean) => {
-  option.value = buildOption(darkMode)
-}
-
-refresh(effectiveDark.value)
-
-onUnmounted(() => {
-  if (themeTimer.value) {
-    clearTimeout(themeTimer.value)
-    themeTimer.value = undefined
-  }
-})
-
-watch(effectiveDark, (darkMode) => {
-  if (themeTimer.value) {
-    clearTimeout(themeTimer.value)
-  }
-  themeTimer.value = setTimeout(() => {
-    refresh(darkMode)
-  }, 50)
-})
-
-watch(
-  () => [series, categories, colors, palette, strokeWidth, strokestyle, opacity, tooltipEnable, type],
-  () => {
-    refresh(effectiveDark.value)
-  },
-  { deep: true }
-)
+const option = computed(() => buildOption(effectiveDark.value))
 </script>
 <template>
-  <ClientOnly>
-    <VChart
-      :id="chartId"
-      v-bind="$attrs"
-      :option="option"
-      :update-options="{ replaceMerge: ['series'] }"
-      autoresize
-      :style="{ height: parsedHeight, width: parsedWidth }"
-    />
-  </ClientOnly>
+  <VChart
+    :id="chartId"
+    :option="option"
+    :update-options="{ replaceMerge: ['series'] }"
+    autoresize
+    :style="{ height: parsedHeight, width: parsedWidth }"
+  />
 </template>

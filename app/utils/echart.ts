@@ -1,3 +1,4 @@
+import { color as echartColor } from 'echarts/core'
 import type { ChartPosition, ChartThemePalete } from '~/types/chart'
 
 export const ECHART_GRID_BORDER = {
@@ -33,6 +34,29 @@ export const resolveEchartColors = (
   return undefined
 }
 
+export const pickEchartColor = (colors: string[] | undefined, index: number, fallback = '#008FFB'): string => {
+  if (!colors || colors.length === 0) {
+    return fallback
+  }
+  return colors[index % colors.length] ?? fallback
+}
+
+// Fade to the same hue at alpha 0: a 'transparent' stop is rgba(0,0,0,0) and
+// darkens the gradient on canvas.
+export const echartAreaGradient = (color: string) => {
+  return {
+    type: 'linear' as const,
+    x: 0,
+    y: 0,
+    x2: 0,
+    y2: 1,
+    colorStops: [
+      { offset: 0, color },
+      { offset: 1, color: echartColor.modifyAlpha(color, 0) }
+    ]
+  }
+}
+
 export const resolveEchartDark = (
   dark = false,
   mode: 'light' | 'dark' = 'light',
@@ -40,6 +64,10 @@ export const resolveEchartDark = (
 ): boolean => {
   return dark || mode === 'dark' || isDark
 }
+
+// ApexCharts angles start at 12 o'clock and run clockwise; ECharts gauge angles
+// start at 3 o'clock and run counter-clockwise.
+export const apexAngleToEchart = (angle: number): number => 90 - angle
 
 export const parseEchartSize = (value?: string, fallback = '350px'): string => {
   if (!value || value === 'auto') {

@@ -78,7 +78,7 @@ watch(miniChatGroupId, (state) => {
 <template>
   <div
     v-if="openMiniChatPage && groupId && miniChatGroupId"
-    class="fixed bottom-0 right-16 w-80 sm:w-84 bg-white dark:bg-neutral-900 rounded-t-xl shadow-2xl border border-neutral-200 dark:border-neutral-800 flex flex-col z-50 transition-all duration-300 ease-in-out font-sans"
+    class="fixed bottom-0 right-16 w-80 sm:w-94 bg-white dark:bg-neutral-900 rounded-t-xl shadow-2xl border border-neutral-200 dark:border-neutral-800 flex flex-col z-50 transition-all duration-300 ease-in-out font-sans"
   >
     <!-- Header -->
     <div

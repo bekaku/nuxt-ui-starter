@@ -72,13 +72,11 @@ const {
 
 const { isDark } = useTheme()
 
-const option = ref<EChartsCoreOption>({})
-const themeTimer = ref<ReturnType<typeof setTimeout> | undefined>()
 const isHorizontal = computed(() => horizontal && type === 'bar')
 const effectiveDark = computed(() => resolveEchartDark(dark, mode, isDark.value))
 const resolvedColors = computed(() => resolveEchartColors(colors, palette))
 const parsedHeight = computed(() => parseEchartSize(height, '350px'))
-const parsedWidth = computed(() => (width === 'auto' ? '100%' : width))
+const parsedWidth = computed(() => parseEchartSize(width, '100%'))
 const categoryInterval = computed(() => {
   if (xaxisTickamount <= 0 || categories.length === 0) {
     return 'auto' as const
@@ -130,30 +128,21 @@ const buildSeriesOption = (darkMode: boolean): EChartsCoreOption['series'] => {
         markLine: markLineData.length > 0 ? { data: markLineData, symbol: 'none' } : undefined
       }
     }
-    const color = resolvedColors.value?.[index] ?? '#008FFB'
+    const color = pickEchartColor(resolvedColors.value, index)
     return {
       ...base,
       type: 'line' as const,
+      itemStyle: { color },
+      lineStyle: { width: strokeWidth, color },
       smooth: strokestyle === 'smooth',
       step: strokestyle === 'stepline' ? ('middle' as const) : false,
       showSymbol: false,
       symbol: 'circle',
       symbolSize: 6,
-      lineStyle: { width: strokeWidth },
       areaStyle: type === 'area'
         ? {
             opacity: opacity ?? 0.25,
-            color: {
-              type: 'linear',
-              x: 0,
-              y: 0,
-              x2: 0,
-              y2: 1,
-              colorStops: [
-                { offset: 0, color },
-                { offset: 1, color: 'transparent' }
-              ]
-            }
+            color: echartAreaGradient(color)
           }
         : undefined,
       label: { show: showDataLabels, position: 'top' as const, color: echartAxisLabelColor(darkMode) },
@@ -163,6 +152,7 @@ const buildSeriesOption = (darkMode: boolean): EChartsCoreOption['series'] => {
 }
 
 const buildOption = (darkMode: boolean): EChartsCoreOption => {
+  const hasZoom = zoom && !sparkline
   const splitColor = echartSplitLineColor(darkMode)
   const labelColor = echartAxisLabelColor(darkMode)
   const tooltipBase = echartTooltipBase(darkMode)
@@ -170,6 +160,7 @@ const buildOption = (darkMode: boolean): EChartsCoreOption => {
     type: 'category' as const,
     data: [...categories],
     show: !sparkline,
+    inverse: isHorizontal.value,
     axisLine: { lineStyle: { color: splitColor } },
     axisTick: { show: false },
     axisLabel: {
@@ -198,7 +189,7 @@ const buildOption = (darkMode: boolean): EChartsCoreOption => {
     animationDuration: 800,
     color: resolvedColors.value,
     legend: sparkline ? { show: false } : buildEchartLegend(legendPosition, showLegend, darkMode),
-    grid: { left: 8, right: 12, top: showLegend && !sparkline ? 32 : 12, bottom: showLegend && !sparkline ? 32 : 12, containLabel: true },
+    grid: { left: 8, right: 12, top: showLegend && !sparkline ? 32 : 12, bottom: (showLegend && !sparkline ? 32 : 12) + (hasZoom ? 28 : 0), containLabel: true },
     tooltip: {
       show: true,
       trigger: 'axis',
@@ -208,7 +199,7 @@ const buildOption = (darkMode: boolean): EChartsCoreOption => {
     },
     xAxis: isHorizontal.value ? valueAxis : categoryAxis,
     yAxis: isHorizontal.value ? categoryAxis : valueAxis,
-    dataZoom: zoom && !sparkline ? [{ type: 'inside' }, { type: 'slider', height: 20 }] : undefined,
+    dataZoom: hasZoom ? [{ type: 'inside' }, { type: 'slider', height: 20, bottom: showLegend && legendPosition === 'bottom' ? 32 : 6 }] : undefined,
     toolbox: showToolbar && !sparkline
       ? { show: true, feature: { saveAsImage: { show: true }, dataZoom: { show: true }, restore: { show: true } } }
       : { show: false },
@@ -216,40 +207,11 @@ const buildOption = (darkMode: boolean): EChartsCoreOption => {
   } as EChartsCoreOption
 }
 
-const refresh = (darkMode: boolean) => {
-  option.value = buildOption(darkMode)
-}
-
-refresh(effectiveDark.value)
-
-onUnmounted(() => {
-  if (themeTimer.value) {
-    clearTimeout(themeTimer.value)
-    themeTimer.value = undefined
-  }
-})
-
-watch(effectiveDark, (darkMode) => {
-  if (themeTimer.value) {
-    clearTimeout(themeTimer.value)
-  }
-  themeTimer.value = setTimeout(() => {
-    refresh(darkMode)
-  }, 50)
-})
-
-watch(
-  () => [series, categories, colors, palette, type, strokestyle, strokeWidth, horizontal, sparkline, showLegend, legendUseSeriesColors, legendPosition, showDataLabels, labelRotate, yaxisShow, yaxisTickamount, xaxisTickamount, minYVal, maxYVal, showToolbar, zoom, opacity],
-  () => {
-    refresh(effectiveDark.value)
-  },
-  { deep: true }
-)
+const option = computed(() => buildOption(effectiveDark.value))
 </script>
 <template>
   <VChart
     :id="chartId"
-    v-bind="$attrs"
     :option="option"
     :update-options="{ replaceMerge: ['series'] }"
     autoresize

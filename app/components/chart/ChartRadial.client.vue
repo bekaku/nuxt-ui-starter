@@ -69,12 +69,10 @@ const {
 
 const { isDark } = useTheme()
 
-const option = ref<EChartsCoreOption>({})
-const themeTimer = ref<ReturnType<typeof setTimeout> | undefined>()
 const effectiveDark = computed(() => resolveEchartDark(dark, mode, isDark.value))
 const resolvedColors = computed(() => resolveEchartColors(colors, palette))
 const parsedHeight = computed(() => parseEchartSize(height, '300px'))
-const parsedWidth = computed(() => (width === 'auto' ? '100%' : width))
+const parsedWidth = computed(() => parseEchartSize(width, '100%'))
 
 const toFontSize = (value: string, fallback: number): number => {
   const parsed = Number.parseInt(value, 10)
@@ -92,6 +90,8 @@ const buildOption = (darkMode: boolean): EChartsCoreOption => {
   const maxValue = Math.max(100, ...series)
   const ringWidth = series.length > 1 ? Math.max(8, Math.min(16, Math.floor(72 / series.length))) : 16
 
+  const apexEndAngle = Math.min(endAngle, startAngle + 360)
+
   const gaugeSeries = series.map((value, index) => {
     const ringIndex = index
     const outer = (92 - ringIndex * (ringWidth + 6)) * gaugeRadiusScale
@@ -99,8 +99,8 @@ const buildOption = (darkMode: boolean): EChartsCoreOption => {
     return {
       type: 'gauge' as const,
       name: categories[index] ?? `S${index + 1}`,
-      startAngle,
-      endAngle,
+      startAngle: apexAngleToEchart(startAngle),
+      endAngle: apexAngleToEchart(apexEndAngle),
       min: 0,
       max: maxValue,
       radius: `${Math.max(28, outer)}%`,
@@ -157,40 +157,11 @@ const buildOption = (darkMode: boolean): EChartsCoreOption => {
   }
 }
 
-const refresh = (darkMode: boolean) => {
-  option.value = buildOption(darkMode)
-}
-
-refresh(effectiveDark.value)
-
-onUnmounted(() => {
-  if (themeTimer.value) {
-    clearTimeout(themeTimer.value)
-    themeTimer.value = undefined
-  }
-})
-
-watch(effectiveDark, (darkMode) => {
-  if (themeTimer.value) {
-    clearTimeout(themeTimer.value)
-  }
-  themeTimer.value = setTimeout(() => {
-    refresh(darkMode)
-  }, 50)
-})
-
-watch(
-  () => [series, categories, colors, palette, showLegend, legendUseSeriesColors, legendFloating, legendOffsetX, legendOffsetY, legendPosition, showDataLabels, showDataLabelsName, showDataLabelsValue, startAngle, endAngle, stokeLineCap, valUnit],
-  () => {
-    refresh(effectiveDark.value)
-  },
-  { deep: true }
-)
+const option = computed(() => buildOption(effectiveDark.value))
 </script>
 <template>
   <VChart
     :id="chartId"
-    v-bind="$attrs"
     :option="option"
     :update-options="{ replaceMerge: ['series'] }"
     autoresize

@@ -41,12 +41,10 @@ const {
 
 const { isDark } = useTheme()
 
-const option = ref<EChartsCoreOption>({})
-const themeTimer = ref<ReturnType<typeof setTimeout> | undefined>()
 const effectiveDark = computed(() => resolveEchartDark(dark, mode, isDark.value))
 const resolvedColors = computed(() => resolveEchartColors(colors, palette))
 const parsedHeight = computed(() => parseEchartSize(height, '350px'))
-const parsedWidth = computed(() => (width === 'auto' ? '100%' : width))
+const parsedWidth = computed(() => parseEchartSize(width, '100%'))
 
 const buildOption = (darkMode: boolean): EChartsCoreOption => {
   const tooltipBase = echartTooltipBase(darkMode)
@@ -70,7 +68,7 @@ const buildOption = (darkMode: boolean): EChartsCoreOption => {
         data,
         radius: type === 'donut' ? ['42%', '70%'] : '65%',
         center: ['50%', showLegend && (legendPosition === 'top' || legendPosition === 'bottom') ? '46%' : '50%'],
-        label: { show: showDataLabels },
+        label: { show: showDataLabels, color: echartAxisLabelColor(darkMode) },
         labelLine: { show: showDataLabels },
         itemStyle: {
           borderWidth: strokeWidth,
@@ -82,40 +80,11 @@ const buildOption = (darkMode: boolean): EChartsCoreOption => {
   }
 }
 
-const refresh = (darkMode: boolean) => {
-  option.value = buildOption(darkMode)
-}
-
-refresh(effectiveDark.value)
-
-onUnmounted(() => {
-  if (themeTimer.value) {
-    clearTimeout(themeTimer.value)
-    themeTimer.value = undefined
-  }
-})
-
-watch(effectiveDark, (darkMode) => {
-  if (themeTimer.value) {
-    clearTimeout(themeTimer.value)
-  }
-  themeTimer.value = setTimeout(() => {
-    refresh(darkMode)
-  }, 50)
-})
-
-watch(
-  () => [series, categories, colors, palette, type, showLegend, legendPosition, showDataLabels, strokeWidth],
-  () => {
-    refresh(effectiveDark.value)
-  },
-  { deep: true }
-)
+const option = computed(() => buildOption(effectiveDark.value))
 </script>
 <template>
   <VChart
     :id="chartId"
-    v-bind="$attrs"
     :option="option"
     :update-options="{ replaceMerge: ['series'] }"
     autoresize

@@ -13,7 +13,6 @@ import {
   TooltipComponent
 } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
-import VChart from 'vue-echarts'
 
 use([
   BarChart,
@@ -34,6 +33,6 @@ use([
   CanvasRenderer
 ])
 
-export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.vueApp.component('VChart', VChart)
-})
+// Chart components import `vue-echarts` themselves; this only registers the
+// tree-shaken ECharts modules they rely on.
+export default defineNuxtPlugin(() => {})
