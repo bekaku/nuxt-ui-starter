@@ -95,6 +95,12 @@ Evidence labels:
   optional and only worth adding when the call is shared by several files.
   Use relative paths resolved against `runtimeConfig.public.apiBase`; preserve the existing upload
   path spelling until live contract evidence supports changing it.
+- Display user-supplied or untrusted text (user input, posts, comments, third-party
+  content) with `<BaseContentText>` (`app/components/base/BaseContentText.vue`):
+  it escapes and sanitizes, `urlify` makes URLs clickable links, and `rows` /
+  `show-more` handle truncation. Never render such text with a raw `v-html`.
+  If the source is HTML, convert it to plain text first (see `hackerHtmlToText`
+  in `app/utils/feedUtil.ts`).
 - Gate UI with `v-rbac` / `BaseTable` permission props (UX only, never security).
 - Pages declare `definePageMeta({ pageName, requiresPermission })`;
   keep middleware order `00.seo → 01.auth → 02.check-permit`.

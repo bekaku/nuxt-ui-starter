@@ -103,6 +103,9 @@ its route name must be in `AuthNoFilterPage` (`app/libs/constants.ts`) — ask b
 - IDs are `IdType` (bigint | string). Never convert to `number`.
 - Formatting: 2 spaces, LF, no trailing commas. Quote/semicolon style is mixed across the repo —
   match the file you are editing. No new `any` or `@ts-ignore`.
+- Show user-supplied or untrusted text (user input, posts, comments, third-party content) with
+  `<BaseContentText :content="…" urlify />` — never `v-html` directly. Use `rows` + `show-more` to
+  truncate. For HTML sources, convert to plain text first (`hackerHtmlToText` in `app/utils/feedUtil.ts`).
 - Theme-aware classes (`bg-default`, `text-muted`, `border-default`) over hardcoded colors; check dark mode.
 - Keep the change minimal; check every caller before changing a shared component or composable
   (`grep -rn "<ComponentName\|useThing(" app`).
@@ -117,6 +120,7 @@ its route name must be in `AuthNoFilterPage` (`app/libs/constants.ts`) — ask b
 | Menu shows item, click gives 403 | Menu `permissions` ≠ page `requiresPermission` | Make them match |
 | Two toasts on an error | Wrapper already toasts `AppException` / `ResponseMessage` | Remove the manual error toast; keep the error state |
 | State leaks between users/tabs on SSR | Module-level `ref` used as global state | Use `useState('<domain>:<key>')` |
+| Links in user text are not clickable, or XSS risk from `v-html` | User text rendered with `{{ }}` / raw `v-html` | Render it with `<BaseContentText :content urlify />` |
 | Element hidden by `v-rbac` cannot be found later | `v-rbac` removes it from the DOM | Use `v-if` with `useRbac().hasPermission(...)` if you need to toggle |
 
 ## Done checklist

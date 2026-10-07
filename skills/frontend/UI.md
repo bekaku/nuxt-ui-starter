@@ -15,6 +15,10 @@ Use for production pages, components, layouts, styling, and locale text. Inspect
 - A local `:ui` override is valid for a component-specific layout or slot; the repository uses them in production. Promote an override to `app/app.config.ts` when it should apply across the app. Check light and dark appearance for every new color choice.
 - Follow nearby styling and the repo's 2-space/LF formatting. Use an explanatory comment when it helps preserve a non-obvious invariant; do not add comments that only repeat code.
 
+## Displaying user text
+
+- Use `<BaseContentText>` (`app/components/base/BaseContentText.vue`) for any user-supplied or untrusted text (input, posts, comments, third-party content). It escapes then sanitizes (`inputSanitizeHtml`), `urlify` turns URLs into clickable links, and `rows` / `show-more` truncate with a see-more toggle. Do not use `v-html` directly; for HTML sources convert to plain text first (e.g. `hackerHtmlToText` in `app/utils/feedUtil.ts`). Examples: `app/components/example/ExampleFeedItem.vue`, `ExampleCommentThread.vue`.
+
 ## i18n
 
 - User-facing text belongs in both `i18n/locales/en/<file>.json` and `i18n/locales/th/<file>.json` (`app`, `base`, `helper`, `model`, or `error`). The files are merged into one message tree — the file name is not a key prefix — so put a key in the file that already holds its top-level family (`nav.*` → `app.json`, `success.*` → `helper.json`, `model.*` → `model.json`). Root `i18n/locales/en.json` / `th.json` are not loaded.
