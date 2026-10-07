@@ -681,5 +681,18 @@
     "new": "Add new",
     "view": "Edit",
     "copy": "Copy"
+  },
+  "feedThread": {
+    "post": "{name}'s post",
+    "comments": "{count} comments",
+    "noComments": "No comments yet",
+    "loadFailed": "Could not load this post",
+    "retry": "Try again",
+    "collapse": "Collapse thread",
+    "expand": "Expand thread",
+    "moreReplies": "{count} more replies",
+    "viewReplies": "View {count} replies",
+    "hideReplies": "Hide replies",
+    "deleted": "[deleted]"
   }
 }

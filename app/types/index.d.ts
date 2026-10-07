@@ -67,6 +67,20 @@ export interface FeedItem {
   domain: string;
   points: number;
   time_ago: string;
-  comments_count: number;
+  comments_count?: number;
   type: string;
+}
+export interface FeedComment {
+  id: number;
+  level: number;
+  user?: string;
+  time_ago: string;
+  content?: string;
+  dead?: boolean;
+  deleted?: boolean;
+  comments: FeedComment[];
+}
+export interface FeedItemDetail extends FeedItem {
+  content?: string;
+  comments: FeedComment[];
 }

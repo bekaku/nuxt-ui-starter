@@ -3,11 +3,15 @@ import { ULink } from "#components";
 import type { SelectItem } from "@nuxt/ui";
 import type { FeedItem } from "~/types";
 
-const props = defineProps<{
-  item: FeedItem;
-  index?: number;
-  showComment?: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    item: FeedItem;
+    index?: number;
+    showComment?: boolean;
+    openable?: boolean;
+  }>(),
+  { openable: true },
+);
 const { appNavigateTo } = useBase();
 const { t } = useLang();
 const sortItems = ref<SelectItem[]>([
@@ -35,12 +39,25 @@ const sortModel = ref("NEW_COMMENT");
 const onMenuTap = (e: any) => {
   console.log("onMenuTap", e);
 };
-const onItemClick = (e: any) => {
+// Open the post dialog unless the click landed on an interactive child (link, button, menu)
+const onItemClick = (e: MouseEvent) => {
+  if (props.showComment || !props.openable) {
+    return;
+  }
+  const target = e.target as HTMLElement | null;
+  if (target?.closest("a, button, [role='menuitem'], textarea, input")) {
+    return;
+  }
   appNavigateTo(`/example/feed/${props.item.id}`);
 };
 </script>
 <template>
-  <UCard class="mb-8" :ui="{ body: 'p-0! sm:p-0!' }">
+  <UCard
+    class="mb-8"
+    :class="{ 'cursor-pointer': !showComment && openable }"
+    :ui="{ body: 'p-0! sm:p-0!' }"
+    @click="onItemClick"
+  >
     <BaseItem dense top :separator="false" class="pt-4">
       <template #start>
         <UAvatar

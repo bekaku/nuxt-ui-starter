@@ -654,5 +654,7 @@ onLoadData();
         </div>
       </div>
     </aside>
+    <!-- Post detail dialog (child route /example/feed/:id) -->
+    <NuxtPage />
   </main>
 </template>
