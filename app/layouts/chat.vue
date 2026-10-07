@@ -5,7 +5,7 @@ import type { GroupChat } from "~/types/models";
 const route = useRoute();
 const toast = useToast();
 const { t } = useLang();
-const { isDark, appLayout } = useTheme();
+const { appLayout } = useTheme();
 const { chatHistory, isInitial, initHistoryData } = useAppChat();
 
 const open = ref(false);
@@ -107,22 +107,16 @@ onMounted(() => {
         <div class="flex w-full justify-between">
           <UButton
             v-if="!collapsed"
-            :avatar="{
-              src: !isDark ? '/logo/logo-black.png' : '/logo/logo-white.png',
-              alt: 'App',
-            }"
             to="/"
             variant="ghost"
             :square="collapsed"
             class="data-[state=open]:bg-elevated cursor-pointer justify-start"
             :class="[!collapsed && 'py-2']"
-            :ui="{
-              leadingAvatar: [
-                'rounded-none  bg-transparent',
-                !collapsed ? 'size-10' : 'size-5',
-              ],
-            }"
-          />
+          >
+            <template #leading>
+              <BaseLogo alt="App" :width="80" img-class="size-10 object-contain" />
+            </template>
+          </UButton>
           <UDashboardSidebarCollapse icon="lucide:sidebar" />
         </div>
       </template>

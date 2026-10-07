@@ -4,7 +4,6 @@ import type { DropdownMenuItem } from "@nuxt/ui";
 defineProps<{
   collapsed?: boolean;
 }>();
-const {isDark} = useTheme();
 const teams = ref([
   {
     label: "Nuxt",
@@ -76,18 +75,19 @@ const items = computed<DropdownMenuItem[][]>(() => {
     />
   </UDropdownMenu> -->
   <UButton
-    :avatar="{
-      src: !isDark ? '/logo/logo-black.png' :'/logo/logo-white.png',
-      alt: 'App',
-    }"
     to="/"
     variant="ghost"
     block
     :square="collapsed"
     class="data-[state=open]:bg-elevated cursor-pointer justify-start"
     :class="[!collapsed && 'py-2']"
-    :ui="{
-          leadingAvatar: ['rounded-none  bg-transparent', !collapsed ?'size-10':'size-7' ],
-      }"
-  />
+  >
+    <template #leading>
+      <BaseLogo
+        alt="App"
+        :width="80"
+        :img-class="!collapsed ? 'size-10 object-contain' : 'size-7 object-contain'"
+      />
+    </template>
+  </UButton>
 </template>

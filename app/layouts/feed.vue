@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
-const { isDark } = useTheme();
 const items: NavigationMenuItem[][] = [
   [
     {
@@ -31,13 +30,11 @@ const items: NavigationMenuItem[][] = [
 <template>
   <div>
     <UHeader class="w-full" to="#" :ui="{container:'max-w-[1440px]'}">
-      <template #title>
+      <!-- #left (not #title): UHeader wraps #title in its own <a>, and our content has a <ULink> -> nested anchors -> SSR/hydration duplicate -->
+      <template #left>
         <div class="flex gap-2 items-center">
           <ULink to="/">
-            <NuxtImg
-              :src="!isDark ? '/logo/logo-black.png' : '/logo/logo-white.png'"
-              width="55"
-            />
+            <BaseLogo :width="110" img-class="w-[55px]" />
           </ULink>
 
           <!-- Show only large device -->

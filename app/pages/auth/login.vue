@@ -9,7 +9,6 @@ useSeoMeta({
   title: "Login",
 });
 const { t } = useLang();
-const { isDark } = useTheme();
 const { getPageQuery } = useBase();
 const { signin, loading } = useAuth();
 const redirectTimeout = ref<any>(null);
@@ -107,10 +106,7 @@ onBeforeUnmount(() => {
         <div class="mb-7">
           <div class="w-full flex justify-center py-4">
             <div>
-              <NuxtImg
-                :src="!isDark ? '/logo/logo-black.png' : '/logo/logo-white.png'"
-                width="85"
-              />
+              <BaseLogo :width="170" img-class="w-[85px]" />
             </div>
           </div>
 

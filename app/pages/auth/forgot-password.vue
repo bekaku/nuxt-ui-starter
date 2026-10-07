@@ -13,7 +13,6 @@ useSeoMeta({
 const { t } = useLang()
 const { inputSanitizeHtml } = useBase()
 const api = useApi()
-const { isDark } = useTheme();
 type Step = 'email' | 'code' | 'password' | 'success'
 const step = ref<Step>('email')
 const stepOrder: Exclude<Step, 'success'>[] = ['email', 'code', 'password']
@@ -213,7 +212,7 @@ onBeforeUnmount(clearResendTimer)
   <div class="flex min-h-dvh items-center justify-center bg-white dark:bg-neutral-950 py-10 px-5">
     <div class="w-full max-w-100">
       <div class="mb-7 flex flex-col items-center text-center">
-        <NuxtImg   :src="!isDark ? '/logo/logo-black.png' : '/logo/logo-white.png'" width="72" height="72" alt="RAG AI" />
+        <BaseLogo :width="144" :height="144" alt="RAG AI" img-class="size-18 object-contain" />
 
         <h1 class="mt-4 text-2xl font-bold text-black dark:text-white">
           {{ $t('authen.forgotPasswordHeading') }}
