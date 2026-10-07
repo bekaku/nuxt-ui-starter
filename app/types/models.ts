@@ -291,3 +291,11 @@ export interface FaceRecognitionDetechResponse {
   detectionTime? :string
   status? :string
 }
+
+export interface ExampleTask {
+  id: number
+  task: string
+  description: string
+  chips: string[]
+  avatar: string
+}

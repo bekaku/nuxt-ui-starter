@@ -5,12 +5,16 @@ const {
   valueKey,
   showAction = false,
   includeIndexAsKey = false,
+  listClass,
+  ghostClass = 'drag-ghost',
 } = defineProps<{
   group?: string
   labelKey?: string
   valueKey: string
   showAction?: boolean
   includeIndexAsKey?: boolean
+  listClass?: string
+  ghostClass?: string
 }>()
 const { t } = useLang()
 const modelValue = defineModel<any[]>({ default: () => [] })
@@ -53,7 +57,8 @@ const onDragEnd = (event: any) => {
       v-model="modelValue"
       :animation="250"
       :group="group"
-      class="drop-zone"
+      :class="listClass"
+      :ghost-class="ghostClass"
       @start="onDragStart"
       @end="onDragEnd"
     >
@@ -76,14 +81,7 @@ const onDragEnd = (event: any) => {
   </div>
 </template>
 <style lang="css" scoped>
-.drop-zone {
-  min-height: 100vh; /* ปรับตัวเลขได้ตามความเหมาะสมของ UI คุณ */
-  background-color: var(--color-neutral-100);
-  padding-bottom: 10px;
-}
-.dark {
-  .drop-zone {
-    background-color: var(--color-neutral-600);
-  }
+:deep(.drag-ghost) {
+  opacity: 0.4;
 }
 </style>

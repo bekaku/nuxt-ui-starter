@@ -1,15 +1,53 @@
 <script setup lang="ts">
-import type { SortableEvent } from "vue-draggable-plus";
-import { VueDraggable } from "vue-draggable-plus";
+import type { ExampleTask } from "~/types/models";
 useSeoMeta({
   title: "Darg and Drop",
 });
-const { isMobile } = useDevice();
-// const drgaGroup = 'people';
-const listHeight = "65vh";
 const draging = ref(false);
-const draging2 = ref(false);
-const todoItems = ref<any[]>([
+
+// Auto-scroll the board sideways while a card is dragged near its left/right edge
+const scrollArea = useTemplateRef<{ $el: HTMLElement }>("scrollArea");
+const EDGE_SIZE = 160;
+const MAX_SCROLL_SPEED = 32;
+let pointerX = 0;
+let scrollFrame = 0;
+
+const trackPointer = (event: MouseEvent) => {
+  pointerX = event.clientX;
+};
+const autoScroll = () => {
+  const el = scrollArea.value?.$el;
+  if (el) {
+    const rect = el.getBoundingClientRect();
+    const toLeft = pointerX - rect.left;
+    const toRight = rect.right - pointerX;
+    if (toLeft < EDGE_SIZE) {
+      el.scrollLeft -=
+        MAX_SCROLL_SPEED * Math.min(1, (EDGE_SIZE - toLeft) / EDGE_SIZE);
+    } else if (toRight < EDGE_SIZE) {
+      el.scrollLeft +=
+        MAX_SCROLL_SPEED * Math.min(1, (EDGE_SIZE - toRight) / EDGE_SIZE);
+    }
+  }
+  scrollFrame = requestAnimationFrame(autoScroll);
+};
+const stopAutoScroll = () => {
+  cancelAnimationFrame(scrollFrame);
+  document.removeEventListener("dragover", trackPointer);
+  document.removeEventListener("pointermove", trackPointer);
+};
+const onDragStart = () => {
+  draging.value = true;
+  document.addEventListener("dragover", trackPointer);
+  document.addEventListener("pointermove", trackPointer);
+  scrollFrame = requestAnimationFrame(autoScroll);
+};
+const onDragEnd = () => {
+  draging.value = false;
+  stopAutoScroll();
+};
+onBeforeUnmount(stopAutoScroll);
+const todoItems = ref<ExampleTask[]>([
   {
     id: 1,
     task: "Task 1",
@@ -47,7 +85,7 @@ const todoItems = ref<any[]>([
     avatar: "https://cdn.quasar.dev/img/avatar3.jpg",
   },
 ]);
-const inProgressItems = ref<any[]>([
+const inProgressItems = ref<ExampleTask[]>([
   {
     id: 6,
     task: "Task 2",
@@ -84,7 +122,7 @@ const inProgressItems = ref<any[]>([
     avatar: "https://cdn.quasar.dev/img/avatar3.jpg",
   },
 ]);
-const testingItems = ref<any[]>([
+const testingItems = ref<ExampleTask[]>([
   {
     id: 11,
     task: "Task 24",
@@ -121,7 +159,7 @@ const testingItems = ref<any[]>([
     avatar: "https://cdn.quasar.dev/img/avatar3.jpg",
   },
 ]);
-const doneItems = ref<any[]>([
+const doneItems = ref<ExampleTask[]>([
   {
     id: 16,
     task: "Task 8",
@@ -144,7 +182,7 @@ const doneItems = ref<any[]>([
     avatar: "https://cdn.quasar.dev/img/avatar3.jpg",
   },
 ]);
-const deployItems = ref<any[]>([
+const deployItems = ref<ExampleTask[]>([
   {
     id: 19,
     task: "Task 19",
@@ -168,300 +206,107 @@ const deployItems = ref<any[]>([
   },
 ]);
 
-const log = (ctx: any) => {
-  console.log("log", ctx);
-};
-const onStartDrag2 = (event: SortableEvent) => {
-  draging2.value = true;
-};
-const onEndDrag2 = (event: SortableEvent) => {
-  draging2.value = false;
-};
-const onDragStart = (event: any) => {
-  draging.value = true;
-  console.log("event", event);
-};
 
-const onDragEnd = (event: any) => {
-  console.log("event", event);
-  draging.value = false;
-};
+const columns = [
+  {
+    key: "todo",
+    title: "Todo",
+    icon: "lucide:file",
+    iconClass: "text-warning",
+    dot: "bg-warning",
+    accent: "bg-warning",
+    items: todoItems
+  },
+  {
+    key: "in-progress",
+    title: "In Progress",
+    icon: "lucide:clock",
+    iconClass: "text-primary",
+    dot: "bg-primary",
+    accent: "bg-primary",
+    items: inProgressItems
+  },
+  {
+    key: "testing",
+    title: "Testing",
+    icon: "lucide:bug",
+    iconClass: "text-error",
+    dot: "bg-error",
+    accent: "bg-error",
+    items: testingItems
+  },
+  {
+    key: "done",
+    title: "Done",
+    icon: "lucide:check-circle-2",
+    iconClass: "text-success",
+    dot: "bg-success",
+    accent: "bg-success",
+    items: doneItems
+  },
+  {
+    key: "deploy",
+    title: "Deploy",
+    icon: "lucide:rocket",
+    iconClass: "text-info",
+    dot: "bg-info",
+    accent: "bg-info",
+    items: deployItems
+  }
+];
 </script>
 
 <template>
   <BaseDashboardPanel id="example-drag-drop" title="Darg and Drop" body-class="max-w-full">
     <UScrollArea
+      ref="scrollArea"
       orientation="horizontal"
-      class="w-full data-[orientation=vertical]:h-96 p-4"
+      class="w-full p-4"
     >
-      <div class="flex flex-none gap-4">
-         <UCard
-          title="Draggable Component"
-          class="w-[350px] min-h-45 rounded-md"
-          :ui="{ body: 'p-0! sm:p-0!' }"
-          :class="{ 'border border-error border-dashed': draging }"
+      <div class="flex flex-none items-start gap-4">
+        <section
+          v-for="col in columns"
+          :key="col.key"
+          class="w-[320px] shrink-0 rounded-xl bg-elevated/50 ring ring-default transition-colors"
+          :class="{ 'ring-primary/50 ring-dashed bg-primary/5': draging }"
         >
-          <UScrollArea orientation="vertical" class="w-full h-[75vh]">
+          <header class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center gap-2">
+              <span class="size-2.5 rounded-full" :class="col.dot" />
+              <h3 class="text-sm font-semibold text-highlighted">
+                {{ col.title }}
+              </h3>
+            </div>
+            <UBadge
+              color="neutral"
+              variant="subtle"
+              size="sm"
+              :label="col.items.value.length"
+            />
+          </header>
+          <UScrollArea orientation="vertical" class="h-[72vh] w-full">
             <BaseDragable
-              v-model="deployItems"
+              v-model="col.items.value"
               group="my-tasks"
               label-key="task"
               value-key="id"
+              list-class="flex min-h-[70vh] flex-col gap-3 px-3 pb-3"
               @on-drag-start="onDragStart"
               @on-drag-end="onDragEnd"
             >
-              <template #item="{ item, index }">
-                <div
+              <template #item="{ item }">
+                <ExampleTaskCard
                   v-if="item"
-                  class="my-4 mx-2 bg-white dark:bg-neutral-800 p-2 rounded-md"
-                >
-                  <div class="flex flex-col gap-2">
-                    <div class="text-md font-bold">{{ item.task }}</div>
-                    <div>{{ item.description }}</div>
-                    <div class="flex gap-2 pt-2">
-                      <UBadge
-                        v-for="(chip, chipIndex) in item.chips"
-                        :key="`${index}-chip-${chipIndex}-${chip}`"
-                      >
-                        {{ chip }}
-                      </UBadge>
-                    </div>
-                  </div>
-                  <BaseItem :separator="false">
-                    <template #start>
-                      <Icon name="lucide:check" class="text-success" />
-                    </template>
-                    <template #end>
-                      <UAvatar :src="item.avatar" loading="lazy" />
-                    </template>
-                  </BaseItem>
-                </div>
+                  :item="item"
+                  :icon="col.icon"
+                  :icon-class="col.iconClass"
+                  :accent="col.accent"
+                />
               </template>
             </BaseDragable>
           </UScrollArea>
-        </UCard>
-        <!-- Todo -->
-        <div
-          class="w-[350px] min-h-full bg-neutral-100 dark:bg-neutral-700 border border-default rounded-md"
-          :class="{ 'border-primary border-dashed': draging }"
-        >
-          <BaseItem
-            :separator="true"
-            title="Todo"
-            class="bg-white dark:bg-neutral-800 rounded-t-md"
-          >
-            <template #end>
-              <UBadge color="neutral" :label="todoItems.length" />
-            </template>
-          </BaseItem>
-          <UScrollArea orientation="vertical" class="w-full h-[75vh]">
-            <VueDraggable
-              v-model="todoItems"
-              :animation="250"
-              group="my-tasks"
-              class="drop-zone px-2"
-              @start="onDragStart"
-              @end="onDragEnd"
-            >
-              <div
-                v-for="(element, index) in todoItems"
-                :key="element.id"
-                class="my-4 bg-white dark:bg-neutral-800 p-2 rounded-md"
-              >
-                <div class="flex flex-col gap-2">
-                  <div class="text-md font-bold">{{ element.task }}</div>
-                  <div>{{ element.description }}</div>
-                  <div class="flex gap-2 pt-2">
-                    <UBadge
-                      v-for="(chip, chipIndex) in element.chips"
-                      :key="`${index}-chip-${chipIndex}-${chip}`"
-                    >
-                      {{ chip }}
-                    </UBadge>
-                  </div>
-                </div>
-                <BaseItem :separator="false">
-                  <template #start>
-                    <Icon name="lucide:file" class="text-warning" />
-                  </template>
-                  <template #end>
-                    <UAvatar :src="element.avatar" loading="lazy" />
-                  </template>
-                </BaseItem>
-              </div>
-            </VueDraggable>
-          </UScrollArea>
-        </div>
-        <!-- In Progress -->
-        <div
-          class="w-[350px] min-h-full bg-neutral-100 dark:bg-neutral-700 border border-default rounded-md"
-          :class="{ 'border-primary border-dashed': draging }"
-        >
-          <BaseItem
-            :separator="true"
-            title="In Progress"
-            class="bg-white dark:bg-neutral-800 rounded-t-md"
-          >
-            <template #end>
-              <UBadge color="neutral" :label="inProgressItems.length" />
-            </template>
-          </BaseItem>
-          <UScrollArea orientation="vertical" class="w-full h-[75vh]">
-            <VueDraggable
-              v-model="inProgressItems"
-              :animation="250"
-              group="my-tasks"
-              class="drop-zone px-2"
-              @start="onDragStart"
-              @end="onDragEnd"
-            >
-              <div
-                v-for="(element, index) in inProgressItems"
-                :key="element.id"
-                class="my-4 bg-white dark:bg-neutral-800 p-2 rounded-md"
-              >
-                <div class="flex flex-col gap-2">
-                  <div class="text-md font-bold">{{ element.task }}</div>
-                  <div>{{ element.description }}</div>
-                  <div class="flex gap-2 pt-2">
-                    <UBadge
-                      v-for="(chip, chipIndex) in element.chips"
-                      :key="`${index}-chip-${chipIndex}-${chip}`"
-                    >
-                      {{ chip }}
-                    </UBadge>
-                  </div>
-                </div>
-                <BaseItem :separator="false">
-                  <template #start>
-                    <Icon name="lucide:clock" class="text-primary" />
-                  </template>
-                  <template #end>
-                    <UAvatar :src="element.avatar" loading="lazy" />
-                  </template>
-                </BaseItem>
-              </div>
-            </VueDraggable>
-          </UScrollArea>
-        </div>
-        <!-- Testing -->
-        <div
-          class="w-[350px] min-h-full bg-neutral-100 dark:bg-neutral-700 border border-default rounded-md"
-          :class="{ 'border-primary border-dashed': draging }"
-        >
-          <BaseItem
-            :separator="true"
-            title="Testing"
-            class="bg-white dark:bg-neutral-800 rounded-t-md"
-          >
-            <template #end>
-              <UBadge color="neutral" :label="testingItems.length" />
-            </template>
-          </BaseItem>
-          <UScrollArea orientation="vertical" class="w-full h-[75vh]">
-            <VueDraggable
-              v-model="testingItems"
-              :animation="250"
-              group="my-tasks"
-              class="drop-zone px-2"
-              @start="onDragStart"
-              @end="onDragEnd"
-            >
-              <div
-                v-for="(element, index) in testingItems"
-                :key="element.id"
-                class="my-4 bg-white dark:bg-neutral-800 p-2 rounded-md"
-              >
-                <div class="flex flex-col gap-2">
-                  <div class="text-md font-bold">{{ element.task }}</div>
-                  <div>{{ element.description }}</div>
-                  <div class="flex gap-2 pt-2">
-                    <UBadge
-                      v-for="(chip, chipIndex) in element.chips"
-                      :key="`${index}-chip-${chipIndex}-${chip}`"
-                    >
-                      {{ chip }}
-                    </UBadge>
-                  </div>
-                </div>
-                <BaseItem :separator="false">
-                  <template #start>
-                    <Icon name="lucide:bug" class="text-error" />
-                  </template>
-                  <template #end>
-                    <UAvatar :src="element.avatar" loading="lazy" />
-                  </template>
-                </BaseItem>
-              </div>
-            </VueDraggable>
-          </UScrollArea>
-        </div>
-        <!-- Done -->
-        <div
-          class="w-[350px] min-h-full bg-neutral-100 dark:bg-neutral-700 border border-default rounded-md"
-          :class="{ 'border-primary border-dashed': draging }"
-        >
-          <BaseItem
-            :separator="true"
-            title="Done"
-            class="bg-white dark:bg-neutral-800 rounded-t-md"
-          >
-            <template #end>
-              <UBadge color="neutral" :label="doneItems.length" />
-            </template>
-          </BaseItem>
-          <UScrollArea orientation="vertical" class="w-full h-[75vh]">
-            <VueDraggable
-              v-model="doneItems"
-              :animation="250"
-              group="my-tasks"
-              class="drop-zone px-2"
-              @start="onDragStart"
-              @end="onDragEnd"
-            >
-              <div
-                v-for="(element, index) in doneItems"
-                :key="element.id"
-                class="my-4 bg-white dark:bg-neutral-800 p-2 rounded-md"
-              >
-                <div class="flex flex-col gap-2">
-                  <div class="text-md font-bold">{{ element.task }}</div>
-                  <div>{{ element.description }}</div>
-                  <div class="flex gap-2 pt-2">
-                    <UBadge
-                      v-for="(chip, chipIndex) in element.chips"
-                      :key="`${index}-chip-${chipIndex}-${chip}`"
-                    >
-                      {{ chip }}
-                    </UBadge>
-                  </div>
-                </div>
-                <BaseItem :separator="false">
-                  <template #start>
-                    <Icon name="lucide:check" class="text-success" />
-                  </template>
-                  <template #end>
-                    <UAvatar :src="element.avatar" loading="lazy" />
-                  </template>
-                </BaseItem>
-              </div>
-            </VueDraggable>
-          </UScrollArea>
-        </div>
+        </section>
       </div>
     </UScrollArea>
   </BaseDashboardPanel>
 </template>
-<style lang="css" scoped>
-.drop-zone {
-  min-height: 100vh; /* ปรับตัวเลขได้ตามความเหมาะสมของ UI คุณ */
-  background-color: var(--color-neutral-100);
-  padding-bottom: 10px;
-}
-
-.dark {
-  .drop-zone {
-    background-color: var(--color-neutral-600);
-  }
-}
-</style>
