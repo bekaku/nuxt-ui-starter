@@ -17,10 +17,21 @@
     "settingsPublicProfile": "Public profile",
     "settingsNotification": "Notification",
     "settingsSecurity": "Password and authentication",
-    "settingsEmail": "Email"
+    "settingsEmail": "Email",
+    "manualSubtitle": "System manual for admins, developers and integration teams",
+    "manualSearchPlaceholder": "Search manuals by title or description",
+    "manualEmpty": "No manuals match your search",
+    "manualResultCount": "{0} topics found",
+    "manualBack": "Back to manuals",
+    "manualPrev": "Previous topic",
+    "manualNext": "Next topic",
+    "manualNotFound": "Manual content not found",
+    "manualFallbackNotice": "English content is not available yet, showing the Thai version",
+    "manualUpdatedAt": "Last updated {0}"
   },
   "nav": {
     "dashboard": "Dashboard",
+    "manual": "User manual",
     "developers": "Developer",
     "forDeveloper": "Developer",
     "forAdmin": "Admininstrator",

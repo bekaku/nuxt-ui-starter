@@ -17,10 +17,21 @@
     "settingsPublicProfile": "โปรไฟล์สาธารณะ",
     "settingsNotification": "แจ้งเตือน",
     "settingsSecurity": "รหัสผ่านและการเข้าสู่ระบบ",
-    "settingsEmail": "อีเมล์"
+    "settingsEmail": "อีเมล์",
+    "manualSubtitle": "คู่มือการใช้งานระบบสำหรับผู้ดูแล นักพัฒนา และทีมที่เชื่อมต่อระบบ",
+    "manualSearchPlaceholder": "ค้นหาคู่มือจากชื่อหรือคำอธิบาย",
+    "manualEmpty": "ไม่พบคู่มือที่ตรงกับคำค้นหา",
+    "manualResultCount": "พบ {0} เรื่อง",
+    "manualBack": "กลับไปหน้าคู่มือ",
+    "manualPrev": "เรื่องก่อนหน้า",
+    "manualNext": "เรื่องถัดไป",
+    "manualNotFound": "ไม่พบเนื้อหาคู่มือเรื่องนี้",
+    "manualFallbackNotice": "ยังไม่มีเนื้อหาภาษาอังกฤษ กำลังแสดงเนื้อหาภาษาไทย",
+    "manualUpdatedAt": "อัปเดตล่าสุด {0}"
   },
   "nav": {
     "dashboard": "หน้าหลัก",
+    "manual": "คู่มือการใช้งาน",
     "developers": "นักพัฒนา",
     "forDeveloper": "สำหรับนักพัฒนา",
     "forAdmin": "ผู้ดูแลระบบ",

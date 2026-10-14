@@ -11,6 +11,7 @@ shape (When to use → Read first → decision table / recipe → Rules → Comm
 | "Add a Foo management page", "add a column/filter to the user list", "Delete button missing on roles" | `crud-module` | `skills/frontend/CRUD.md` (X5–X9) |
 | "Add a settings page", "new dashboard widget", "change this component", "add a menu item", "translate this label" | `nuxt-frontend` | `skills/frontend/UI.md`, `TYPES_VALIDATION.md` |
 | "Hide this button for users without X", "page should require permission Y" | `nuxt-frontend` | `skills/frontend/AUTH.md` |
+| "Add a user-manual topic", "new manual category", "manual card or content missing" | `nuxt-frontend` | — |
 | "Call the new /api/foo endpoint", "response shape changed", "upload fails", "stream stops" | `api-integration` | `skills/frontend/API.md`, `docs/API_CONTRACT.md` |
 | "Login / linked account / refresh token problem" | `api-integration` | `skills/frontend/AUTH.md` |
 | "New entity screen on a new endpoint" | `crud-module` + `api-integration` | — |

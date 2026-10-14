@@ -47,6 +47,7 @@ WORKDIR /app
 
 # Copy built artifacts with correct permissions
 COPY --chown=node:node --from=build /app/.output /app
+COPY --chown=node:node --from=build /app/manuals /app/manuals
 # COPY --chown=node:node --from=build /app/node_modules /app/node_modules
 COPY --chown=node:node --from=build /app/ecosystem.config.cjs /app
 

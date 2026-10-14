@@ -43,6 +43,7 @@ you add or change a backend call. Skip this skill for docs-only work.
 | A browser-only plugin | `app/plugins/<name>.client.ts` | `app/plugins/cropperjs.client.ts` |
 | App-wide Nuxt UI defaults / colors | `app/app.config.ts`; CSS tokens in `app/assets/css/main.css` | — |
 | A sidebar entry | `appNavs` in `app/composables/useMenu.ts` (hardcoded, filtered by `permissions`) | existing items |
+| A user-manual topic or category | `manuals/<slug>.md` + registry entry in `app/libs/manuals.ts` | `manuals/admin-getting-started.md`, `app/pages/manual/` |
 | UI text | `i18n/locales/en/<file>.json` **and** `i18n/locales/th/<file>.json` | see i18n below |
 
 Layouts: pages use `default` unless `definePageMeta({ layout: … })` says otherwise (`false` for the
@@ -77,6 +78,30 @@ login screens; `ai`, `chat`, `feed`, `empty` exist in `app/layouts/`).
 Every authenticated route is protected by `01.auth.global.ts` automatically. To make a page public,
 its route name must be in `AuthNoFilterPage` (`app/libs/constants.ts`) — ask before adding one.
 
+## Recipe: user manual (คู่มือการใช้งาน)
+
+Manual content lives in `manuals/<slug>.md` at the project root; structure (categories, cards,
+icons, Thai/English titles) lives in `app/libs/manuals.ts`. The shell pages
+`app/pages/manual/index.vue` (cards + search) and `app/pages/manual/[slug].vue` (markdown render)
+already exist — adding a topic usually needs no new component.
+
+1. Create `manuals/<slug>.md`: slug is lowercase letters, digits, hyphens (`/^[a-z0-9-]{1,80}$/`,
+   enforced by the content endpoint). Start with `# Title`, Thai-first, no backend endpoint/field
+   claims without live evidence (`BACKEND_NOT_ACCESSIBLE`).
+2. Register it in `manualCategories` (`app/libs/manuals.ts`): pick a category (or add one with
+   `titleTh`/`titleEn`), add `{ slug, icon, titleTh, titleEn, descTh, descEn }`. Every registered
+   slug must have its `.md` file, and vice versa.
+3. The detail page fetches `/api/manuals/content?slug=…&locale=…` (local Nitro, `useFetch` —
+   not the Spring Boot backend) and renders with
+   `<BaseMarkdownPreview :key="content" :content="content" />` (`:key` forces a remount when the
+   async content arrives; the component copies props once). The endpoint returns `servedLocale`;
+   when it differs from the requested locale, show the `page.manualFallbackNotice` banner.
+   Per-locale files are `<slug>.th.md` / `<slug>.en.md`; plain `<slug>.md` is the Thai default.
+4. If the topic needs a sidebar/menu change, follow the normal menu + i18n steps. Manual pages
+   omit `requiresPermission` (open to every signed-in user).
+5. Production reads `manuals/` from the server cwd — `Dockerfile` already copies it. Do not remove
+   that `COPY` line.
+
 ## i18n (how the files actually work)
 
 - The five files per locale (`app`, `base`, `helper`, `model`, `error`) are merged into one message
@@ -106,6 +131,8 @@ its route name must be in `AuthNoFilterPage` (`app/libs/constants.ts`) — ask b
 - Show user-supplied or untrusted text (user input, posts, comments, third-party content) with
   `<BaseContentText :content="…" urlify />` — never `v-html` directly. Use `rows` + `show-more` to
   truncate. For HTML sources, convert to plain text first (`hackerHtmlToText` in `app/utils/feedUtil.ts`).
+- Manual topics: slug matches `/^[a-z0-9-]{1,80}$/`; registry entry and `.md` file must exist as a
+  pair; render markdown only via `BaseMarkdownPreview` (with `:key`), never raw `v-html`.
 - Theme-aware classes (`bg-default`, `text-muted`, `border-default`) over hardcoded colors; check dark mode.
 - Keep the change minimal; check every caller before changing a shared component or composable
   (`grep -rn "<ComponentName\|useThing(" app`).
@@ -122,6 +149,8 @@ its route name must be in `AuthNoFilterPage` (`app/libs/constants.ts`) — ask b
 | State leaks between users/tabs on SSR | Module-level `ref` used as global state | Use `useState('<domain>:<key>')` |
 | Links in user text are not clickable, or XSS risk from `v-html` | User text rendered with `{{ }}` / raw `v-html` | Render it with `<BaseContentText :content urlify />` |
 | Element hidden by `v-rbac` cannot be found later | `v-rbac` removes it from the DOM | Use `v-if` with `useRbac().hasPermission(...)` if you need to toggle |
+| Manual detail page is blank though the API returns content | `BaseMarkdownPreview` copies props once, so late-arriving content is ignored | Pass `:key="content"` so it remounts |
+| Manual 404 in production only | `manuals/` is missing from the runtime image | Keep the `COPY … /app/manuals` line in `Dockerfile` |
 
 ## Done checklist
 

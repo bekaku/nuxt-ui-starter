@@ -114,6 +114,9 @@ endpoints are already handled by the scaffold (`crud-module`).
 - MUST NOT invent endpoints, fields, status codes, or permission codes; unverified items are labelled.
 - MUST NOT import `server/database/*`, `drizzle-orm`, or `mysql2` into `app/`. `server/api/mock/*` and
   `server/api/meta.ts` are local Nitro handlers, not the Spring Boot API.
+- Local Nitro content endpoints (e.g. `server/api/manuals/content.get.ts`, which reads `manuals/*.md`
+  from disk) are not backend calls: fetch them with `useFetch`, never `useApi()`. Keep the slug
+  allowlist validation and the `Dockerfile` copy of the content directory.
 - SSE: keep partial output on disconnect, abort with `AbortController`, render citations only from the `sources` event.
 
 ## Common mistakes

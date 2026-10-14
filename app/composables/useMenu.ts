@@ -71,6 +71,11 @@ export const useMenu = () => {
         defaultOpen: true,
         children: [
           {
+            label: t("nav.manual"),
+            icon: "lucide:book-open",
+            to: "/manual",
+          },
+          {
             label: t("drive.title"),
             icon: "lucide:folder",
             to: "/my-drive/folder/0",
