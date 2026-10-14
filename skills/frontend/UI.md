@@ -8,6 +8,7 @@ Use for production pages, components, layouts, styling, and locale text. Inspect
 - For entity screens, follow `.agents/skills/crud-module/SKILL.md` (reference modules `app/pages/permission/`, `app-role/`, `app-user/`). Use `BaseTable` and `BaseForm` where their props and slots fit. For other screens, reuse nearby Nuxt UI components and layouts instead of forcing a CRUD shape.
 - Declare `definePageMeta({ pageName, requiresPermission })` for protected admin screens using verified permission codes. Check callers and emitted events before changing a shared component.
 - Browser-only libraries and globals need a client boundary (`.client.vue`, client plugin, or `import.meta.client`) because SSR is enabled.
+- For user-manual topics (cards + markdown detail), follow the manual recipe in `.agents/skills/nuxt-frontend/SKILL.md` (`manuals/*.md` + `app/libs/manuals.ts` + `app/pages/manual/`) instead of inventing a new docs pattern.
 
 ## Styling
 

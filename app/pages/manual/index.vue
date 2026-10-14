@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { manualCategories } from '~/libs/manuals'
+import { manualCategories, pickManualText } from '~/libs/manuals'
 
 definePageMeta({
   pageName: 'nav.manual'
@@ -8,7 +8,7 @@ definePageMeta({
 const { locale } = useLang()
 const search = ref('')
 
-const isThai = computed(() => locale.value === 'th')
+const lang = computed(() => locale.value)
 
 const filteredCategories = computed(() => {
   const q = search.value.trim().toLowerCase()
@@ -17,8 +17,8 @@ const filteredCategories = computed(() => {
     .map(cat => ({
       ...cat,
       items: cat.items.filter((item) => {
-        const title = isThai.value ? item.titleTh : item.titleEn
-        const desc = isThai.value ? item.descTh : item.descEn
+        const title = pickManualText(item.title, lang.value)
+        const desc = pickManualText(item.desc, lang.value)
         return title.toLowerCase().includes(q) || desc.toLowerCase().includes(q)
       })
     }))
@@ -77,7 +77,7 @@ const clearSearch = () => {
       <div v-else class="flex flex-col gap-8">
         <section v-for="cat in filteredCategories" :key="cat.key">
           <h2 class="font-bold text-base mb-3">
-            {{ isThai ? cat.titleTh : cat.titleEn }}
+            {{ pickManualText(cat.title, lang) }}
           </h2>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <UCard
@@ -91,10 +91,10 @@ const clearSearch = () => {
                 <Icon :name="item.icon" class="size-6 text-primary shrink-0 mt-0.5" />
                 <div class="min-w-0">
                   <h3 class="font-semibold text-[15px] leading-snug mb-1">
-                    {{ isThai ? item.titleTh : item.titleEn }}
+                    {{ pickManualText(item.title, lang) }}
                   </h3>
                   <p class="text-sm text-muted leading-relaxed line-clamp-2">
-                    {{ isThai ? item.descTh : item.descEn }}
+                    {{ pickManualText(item.desc, lang) }}
                   </p>
                 </div>
               </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { findManual, findManualCategory, getPrevNextManual } from '~/libs/manuals'
+import { findManual, findManualCategory, getPrevNextManual, pickManualText } from '~/libs/manuals'
 
 definePageMeta({
   pageName: 'nav.manual'
@@ -12,7 +12,7 @@ const slug = computed(() => String(route.params.slug || ''))
 const manual = computed(() => findManual(slug.value))
 const category = computed(() => findManualCategory(slug.value))
 const prevNext = computed(() => getPrevNextManual(slug.value))
-const isThai = computed(() => locale.value === 'th')
+const lang = computed(() => locale.value)
 
 if (!manual.value) {
   throw showError({ statusCode: 404, statusMessage: 'Manual not found' })
@@ -33,11 +33,11 @@ const isFallbackLocale = computed(() => {
 
 const title = computed(() => {
   if (!manual.value) return ''
-  return isThai.value ? manual.value.titleTh : manual.value.titleEn
+  return pickManualText(manual.value.title, lang.value)
 })
 const desc = computed(() => {
   if (!manual.value) return ''
-  return isThai.value ? manual.value.descTh : manual.value.descEn
+  return pickManualText(manual.value.desc, lang.value)
 })
 
 useSeoMeta({
@@ -66,7 +66,7 @@ const goManual = async (target?: string) => {
       />
 
       <p v-if="category" class="text-xs text-muted mb-1">
-        {{ isThai ? category.titleTh : category.titleEn }}
+        {{ pickManualText(category.title, lang) }}
       </p>
       <h1 class="text-2xl font-bold mb-2">
         {{ title }}
@@ -128,7 +128,7 @@ const goManual = async (target?: string) => {
           :disabled="!prevNext.prev"
           @click="goManual(prevNext.prev?.slug)"
         >
-          {{ prevNext.prev ? (isThai ? prevNext.prev.titleTh : prevNext.prev.titleEn) : $t('page.manualPrev') }}
+          {{ prevNext.prev ? pickManualText(prevNext.prev.title, lang) : $t('page.manualPrev') }}
         </UButton>
         <UButton
           color="neutral"
@@ -137,7 +137,7 @@ const goManual = async (target?: string) => {
           :disabled="!prevNext.next"
           @click="goManual(prevNext.next?.slug)"
         >
-          {{ prevNext.next ? (isThai ? prevNext.next.titleTh : prevNext.next.titleEn) : $t('page.manualNext') }}
+          {{ prevNext.next ? pickManualText(prevNext.next.title, lang) : $t('page.manualNext') }}
         </UButton>
       </div>
     </div>

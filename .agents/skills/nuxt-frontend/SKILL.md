@@ -89,8 +89,9 @@ already exist — adding a topic usually needs no new component.
    enforced by the content endpoint). Start with `# Title`, Thai-first, no backend endpoint/field
    claims without live evidence (`BACKEND_NOT_ACCESSIBLE`).
 2. Register it in `manualCategories` (`app/libs/manuals.ts`): pick a category (or add one with
-   `titleTh`/`titleEn`), add `{ slug, icon, titleTh, titleEn, descTh, descEn }`. Every registered
-   slug must have its `.md` file, and vice versa.
+   a `title` map), add `{ slug, icon, title: { th, en }, desc: { th, en } }`. Text maps may carry
+   extra locale keys later (e.g. `lo`); read them only via `pickManualText(text, locale)`, which
+   falls back to `th`. Every registered slug must have its `.md` file, and vice versa.
 3. The detail page fetches `/api/manuals/content?slug=…&locale=…` (local Nitro, `useFetch` —
    not the Spring Boot backend) and renders with
    `<BaseMarkdownPreview :key="content" :content="content" />` (`:key` forces a remount when the

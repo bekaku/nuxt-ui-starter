@@ -31,3 +31,7 @@ Read this document when implementing or debugging behavior related to these know
 - `locale` cookie drives `Accept-Language`; changing language without reloading pending `api` calls sends the old header.
 
 - `Temp.vue`, `pages/test/*`, `pages/example/*` are playground/demo — NEVER import from them into production paths.
+
+- `BaseMarkdownPreview` copies its `content` prop once on mount — async content arriving later renders blank unless the caller passes `:key="content"` to force a remount (`app/pages/manual/[slug].vue`).
+
+- `manuals/*.md` are read from disk at runtime — the `COPY … /app/manuals` line in `Dockerfile` is load-bearing; removing it causes production-only 404s on every manual detail page.
