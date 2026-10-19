@@ -27,7 +27,7 @@ Evidence labels:
 | Framework | Nuxt `^4.5.2` (`app/` srcDir), SSR enabled (`ssr: true`) |
 | UI | Nuxt UI `^4.11.0` + Tailwind CSS `^4.3.3` |
 | Language | Vue `^3.5.42` Composition API, `<script setup lang="ts">`, TypeScript `~6.0.3` |
-| API | External Spring Boot REST API via `useApi()` (`app/composables/useApi.ts`); `server/api/` holds Nitro mocks + one scraper only |
+| API | External Spring Boot REST API via `useApi()` (`app/composables/useApi.ts`); `server/api/` holds Nitro mocks, the OG scraper (`meta.ts`), and the local manuals content endpoint |
 | Validation | Zod `^4.5.4` (per-page client `UForm` validation only) |
 | Auth | Cookie JWT (`_session_` / `_slid_`, HttpOnly), `useAuth` + global route guards + `v-rbac` (presentation only) |
 | i18n | `@nuxtjs/i18n ^10.6.0`, locales `th` (default) / `en`, `no_prefix` strategy |
@@ -37,7 +37,7 @@ Evidence labels:
 ## 3. Architecture Overview
 
 - `app/` — Nuxt client: `pages/`, `components/`, `composables/`, `api/` (`useAuthApi.ts`, `useFavoriteMenuApi.ts`, auto-imported), `middleware/00|01|02.*.global.ts`, `layouts/` (`ai`, `chat`, `default`, `empty`, `feed`), `plugins/`, `types/`, `utils/` + `libs/`.
-- `server/api/` — Nitro mocks (`mock/*`) + OG scraper (`meta.ts`); `server/database/` is a one-off `migrate:mysql:pg` tool, not app runtime — never import `drizzle-orm` / `mysql2` in `app/`.
+- `server/api/` — Nitro mocks (`mock/*`) + OG scraper (`meta.ts`) + local manuals content endpoint (`manuals/content.get.ts`); `server/database/` is a one-off `migrate:mysql:pg` tool, not app runtime — never import `drizzle-orm` / `mysql2` in `app/`.
 - `shared/types/` — effectively empty; canonical types live in `app/types/` (`common.ts`, `models.ts`, `props.ts`, `chart.ts`, `index.d.ts`).
 - `i18n/locales/{en,th}/` — UI strings (`app`, `base`, `helper`, `model`, `error` namespaces).
 - Auth boundary: authorization is server-owned. Client `v-rbac` / route middleware / `requiresPermission` is UX only. Do not weaken a backend authorization rule because this console's users are admins.
@@ -54,10 +54,11 @@ Evidence labels:
 
 - Pages: `app/pages/<kebab-case>/index.vue` (list) + `app/pages/<kebab-case>/[crud]/[id].vue` (form); reference modules: `app-user/`, `app-role/`, `permission/`, `api-client/`.
 - Domain API helpers: `app/api/useAuthApi.ts` and `useFavoriteMenuApi.ts` (both via `useApi()`); core wrapper: `app/composables/useApi.ts`.
-- CRUD scaffolding: `app/composables/useCrudList.ts` / `useCrudForm.ts` / `usePagefecth.ts` (note the `usePagefecth` spelling is intentional, do not "fix" it).
+- CRUD scaffolding: `app/composables/useCrudList.ts` / `useCrudForm.ts` / `usePagefecth.ts` (the underlying paging/filter/sort engine — also usable standalone on non-CRUD list screens; the `usePagefecth` spelling is intentional, do not "fix" it).
 - AuthN/Z helpers: `app/composables/useAuth.ts`, `app/composables/useRbac.ts`, `app/plugins/rbac.ts` (`v-rbac`), `app/middleware/01.auth.global.ts`, `02.check-permit.global.ts`.
 - Types: `app/types/{common,models,props}.ts`. ID type: `IdType = bigint | string | null | undefined` (`models.ts:7`).
 - RAG chat harness: `app/composables/useAiChat.ts` (`ChatStatus`: `ready | submitted | streaming | error`).
+- User manuals: content `manuals/<slug>.md` + registry `app/libs/manuals.ts`; pages in `app/pages/manual/`.
 - Agent skills: `.agents/skills/` (canonical); `skills/frontend/` (detailed domain references, preserved).
 - Task specs: `tasks/<id>-<short-name>.md` (canonical template: `tasks/TASK_TEMPLATE.md`).
 - Open questions: `docs/FRONTEND_OPEN_QUESTIONS.md`. Known traps: `docs/FRONTEND_FOOTGUNS.md`.
@@ -87,6 +88,9 @@ Evidence labels:
 
 - `<script setup lang="ts">` first, `<template>` second; never Options API
   (`generic="T"` for generic components).
+- Check `app/components/base/Base*.vue` before using a raw Nuxt UI (`U*`)
+  component or hand-rolled markup — if a wrapper fits, use it; fall back to a
+  raw `U*` component only when no `Base*` covers the case.
 - Shared client state via namespaced `useState` (never Pinia, never
   `provide`/`inject` for app state). Two-way binding via `defineModel`.
 - Protected requests go through `useApi()` (silent refresh, SSR cookie forward);

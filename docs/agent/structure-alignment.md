@@ -23,7 +23,7 @@ database/Nitro implementation rules were NOT copied (different architecture).
 | `skills/nuxt-fullstack/*` (legacy pointers) | `skills/frontend/*` (full guides) | `skills/frontend/*` | KEEP | INTENTIONAL_DIFFERENCE: target keeps full domain detail instead of pointers |
 | `tasks/TASK_TEMPLATE.md` (14 sections) | `tasks/TASK_TEMPLATE.md` (15 sections) | `tasks/TASK_TEMPLATE.md` | UPDATE | Adopt reference format (table metadata, CP layout); keep target §11 backend deps |
 | — (no `tasks/README.md`) | `tasks/README.md` (task index) | `tasks/README.md` | KEEP | INTENTIONAL_DIFFERENCE: index required by `task-planning`; reference has no equivalent |
-| Root `TASK_TEMPLATE.md` (absent in reference) | `TASK_TEMPLATE.md` (full duplicate) | `TASK_TEMPLATE.md` | DEPRECATE | Convert to pointer; canonical is `tasks/TASK_TEMPLATE.md` |
+| Root `TASK_TEMPLATE.md` (absent in reference) | `TASK_TEMPLATE.md` (full duplicate) | — (removed) | DELETE | Duplicate of the canonical `tasks/TASK_TEMPLATE.md`; removed entirely (no pointer file) |
 | `docs/agent/project-map.md` | `docs/agent/project-map.md` | `docs/agent/project-map.md` | KEEP | Same location and purpose |
 | `docs/agent/audit-report.md` | `docs/agent/repository-audit.md` | `docs/agent/audit-report.md` | RENAME | Match reference filename; content rewritten to reference report format |
 | `docs/agent/skills-index.md` (table + mapping) | `docs/agent/skills-index.md` (catalogue) | `docs/agent/skills-index.md` | UPDATE | Adopt reference table + task→skill mapping format |
@@ -38,7 +38,7 @@ database/Nitro implementation rules were NOT copied (different architecture).
 |---|---|---|---|
 | `AGENTS.md` | `AGENTS.md` | UPDATE (rewrite to §§1–14) | Done, all target rules preserved |
 | `SKILLS.md` | `SKILLS.md` | UPDATE (pointer list) | Done |
-| `TASK_TEMPLATE.md` | `TASK_TEMPLATE.md` | DEPRECATE (pointer file) | Done, history preserved |
+| `TASK_TEMPLATE.md` | — (removed) | DELETE (full duplicate) | Done — deleted in this commit; history preserved in git |
 | `tasks/TASK_TEMPLATE.md` | `tasks/TASK_TEMPLATE.md` | UPDATE (reference layout + §11) | Done, 15 sections |
 | `docs/agent/repository-audit.md` | `docs/agent/audit-report.md` | RENAME + rewrite (report format) | Done (`mv`, untracked dir) |
 | `docs/agent/skills-index.md` | `docs/agent/skills-index.md` | UPDATE (table + mapping) | Done |

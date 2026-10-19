@@ -11,7 +11,7 @@ A production-ready full-stack admin dashboard starter built with **Nuxt 4** and 
 
 - **SSR-first architecture** with SSR-safe API layer, auth token refresh, and cookie forwarding
 - **Nuxt UI v4** component system with light/dark mode, collapsible sidebar, command palette, and keyboard shortcuts
-- **Generic CRUD pattern** — single `[crud].vue` dynamic route per feature, driven by reusable `useCrudList` / `useCrudForm` composables
+- **Generic CRUD pattern** — one list page plus a single `[crud]/[id].vue` dynamic form route per feature, driven by reusable `useCrudList` / `useCrudForm` composables
 - **Authentication & authorization** — global route guards (`auth`, `check-permit`), JWT access/refresh cookies, permission-aware UI via `useRbac`
 - **Internationalization** — `en` / `th` locales with namespaced message files and browser-language detection
 - **Rich media support** — charts (ECharts, Unovis), image cropping (CropperJS), video playback (Plyr), PDF viewing/manipulation, file upload with compression
@@ -36,13 +36,13 @@ A production-ready full-stack admin dashboard starter built with **Nuxt 4** and 
 │   ├── api/            # API client composables (auto-imported)
 │   ├── components/     # Auto-imported components grouped by feature
 │   ├── composables/    # Core logic: useApi, useAuth, useCrud*, useRbac, ...
-│   ├── layouts/        # default, ai, empty, feed
+│   ├── layouts/        # default, ai, chat, empty, feed
 │   ├── middleware/     # Global guards: seo → auth → permissions
 │   ├── pages/          # File-based routes; features use [crud] segments
 │   ├── plugins/        # Client/server auth init + client-only libs
 │   └── utils/          # date, file, and app helpers
-├── server/api/         # Nitro endpoints (meta + mock data)
-├── shared/types/       # Client/server shared types
+├── server/api/         # Nitro endpoints (mock data, meta scraper, manuals content)
+├── shared/types/       # Placeholder — frontend types live in app/types/
 ├── i18n/locales/       # en/ & th/ namespaces: app, base, helper, model, error
 └── public/fonts/       # Self-hosted font assets
 ```
@@ -55,7 +55,7 @@ This is a Nuxt 4 (Vue 3) admin/dashboard starter built on `@nuxt/ui` v4, designe
 
 1. **Entry & config**
    - `nuxt.config.ts` — modules (`@nuxt/ui`, `@nuxtjs/i18n`, `@vueuse`, device, image, icon), runtimeConfig (JWT cookie names, upload limits, API base), fonts, route rules. Auto-imports extended to `app/api`.
-   - `app/app.vue`, `app.config.ts`, layouts in `app/layouts/` (`default`, `ai`, `empty`, `feed`).
+   - `app/app.vue`, `app.config.ts`, layouts in `app/layouts/` (`default`, `ai`, `chat`, `empty`, `feed`).
 
 2. **Routing & pages** (`app/pages/`)
    - Feature folders: `ai-chats/`, `api-client/`, `app-user/`, `app-role/`, `permission/`, `my-drive/`, `settings/`, `example/`.
@@ -73,12 +73,12 @@ This is a Nuxt 4 (Vue 3) admin/dashboard starter built on `@nuxt/ui` v4, designe
    - Domain helpers: `useAiChat` (SSE streaming chat client), `useMenu`, `useUpload`, `useDownload`, `useDateFns`, `useLoader`, `useConfirmDialog`, broadcast-channel/cache/theme utilities.
 
 5. **Components** (`app/components/base/`, `chat/`)
-   - ~45 `Base*` primitives (Table, Form, Modal, FileUpload, PdfView, ImageCropper, CameraCapture, InfiniteScroll, etc.) wrapping Nuxt UI. Pages compose these rather than raw UI lib components.
+   - ~45 `Base*` primitives (Table, Form, Modal, FileUpload, PdfView, ImageCropper, CameraCapture, InfiniteScroll, etc.) wrapping Nuxt UI. Check this folder first when building UI — pages compose these rather than raw UI lib components.
    - Plugins in `app/plugins/` register client-only libs (plyr, cropperjs, pdf) as lazy components and provide `$datefns`.
 
 6. **Backend contract**
    - Real API is external: endpoints derived by convention `/api/{camelCaseEntity}` (+ `/generate/{id}` style actions), JWT in cookies (`_session_`/`_slid_`).
-   - `server/api/mock/*` — local mock data (dashboard charts, chat history, files) so the starter runs standalone; `shared/types` holds shared DTOs.
+   - `server/api/mock/*` — local mock data (dashboard charts, chat history, files) so the starter runs standalone; `shared/types` is an intentional placeholder (frontend types live in `app/types/`).
 
 7. **i18n** — `@nuxtjs/i18n` with `no_prefix` strategy, default `th`, split namespace files per locale (`app/base/helper/model/error.json`) in `i18n/locales/{en,th}/`.
 
@@ -100,7 +100,7 @@ In short: a convention-driven CRUD scaffold where entities are declared via comp
 pnpm install
 
 # Copy environment variables and adjust as needed
-cp .env.example .env.dev
+cp .env.example .env
 
 # Start the development server on http://localhost:3003
 pnpm dev
@@ -110,7 +110,7 @@ pnpm dev
 
 | Command | Description |
 | --- | --- |
-| `pnpm dev` | Development server on port `3003` (loads `.env.dev`) |
+| `pnpm dev` | Development server on port `3003` (loads `.env`) |
 | `pnpm build` | Production build (Nitro output in `.output/`) |
 | `pnpm preview` | Preview the production build |
 | `pnpm lint` | Lint with ESLint |
@@ -126,7 +126,7 @@ All runtime configuration lives in `runtimeConfig.public` (see `nuxt.config.ts`)
 | `NUXT_PUBLIC_CDN_BASE` | CDN base URL for static/media assets |
 | `NUXT_PUBLIC_SITE_URL` | Public site URL (used for OG metadata) |
 | `NUXT_PUBLIC_TIME_OUT` | Request timeout in ms (`0` disables) |
-| `NUXT_PUBLIC_JWT_KEY_NAME` | Session cookie name |
+| `NUXT_PUBLIC_API_CLIENT` | Client identifier sent as the `Accept-Apiclient` header |
 
 ## Deployment
 

@@ -1,6 +1,6 @@
 # Frontend Known Footguns
 
-Read this document when implementing or debugging behavior related to these known traps.
+Read this document when implementing or debugging behavior related to these known traps. Line references were recorded September 2026 and drift — search for the named symbol when in doubt.
 
 ## Known footguns (frontend-side, all observed)
 
@@ -26,7 +26,7 @@ Read this document when implementing or debugging behavior related to these know
 
 - `useCrudForm` types route IDs as `number` via `getParam<number>`, but this is only a TypeScript cast — the runtime value is still the route string, so precision survives. `useBase().getParamNumber()` really coerces (`+val`) and MUST NOT be used for Snowflake IDs. Do not copy either numeric typing into new code.
 
-- `uploadChunkApi`/`mergeChunkApi` paths lack a leading slash — adding one changes resolution against `baseURL`; copy verbatim.
+- `uploadChunkApi`/`mergeChunkApi` paths carry a leading slash (`/api/fileManager/...`) — keep the `useUpload.ts` spelling. With a relative `baseURL` (default `apiBase` `/api`), removing the slash would double the prefix to `/api/api/...`.
 
 - `locale` cookie drives `Accept-Language`; changing language without reloading pending `api` calls sends the old header.
 

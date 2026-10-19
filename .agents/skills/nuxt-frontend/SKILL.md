@@ -37,6 +37,7 @@ you add or change a backend call. Skip this skill for docs-only work.
 | Stateful or reusable logic | `app/composables/use<Name>.ts` exporting `export const use<Name> = () => {…}` | `useLang.ts`, `useAppChat.ts` |
 | Shared client state | `useState<T>('<domain>:<key>', () => init)` inside a composable | `useAuth.ts` (`auth:user`), `useAppChat.ts` (`chat:history`) |
 | A backend call | `const api = useApi()` directly in the page/composable (default); an `app/api/use<Domain>Api.ts` helper only if the call is shared by several files (see `api-integration`) | `app/pages/settings/index.vue` (direct), `app/api/useFavoriteMenuApi.ts` (helper) |
+| A paged / searchable / filterable list (non-CRUD) | `usePagefecth<T>({ apiEndpoint, defaultSorts, … })` in the page (composable: `app/composables/usePagefecth.ts`) | `app/pages/ai-chats/recent.vue`, `app/layouts/ai.vue` |
 | A pure helper | `app/utils/<file>.ts` (auto-imported) | `app/utils/appUtil.ts`, `dateUtil.ts` |
 | A constant | `app/libs/constants.ts` (import explicitly from `~/libs/constants`) | existing exports there |
 | A type | entities → `app/types/models.ts` (extend `Id`); API/infra shapes → `common.ts`; component props → `props.ts` | `import type { AppUser } from '~/types/models'` |
@@ -97,7 +98,8 @@ already exist — adding a topic usually needs no new component.
    `<BaseMarkdownPreview :key="content" :content="content" />` (`:key` forces a remount when the
    async content arrives; the component copies props once). The endpoint returns `servedLocale`;
    when it differs from the requested locale, show the `page.manualFallbackNotice` banner.
-   Per-locale files are `<slug>.th.md` / `<slug>.en.md`; plain `<slug>.md` is the Thai default.
+   Per-locale files are `<slug>.<locale>.md` (e.g. `<slug>.en.md`); plain `<slug>.md` is the Thai
+   default, and a `<slug>.th.md` file is never served by the endpoint.
 4. If the topic needs a sidebar/menu change, follow the normal menu + i18n steps. Manual pages
    omit `requiresPermission` (open to every signed-in user).
 5. Production reads `manuals/` from the server cwd — `Dockerfile` already copies it. Do not remove
@@ -118,6 +120,10 @@ already exist — adding a topic usually needs no new component.
 ## Rules
 
 - SFC order: `<script setup lang="ts">` then `<template>`. No Options API. Generic components use `generic="T"`.
+- Components: check `app/components/base/Base*.vue` first — if a wrapper fits, use it before any raw `U*` component.
+- Lists with paging / search / filter / sort: use `usePagefecth` (`app/composables/usePagefecth.ts`) directly
+  when the screen is not an entity CRUD page (`useCrudList` wraps it for those). Do not hand-roll paging/sort state;
+  keep its dual-shape handling (`ApiResponse<T>` or bare `T[]`).
 - Two-way props via `defineModel`; shared state via namespaced `useState` — no Pinia, no `provide/inject` for app state.
 - SSR is on: touch `window`, `document`, `localStorage`, media devices only inside `onMounted`,
   `import.meta.client` guards, `.client.vue` components, or client plugins.
@@ -143,6 +149,8 @@ already exist — adding a topic usually needs no new component.
 | Symptom | Cause | Fix |
 |---|---|---|
 | `window is not defined` / hydration mismatch | Browser API during SSR | Move into `onMounted` / `import.meta.client` / `.client.vue` |
+| Raw `U*` component used where a `Base*` wrapper exists | `app/components/base/` not checked first | Check `Base*.vue` and compose with the wrapper |
+| List page hand-rolls paging/sort/filter state | `usePagefecth` not known/used | Use `usePagefecth` (non-CRUD) or `useCrudList` + `BaseTable` (entity list) |
 | Label shows the raw key (`model.foo.name`) | Key missing in one locale or put in the wrong family file | Add to both locales under the right top-level family |
 | Page opens for everyone | `requiresPermission` missing or `[]` (empty = allow) | Set explicit codes |
 | Menu shows item, click gives 403 | Menu `permissions` ≠ page `requiresPermission` | Make them match |

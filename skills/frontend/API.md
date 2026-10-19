@@ -6,7 +6,7 @@ Use with `.agents/skills/api-integration/SKILL.md` for requests to the external 
 
 - Use `const api = useApi()` for backend calls. `api<T>(path, options)` returns parsed data; `api.raw<T>(path, options)` returns the response, including `status` and `_data`.
 - Calling `useApi()` directly in a page or composable is the default. Domain helpers in `app/api/` (`useAuthApi.ts`, `useFavoriteMenuApi.ts`) are optional; reuse one if it already covers the endpoint, and create a new one only when several files share the call.
-- Use backend paths relative to `runtimeConfig.public.apiBase`, normally `/api/<camelCaseEntity>`. Preserve an existing exceptional path, such as the upload calls without a leading slash, until the contract is verified.
+- Use backend paths relative to `runtimeConfig.public.apiBase`, normally `/api/<camelCaseEntity>`. Keep the upload calls exactly as written in `useUpload.ts` (`/api/fileManager/uploadChunkApi`, `/api/fileManager/mergeChunkApi` — leading slash included); treat the current spelling as intentional until the contract is verified against live evidence.
 - Local Nitro routes under `server/api/mock/` and `server/api/meta.ts` are separate from the external backend; `useFetch` or `$fetch` can be appropriate there. `useAsyncData` can call `useApi()` for SSR data loading; the existing permission and role lookups are examples, not a limit.
 
 ```ts

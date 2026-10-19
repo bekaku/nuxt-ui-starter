@@ -105,7 +105,9 @@ endpoints are already handled by the scaffold (`crud-module`).
 - MUST call backend paths via `useApi()` — directly, or through an existing `app/api/*` helper. Never bare `$fetch` / `useFetch` to `/api/...` of the backend.
 - An `app/api/*` helper is optional; do not create one just to wrap a single call.
 - MUST use paths relative to `apiBase` (`/api/<camelCaseEntity>...`). Keep the existing upload paths
-  `api/fileManager/uploadChunkApi` and `mergeChunkApi` **without** a leading slash.
+  `/api/fileManager/uploadChunkApi` and `/api/fileManager/mergeChunkApi` **with** the leading slash,
+  exactly as written in `useUpload.ts` — with the default relative `apiBase` (`/api`), dropping the
+  slash would double the prefix to `/api/api/...`.
 - MUST keep both list branches: `ApiResponse<T>` (`dataList`, `totalPages`, `totalElements`, `last`) **and** bare `T[]`.
 - MUST NOT read, write, or log `_session_` / `_slid_` cookies or set an `Authorization` header.
 - MUST NOT add page-level 401 handling, refresh logic, or login redirects.

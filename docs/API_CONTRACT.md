@@ -1,6 +1,6 @@
 # API Contract — As Consumed by This Frontend
 
-This is reference documentation, not a global coding skill. Read it only when endpoint, request, response, authentication attachment, error parsing, or contract re-verification is relevant.
+This is reference documentation, not a global coding skill. Read it only when endpoint, request, response, authentication attachment, error parsing, or contract re-verification is relevant. Line references were recorded September 2026 and drift — search for the named symbol when in doubt.
 
 ## PART 2 — API Contract (as consumed by this frontend)
 
@@ -38,7 +38,7 @@ This is reference documentation, not a global coding skill. Read it only when en
 
   - `POST /api/appUser/updateProfile`, `POST /api/appUser/selfUpdatePassword` (`settings/index.vue:70`, `settings/security.vue:40`)
 
-  - `POST api/fileManager/uploadChunkApi` (multipart `FormData` chunks, own retry loop) → `POST api/fileManager/mergeChunkApi`; note MISSING leading slash — copy as-is (`useUpload.ts:138,184`)
+  - `POST /api/fileManager/uploadChunkApi` (multipart `FormData` chunks, own retry loop) → `POST /api/fileManager/mergeChunkApi`; keep the leading slash exactly as written (`useUpload.ts:138,184`)
 
   - `GET <downloadUrl>` with `{ baseURL: cdnBase, responseType: 'stream', query: { chunkSize } }` (`useDownload.ts:140`)
 

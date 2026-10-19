@@ -1,9 +1,9 @@
-# PRODUCTION ONLY. Admin console behind the host's nginx (admin.<domain>). Dev keeps using
-# docker-compose.yml, unchanged.
+# PRODUCTION ONLY. Admin console behind the host's nginx (admin.<domain>).
+# Local dev runs `pnpm dev` and does not use this file.
 #
 #   cp .env.example .env                                  # then set production values
-#   docker compose -f docker-compose.prod.yml build
-#   docker compose -f docker-compose.prod.yml up -d
+#   docker compose build
+#   docker compose up -d
 #
 # Nuxt reads NUXT_* at RUNTIME (`nuxt build` does not bake .env into .output), so .env is passed
 # to the container here. All URLs (NUXT_PUBLIC_API_BASE, _CDN_BASE, ...) are the admin domain:

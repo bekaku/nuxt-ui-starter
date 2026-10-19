@@ -2,6 +2,7 @@
 
 > This document reflects **the frontend view only** (reconstructed from call sites), not a Spring Boot specification.
 > Backend access: `NOT_AVAILABLE` — no `/backend` in this workspace (VERIFIED 2026-09-17).
+> Line references were recorded September 2026 and drift — search for the named symbol when in doubt.
 
 ## 1. API Client Architecture (VERIFIED from `app/composables/useApi.ts`)
 
@@ -46,7 +47,7 @@
 | `GET /api/appRole/findAll` | — | `AppRole[]` (bare array) | cookie | `app-user/[crud]/[id].vue` |
 | `POST\|DELETE /api/favoriteMenu` | — | ? (`UNKNOWN`) | cookie | `app/api/useFavoriteMenuApi.ts` |
 | `POST /api/appUser/updateProfile`, `POST /api/appUser/selfUpdatePassword` | form data | ? (`UNKNOWN`) | cookie | `settings/*` |
-| `POST api/fileManager/uploadChunkApi` + `POST api/fileManager/mergeChunkApi` (no leading `/` — copy verbatim) | `FormData` chunks | `FileUploadChunkResponse \| FileManager \| void` | cookie | `useUpload.ts` |
+| `POST /api/fileManager/uploadChunkApi` + `POST /api/fileManager/mergeChunkApi` (leading `/` included — copy verbatim) | `FormData` chunks | `FileUploadChunkResponse \| FileManager \| void` | cookie | `useUpload.ts` |
 | `GET <downloadUrl>` (`baseURL: cdnBase`, `responseType: 'stream'`) | `?chunkSize` | stream | cookie | `useDownload.ts:140` |
 | `POST /api/aiChat/stream` (`Accept: text/event-stream`, `signal`) | `{ message, conversationId, filterNames }` | `ReadableStream`/SSE | cookie | `useAiChat.ts:216` |
 

@@ -8,6 +8,12 @@ against the reference project followed (see `docs/agent/structure-alignment.md`)
 No secrets were read (`.env` was listed but never opened; only `.env.example`
 was inspected).
 
+> **Post-audit updates (2026-10-15):** TypeScript is now pinned to `~6.0.3`
+> (was `^7.0.2` at audit time — see `docs/FRONTEND_OPEN_QUESTIONS.md`);
+> `.agents/skills/` now holds 5 skills (`crud-module` was added 2026-09-25); the
+> empty `app/stores/` placeholder directory was removed. The rest of this dated
+> report stands as written — re-verify against current source before relying on it.
+
 ## Inspection Coverage
 
 Read fully or in relevant part: `AGENTS.md`, `SKILLS.md`, root and canonical
