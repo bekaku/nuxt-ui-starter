@@ -87,6 +87,8 @@ Also tick the Done checklist of each domain skill you used.
 - Never mark a checkpoint `PASSED` or a gate passing without evidence recorded in the file.
 - Never claim backend behavior as verified from frontend code; use §11 for proposals.
 - A typecheck error is real — fix it; do not add `@ts-ignore`.
+- Git: commit and push only on the branch currently checked out — on `xxx` push
+  `origin xxx`, never `main`; push `main` only when actually on `main` (AGENTS.md §15).
 
 ## Done checklist
 

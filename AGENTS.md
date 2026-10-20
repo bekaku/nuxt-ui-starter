@@ -164,6 +164,8 @@ Evidence labels:
 - No silent dependencies, frameworks, or architectural patterns.
 - No weakening auth/RBAC/error-handling behavior documented as intentional
   (see `docs/FRONTEND_FOOTGUNS.md`).
+- No pushing to any branch other than the one currently checked out — never
+  publish to `main` while working on another branch (see §15 Git Branch Rules).
 
 ## 12. Standard Agent Workflow
 
@@ -227,3 +229,17 @@ When executing a task:
 
 If the agent does not support automatic skill discovery, read the relevant
 `SKILL.md` files directly by path. Do not load every skill by default.
+
+## 15. Git Branch Rules
+
+- Commit and push only to the branch the repo is currently checked out on
+  (confirm with `git branch` or `git rev-parse --abbrev-ref HEAD` before every
+  commit and push). Never push to a branch other than this one.
+- On `main` → commit and push to `origin main`. On any other branch `xxx` →
+  commit and push to `origin xxx` (`git push -u origin xxx` on the first push).
+  Pushing to `main` while HEAD is on `xxx` is a mistake, not a convenience.
+- Never publish work by switching branches, cherry-picking, merging, resetting,
+  or force-pushing to another branch. Work done on a branch belongs to that
+  branch; do not move it to `main` or anywhere else on your own initiative.
+- If the current branch looks wrong for the work, stop and ask the user which
+  branch to use — do not guess.
