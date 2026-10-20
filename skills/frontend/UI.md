@@ -10,7 +10,7 @@ Use for production pages, components, layouts, styling, and locale text. Inspect
 - Check `app/components/base/` (`Base*.vue`) before using a raw Nuxt UI component — if a wrapper fits, compose with it. For non-entity screens without a fitting `Base*`, reuse nearby Nuxt UI components and layouts instead of forcing a CRUD shape.
 - Declare `definePageMeta({ pageName, requiresPermission })` for protected admin screens using verified permission codes. Check callers and emitted events before changing a shared component.
 - Browser-only libraries and globals need a client boundary (`.client.vue`, client plugin, or `import.meta.client`) because SSR is enabled.
-- For user-manual topics (cards + markdown detail), follow the manual recipe in `.agents/skills/nuxt-frontend/SKILL.md` (`manuals/*.md` + `app/libs/manuals.ts` + `app/pages/manual/`) instead of inventing a new docs pattern.
+- For user-manual topics (cards + markdown detail), follow the manual recipe and content rules in `.agents/skills/nuxt-frontend/SKILL.md` (`app/manual/<slug>.<locale>.md` + `app/manual/index.ts` + `app/components/manual/`), and update the topic in the same task as the feature. Do not invent a new docs pattern.
 
 ## Styling
 

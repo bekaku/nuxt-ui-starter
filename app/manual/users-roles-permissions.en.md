@@ -1,5 +1,3 @@
-# Users, roles and permissions
-
 The users and roles pages define who can sign in, and which menus each person sees.
 
 ## 1. Adding a new user

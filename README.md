@@ -37,11 +37,12 @@ A production-ready full-stack admin dashboard starter built with **Nuxt 4** and 
 │   ├── components/     # Auto-imported components grouped by feature
 │   ├── composables/    # Core logic: useApi, useAuth, useCrud*, useRbac, ...
 │   ├── layouts/        # default, ai, chat, empty, feed
+│   ├── manual/         # User-manual registry + Markdown per locale
 │   ├── middleware/     # Global guards: seo → auth → permissions
 │   ├── pages/          # File-based routes; features use [crud] segments
 │   ├── plugins/        # Client/server auth init + client-only libs
 │   └── utils/          # date, file, and app helpers
-├── server/api/         # Nitro endpoints (mock data, meta scraper, manuals content)
+├── server/api/         # Nitro endpoints (mock data, meta scraper)
 ├── shared/types/       # Placeholder — frontend types live in app/types/
 ├── i18n/locales/       # en/ & th/ namespaces: app, base, helper, model, error
 └── public/fonts/       # Self-hosted font assets

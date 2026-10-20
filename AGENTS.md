@@ -27,7 +27,7 @@ Evidence labels:
 | Framework | Nuxt `^4.5.2` (`app/` srcDir), SSR enabled (`ssr: true`) |
 | UI | Nuxt UI `^4.11.0` + Tailwind CSS `^4.3.3` |
 | Language | Vue `^3.5.42` Composition API, `<script setup lang="ts">`, TypeScript `~6.0.3` |
-| API | External Spring Boot REST API via `useApi()` (`app/composables/useApi.ts`); `server/api/` holds Nitro mocks, the OG scraper (`meta.ts`), and the local manuals content endpoint |
+| API | External Spring Boot REST API via `useApi()` (`app/composables/useApi.ts`); `server/api/` holds Nitro mocks and the OG scraper (`meta.ts`) |
 | Validation | Zod `^4.5.4` (per-page client `UForm` validation only) |
 | Auth | Cookie JWT (`_session_` / `_slid_`, HttpOnly), `useAuth` + global route guards + `v-rbac` (presentation only) |
 | i18n | `@nuxtjs/i18n ^10.6.0`, locales `th` (default) / `en`, `no_prefix` strategy |
@@ -37,7 +37,7 @@ Evidence labels:
 ## 3. Architecture Overview
 
 - `app/` — Nuxt client: `pages/`, `components/`, `composables/`, `api/` (`useAuthApi.ts`, `useFavoriteMenuApi.ts`, auto-imported), `middleware/00|01|02.*.global.ts`, `layouts/` (`ai`, `chat`, `default`, `empty`, `feed`), `plugins/`, `types/`, `utils/` + `libs/`.
-- `server/api/` — Nitro mocks (`mock/*`) + OG scraper (`meta.ts`) + local manuals content endpoint (`manuals/content.get.ts`); `server/database/` is a one-off `migrate:mysql:pg` tool, not app runtime — never import `drizzle-orm` / `mysql2` in `app/`.
+- `server/api/` — Nitro mocks (`mock/*`) + OG scraper (`meta.ts`); `server/database/` is a one-off `migrate:mysql:pg` tool, not app runtime — never import `drizzle-orm` / `mysql2` in `app/`.
 - `shared/types/` — effectively empty; canonical types live in `app/types/` (`common.ts`, `models.ts`, `props.ts`, `chart.ts`, `index.d.ts`).
 - `i18n/locales/{en,th}/` — UI strings (`app`, `base`, `helper`, `model`, `error` namespaces).
 - Auth boundary: authorization is server-owned. Client `v-rbac` / route middleware / `requiresPermission` is UX only. Do not weaken a backend authorization rule because this console's users are admins.
@@ -58,7 +58,7 @@ Evidence labels:
 - AuthN/Z helpers: `app/composables/useAuth.ts`, `app/composables/useRbac.ts`, `app/plugins/rbac.ts` (`v-rbac`), `app/middleware/01.auth.global.ts`, `02.check-permit.global.ts`.
 - Types: `app/types/{common,models,props}.ts`. ID type: `IdType = bigint | string | null | undefined` (`models.ts:7`).
 - RAG chat harness: `app/composables/useAiChat.ts` (`ChatStatus`: `ready | submitted | streaming | error`).
-- User manuals: content `manuals/<slug>.md` + registry `app/libs/manuals.ts`; pages in `app/pages/manual/`.
+- User manuals: registry `app/manual/index.ts` (`MANUAL_SECTIONS`: sections, topics, th/en titles) + content `app/manual/<slug>.<locale>.md` (no H1 — the article renders the title; bundled via `import.meta.glob`); UI in `app/pages/manual/` + `app/components/manual/`.
 - Agent skills: `.agents/skills/` (canonical); `skills/frontend/` (detailed domain references, preserved).
 - Task specs: `tasks/<id>-<short-name>.md` (canonical template: `tasks/TASK_TEMPLATE.md`).
 - Open questions: `docs/FRONTEND_OPEN_QUESTIONS.md`. Known traps: `docs/FRONTEND_FOOTGUNS.md`.

@@ -140,4 +140,7 @@ Do not copy that for a normal entity.
 - [ ] No `number` conversion of IDs; no new `any` beyond the existing `meta: {...} as any` column pattern.
 - [ ] If a live backend was available: list, search, sort, page, new, edit, copy, delete were exercised.
       Otherwise the report says which of these were not exercised.
+- [ ] If this screen is user-visible, its manual topic is updated in `app/manual/<slug>.th.md`
+      (and `.en.md` when available) using the `nuxt-frontend` manual recipe; no H1, and no stale
+      "coming soon" text.
 - [ ] Endpoints or permission codes not seen in live evidence are labelled `NOT_VERIFIED` in the task/report.

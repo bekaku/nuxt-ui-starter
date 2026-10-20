@@ -1,5 +1,3 @@
-# Getting started with admin
-
 This guide helps administrators start using the Admin console in minutes, from signing in to personal settings.
 
 ## 1. Signing in

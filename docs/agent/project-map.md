@@ -1,6 +1,6 @@
 # Project Map — Nuxt Admin Console
 
-> `VERIFIED` means confirmed directly from source code in this repo. Structure checked 2026-09-23; inspect current source before relying on old line numbers in linked references.
+> `VERIFIED` means confirmed directly from source code in this repo. Structure checked 2026-10-20; inspect current source before relying on old line numbers in linked references.
 
 ## 1. Verified Overview
 
@@ -20,6 +20,8 @@ app/                 main srcDir
   components/        auto-imported components (base/*, chat/*, chart/*, ...)
   composables/       application behavior (useApi, useAuth, useCrud*, usePagefecth, ...)
   layouts/           5 files: ai.vue, chat.vue, default.vue, empty.vue, feed.vue
+  manual/            user-manual registry (index.ts: sections, topics, th/en titles)
+                     + content <slug>.<locale>.md (bundled at build time)
   middleware/        00.seo.global.ts → 01.auth.global.ts → 02.check-permit.global.ts
   pages/             file-based routes (ai-chats, ai-document-meta, api-client,
                      app-role, app-user, auth, chats, example, manual, my-drive,
@@ -29,15 +31,10 @@ app/                 main srcDir
   types/             hand-maintained frontend types (common.ts,
                      models.ts, props.ts, chart.ts, index.d.ts)
   utils/ / libs/     helpers (two snowflake variants, constants, appUtil, dateUtil, fileUtil)
-                     plus manuals.ts (user-manual registry: categories, cards, LocalizedText)
 server/api/          local Nitro handlers, separate from Spring Boot
-  manuals/           content.get.ts — reads manuals/*.md from disk (?slug, ?locale,
-                     slug allowlist, servedLocale, th fallback)
   mock/              customers, mails, members, notifications + chart/, chat/,
                      dashboard/, file/ subfolders (demo data for example pages)
   meta.ts            cheerio OG scraper
-manuals/             user-manual markdown at project root (<slug>.md = Thai default,
-                     <slug>.<locale>.md per-locale override; copied into prod image)
 server/database/     exists (mysql/, migrate/run-engine.ts) — one-off tooling for
                      `pnpm migrate:mysql:pg` only, not app runtime
 shared/types/        placeholder — frontend types live in app/types/

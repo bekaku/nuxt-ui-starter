@@ -6,7 +6,7 @@ Read `AGENTS.md` first, then load only the skill(s) the work needs. Details and 
 | Canonical skill | File | Use when |
 |---|---|---|
 | `crud-module` | `.agents/skills/crud-module/SKILL.md` | Adding or changing an entity list + `[crud]/[id]` form screen |
-| `nuxt-frontend` | `.agents/skills/nuxt-frontend/SKILL.md` | Any other Nuxt UI work: pages, components, composables, state, styling, i18n, menu |
+| `nuxt-frontend` | `.agents/skills/nuxt-frontend/SKILL.md` | Any other Nuxt UI work: pages, components, composables, state, styling, i18n, menu, user manual |
 | `api-integration` | `.agents/skills/api-integration/SKILL.md` | Adding or changing a backend call, DTO, upload/download, or SSE |
 | `task-planning` | `.agents/skills/task-planning/SKILL.md` | Writing a new numbered `tasks/<id>-*.md` specification |
 | `task-execution` | `.agents/skills/task-execution/SKILL.md` | Implementing or resuming an existing numbered task |

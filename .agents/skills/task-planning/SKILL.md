@@ -35,8 +35,8 @@ Not for: implementing directly (use the domain skill), or continuing an existing
    | §2 Objective | One-paragraph goal, expected outcome, explicit Out of Scope |
    | §3 Required Reading | Required Skills table with real paths only: `.agents/skills/<name>/SKILL.md` (`nuxt-frontend`, `crud-module`, `api-integration`); supporting `skills/frontend/*.md` only if needed |
    | §4 Existing Implementation | Real files to inspect: pages, components, composables, `app/api/`, types, middleware, i18n files, endpoints |
-   | §5 Scope and Impact | Tick affected areas; list what must stay compatible (API shapes, permission codes, i18n keys) |
-   | §6 Implementation Plan | Ordered steps, each = one file or one verifiable change, with its expected outcome |
+   | §5 Scope and Impact | Tick affected areas; list what must stay compatible (API shapes, permission codes, i18n keys); include the matching manual topic when a user-visible screen changes |
+   | §6 Implementation Plan | Ordered steps, each = one file or one verifiable change, with its expected outcome; add the `app/manual/` update when a user-visible screen changes |
    | §9 Acceptance Criteria | Observable behaviors (`AC1: /foo lists rows from GET /api/foo with paging`) |
    | §10 Verification | Leave results `NOT_RUN`; list `pnpm typecheck`, `pnpm build`, and specific manual checks |
    | §11 Backend Dependencies | Proposed contract (method, path, request, response, permission codes) labelled `NOT_VERIFIED`, or `NONE` |

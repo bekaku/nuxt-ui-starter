@@ -1,5 +1,3 @@
-# Using the LLM Playground
-
 The playground lets model testers compare how each model behaves before using it for real.
 
 ## 1. Starting an experiment

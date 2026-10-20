@@ -1,6 +1,6 @@
 ---
 name: nuxt-frontend
-description: Implement or change Nuxt UI code in app/ or i18n/ — pages, components, layouts, composables, shared state, forms, styling, permissions in the UI, and locale strings. Use for any non-CRUD screen or UI change. For a standard entity list/form use crud-module; add api-integration when a backend request or DTO changes.
+description: Implement or change Nuxt UI code in app/ or i18n/ — pages, components, layouts, composables, shared state, forms, styling, permissions in the UI, locale strings, and the in-app user manual. Use for any non-CRUD screen or UI change. For a standard entity list/form use crud-module; add api-integration when a backend request or DTO changes.
 ---
 
 # Nuxt frontend
@@ -44,7 +44,7 @@ you add or change a backend call. Skip this skill for docs-only work.
 | A browser-only plugin | `app/plugins/<name>.client.ts` | `app/plugins/cropperjs.client.ts` |
 | App-wide Nuxt UI defaults / colors | `app/app.config.ts`; CSS tokens in `app/assets/css/main.css` | — |
 | A sidebar entry | `appNavs` in `app/composables/useMenu.ts` (hardcoded, filtered by `permissions`) | existing items |
-| A user-manual topic or category | `manuals/<slug>.md` + registry entry in `app/libs/manuals.ts` | `manuals/admin-getting-started.md`, `app/pages/manual/` |
+| A user-manual topic or section | `app/manual/<slug>.<locale>.md` + registry entry in `app/manual/index.ts` | `app/manual/admin-getting-started.th.md`, `app/components/manual/` |
 | UI text | `i18n/locales/en/<file>.json` **and** `i18n/locales/th/<file>.json` | see i18n below |
 
 Layouts: pages use `default` unless `definePageMeta({ layout: … })` says otherwise (`false` for the
@@ -81,29 +81,60 @@ its route name must be in `AuthNoFilterPage` (`app/libs/constants.ts`) — ask b
 
 ## Recipe: user manual (คู่มือการใช้งาน)
 
-Manual content lives in `manuals/<slug>.md` at the project root; structure (categories, cards,
-icons, Thai/English titles) lives in `app/libs/manuals.ts`. The shell pages
-`app/pages/manual/index.vue` (cards + search) and `app/pages/manual/[slug].vue` (markdown render)
-already exist — adding a topic usually needs no new component.
+Manual content lives in `app/manual/<slug>.<locale>.md`; the registry (sections, cards, icons,
+Thai/English titles) lives in `app/manual/index.ts`. The shell pages `app/pages/manual/index.vue`
+(cards + search) and `app/pages/manual/[slug].vue` (markdown render) plus the shared components
+`app/components/manual/ManualIndex.vue` / `ManualArticle.vue` already exist — adding a topic
+usually needs no new component.
 
-1. Create `manuals/<slug>.md`: slug is lowercase letters, digits, hyphens (`/^[a-z0-9-]{1,80}$/`,
-   enforced by the content endpoint). Start with `# Title`, Thai-first, no backend endpoint/field
-   claims without live evidence (`BACKEND_NOT_ACCESSIBLE`).
-2. Register it in `manualCategories` (`app/libs/manuals.ts`): pick a category (or add one with
-   a `title` map), add `{ slug, icon, title: { th, en }, desc: { th, en } }`. Text maps may carry
-   extra locale keys later (e.g. `lo`); read them only via `pickManualText(text, locale)`, which
-   falls back to `th`. Every registered slug must have its `.md` file, and vice versa.
-3. The detail page fetches `/api/manuals/content?slug=…&locale=…` (local Nitro, `useFetch` —
-   not the Spring Boot backend) and renders with
-   `<BaseMarkdownPreview :key="content" :content="content" />` (`:key` forces a remount when the
-   async content arrives; the component copies props once). The endpoint returns `servedLocale`;
-   when it differs from the requested locale, show the `page.manualFallbackNotice` banner.
-   Per-locale files are `<slug>.<locale>.md` (e.g. `<slug>.en.md`); plain `<slug>.md` is the Thai
-   default, and a `<slug>.th.md` file is never served by the endpoint.
+1. Create `app/manual/<slug>.th.md` (Thai default) and, when available, `<slug>.en.md`. The slug
+   is lowercase letters, digits and hyphens, and must match the registry entry. Start with the
+   intro paragraph, not an H1 — the article page renders the title. Keep Thai-first and make no
+   backend endpoint/field claims without live evidence (`BACKEND_NOT_ACCESSIBLE`).
+2. Register it in `MANUAL_SECTIONS` (`app/manual/index.ts`): pick a section (or add one with a
+   `title` map), add `{ slug, icon, title: { th, en }, description: { th, en } }`. Text maps may
+   carry extra locale keys later; read them only via `manualText(text, locale)`, which falls back
+   to `th`. Every registered slug must have at least its `.th.md` file, and every content file
+   should have a registry entry.
+3. `ManualArticle` loads content with `loadManualContent` (bundled by `import.meta.glob`, no
+   server route) and renders it with `<BaseMarkdownPreview :key="content" :content="content" />`
+   (`:key` forces a remount when the async content arrives; the component copies props once).
+   When the requested locale file is missing, the loader falls back to Thai and the article shows
+   `page.manualFallbackNotice`.
 4. If the topic needs a sidebar/menu change, follow the normal menu + i18n steps. Manual pages
    omit `requiresPermission` (open to every signed-in user).
-5. Production reads `manuals/` from the server cwd — `Dockerfile` already copies it. Do not remove
-   that `COPY` line.
+
+### Manual content rules
+
+- Write task-oriented, not feature-list-oriented: what the reader can do, where the screen is,
+  what they need before starting.
+- Start with one short intro paragraph. Do **not** add an H1 — `ManualArticle` renders the
+  registry title.
+- Use the exact UI labels for the current locale in **bold** (button, field, menu).
+- Procedures → numbered steps; rules/exceptions → bullets; fields/statuses/permissions → tables.
+- State the outcome, limits and failure cases: what happens after the action, what is reserved,
+  what is rejected.
+- Keep numbers, times, units and permission codes exact (e.g. `16:30`, `app_user_edit`).
+- When both locales exist, Thai and English must share the same heading structure; translate
+  meaning, not word-for-word.
+- Do not invent backend behavior. If a fact is unverified, mark it `NOT_VERIFIED` in the task and
+  leave it out of the manual.
+- Remove "coming soon" text when the feature ships.
+- `ManualIndex` searches `title` + `description` only, never the Markdown body — put the words
+  users will search for in the registry description.
+- One topic per screen/feature area; split it when it grows beyond a few screens.
+- Slugs are public URLs: keep them stable. Renaming a slug breaks existing links.
+
+### Manual done checklist
+
+- [ ] The registry entry in `MANUAL_SECTIONS` and `app/manual/<slug>.th.md` both exist; add
+      `<slug>.en.md` when a translation is available.
+- [ ] No H1; when both locales exist, their heading structure matches.
+- [ ] Description contains the terms users will search for.
+- [ ] `/manual` shows the card in the right section; `/manual/<slug>` renders in the current
+      locale (Thai fallback banner is expected when English is missing).
+- [ ] Unknown slug → 404; search and empty state work; 375 px and dark mode are readable.
+- [ ] The manual was updated in the same task as the user-visible feature change.
 
 ## i18n (how the files actually work)
 
@@ -138,8 +169,9 @@ already exist — adding a topic usually needs no new component.
 - Show user-supplied or untrusted text (user input, posts, comments, third-party content) with
   `<BaseContentText :content="…" urlify />` — never `v-html` directly. Use `rows` + `show-more` to
   truncate. For HTML sources, convert to plain text first (`hackerHtmlToText` in `app/utils/feedUtil.ts`).
-- Manual topics: slug matches `/^[a-z0-9-]{1,80}$/`; registry entry and `.md` file must exist as a
-  pair; render markdown only via `BaseMarkdownPreview` (with `:key`), never raw `v-html`.
+- Manual topics: slug matches `/^[a-z0-9-]{1,80}$/`; every `MANUAL_SECTIONS` entry needs its
+  `<slug>.th.md` file (and `<slug>.en.md` when translated), with no H1; render Markdown only via
+  `BaseMarkdownPreview` with `:key="content"`, never raw `v-html`.
 - Theme-aware classes (`bg-default`, `text-muted`, `border-default`) over hardcoded colors; check dark mode.
 - Keep the change minimal; check every caller before changing a shared component or composable
   (`grep -rn "<ComponentName\|useThing(" app`).
@@ -158,8 +190,12 @@ already exist — adding a topic usually needs no new component.
 | State leaks between users/tabs on SSR | Module-level `ref` used as global state | Use `useState('<domain>:<key>')` |
 | Links in user text are not clickable, or XSS risk from `v-html` | User text rendered with `{{ }}` / raw `v-html` | Render it with `<BaseContentText :content urlify />` |
 | Element hidden by `v-rbac` cannot be found later | `v-rbac` removes it from the DOM | Use `v-if` with `useRbac().hasPermission(...)` if you need to toggle |
-| Manual detail page is blank though the API returns content | `BaseMarkdownPreview` copies props once, so late-arriving content is ignored | Pass `:key="content"` so it remounts |
-| Manual 404 in production only | `manuals/` is missing from the runtime image | Keep the `COPY … /app/manuals` line in `Dockerfile` |
+| Manual detail page is blank though content exists | `BaseMarkdownPreview` copies props once, so late-arriving content is ignored | Pass `:key="content"` so it remounts (`ManualArticle.vue`) |
+| Manual topic card opens a 404 | Registry entry has no `<slug>.th.md` file | Add the Markdown file next to the registry entry (`app/manual/`) |
+| Manual page shows the title twice | The Markdown file still starts with `# Title` | Remove the H1; `ManualArticle` renders the registry title |
+| English manual shows Thai | No `<slug>.en.md`; the loader falls back to Thai | Add the translation, or accept the fallback banner |
+| Manual search misses a term | `ManualIndex` searches registry title/description only | Add the keyword to `description`, not only to the body |
+| Manual still says "coming soon" | A feature shipped without updating its topic | Update the topic in the same task; remove stale text |
 
 ## Done checklist
 
@@ -168,5 +204,6 @@ already exist — adding a topic usually needs no new component.
 - [ ] Protected pages declare `requiresPermission`; menu entries use the same codes.
 - [ ] No browser globals on the SSR path; no new `any` / `@ts-ignore`; IDs not coerced to `number`.
 - [ ] Loading, empty, and error states handled for any data the screen fetches.
+- [ ] If a user-visible screen changed, the matching manual topic is updated in `app/manual/` (see the manual recipe and its checklist).
 - [ ] The diff touches only files the task needs. Manual checks not performed are listed in the report.
 - [ ] For a numbered task, the task file was updated as described in `task-execution`.

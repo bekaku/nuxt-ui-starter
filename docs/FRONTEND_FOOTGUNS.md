@@ -32,6 +32,6 @@ Read this document when implementing or debugging behavior related to these know
 
 - `Temp.vue`, `pages/test/*`, `pages/example/*` are playground/demo — NEVER import from them into production paths.
 
-- `BaseMarkdownPreview` copies its `content` prop once on mount — async content arriving later renders blank unless the caller passes `:key="content"` to force a remount (`app/pages/manual/[slug].vue`).
+- `BaseMarkdownPreview` copies its `content` prop once on mount — async content arriving later renders blank unless the caller passes `:key="content"` to force a remount (`app/components/manual/ManualArticle.vue`).
 
-- `manuals/*.md` are read from disk at runtime — the `COPY … /app/manuals` line in `Dockerfile` is load-bearing; removing it causes production-only 404s on every manual detail page.
+- Manual content is bundled at build time by `import.meta.glob` (`app/manual/index.ts`) — a registry entry without its `.th.md` file opens a 404; add the registry row and the Markdown file together.
