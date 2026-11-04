@@ -10,8 +10,8 @@ Use when changing composable state, `UForm` / `BaseForm`, zod schemas, or DTOs. 
 
 ## Forms and validation
 
-- Per-page zod schemas validate client `UForm` state. `BaseForm` uses `:zod-schema` and `.describe(uiConfig(...))` for generated fields; inspect the existing field and slot contract before adding a control.
-- These schemas are not backend validation or a shared API contract. Do not infer required backend fields or status codes from them.
+- Prefer `<BaseForm :zod-schema="schema" v-model="state" @on-submit="onSubmit">` (`app/components/base/BaseForm.vue`) with per-field `.describe(uiConfig(...))` for input forms (both CRUD and non-CRUD screens; pass `:show-back="false"` and `by-pass-permission` when no CRUD route/permission applies). Use `#field-<name>` for a one-off custom control, or add a new `ui.type` to `LabelValue['ui']['type']` (`app/types/common.ts`) and `BaseForm.vue` when a reusable input control is needed. Fall back to raw `<UForm :schema="schema" :state="state">` only when `BaseForm` cannot fit the layout.
+- These schemas validate client form state only — they are not backend validation or a shared API contract. Do not infer required backend fields or status codes from them.
 - For a field or cross-field rule, follow the nearest production form. Add translated validation messages to both locales. Prefer a specific type or `unknown` over new `z.any()` / TypeScript `any`.
 
 ## DTO discipline

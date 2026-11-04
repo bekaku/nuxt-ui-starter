@@ -421,7 +421,7 @@ export interface LabelValue<Type> {
   value?: Type;
   additionalValue?: any;
   ui?: {
-    type?: 'text' | 'date' | 'date-range' | 'password' | 'email' | 'number' | 'number-step' | 'file' | 'search' | 'select' | 'textarea' | 'checkbox' | 'switch' | 'checkbox-group' | 'radio-group' | 'input-menu' | 'input-tags' | 'input-pin' | 'slider'
+    type?: 'text' | 'date' | 'date-range' | 'password' | 'email' | 'number' | 'number-step' | 'file' | 'search' | 'select' | 'textarea' | 'checkbox' | 'switch' | 'checkbox-group' | 'radio-group' | 'input-menu' | 'input-tags' | 'input-pin' | 'slider' | 'markdown'
     placeholder?: string
     variant?: "outline" | "soft" | "subtle" | "ghost" | "none" | 'list' | 'card' | 'table'
     required?: boolean;

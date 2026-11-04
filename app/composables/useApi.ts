@@ -1,4 +1,5 @@
-import type { AppException, RefreshTokenResponse, ResponseMessage } from '~/types/common'
+import type { AppException, AppNavigationMenuItem, RefreshTokenResponse, ResponseMessage } from '~/types/common'
+import type { AppUser, LinkedAccount } from '~/types/models'
 import type { FetchResponse } from 'ofetch';
 import { parse, parseSetCookie } from 'cookie-es';
 // let refreshPromise: Promise<RefreshTokenResponse> | null = null
@@ -35,10 +36,14 @@ import { parse, parseSetCookie } from 'cookie-es';
     }
 */
 export const useApi = () => {
-  const { apiBase, cdnBase, apiClient, isDevMode, isServer } = useConfiguration()
+  const { apiBase, cdnBase, apiClient, isDevMode, isServer, refreshJwtKeyName } = useConfiguration()
   const localeCookie = useCookie('locale');
   // const toast = import.meta.client ? useToast() : null;
   const nuxtApp = useNuxtApp();
+  const auth = useState<AppUser | null>('auth:user', () => null);
+  const appNavigations = useState<AppNavigationMenuItem[]>('auth:navigations', () => []);
+  const linkedAccounts = useState<LinkedAccount[]>('auth:linkedAccounts', () => []);
+  const linkedAccountsFetched = useState<boolean>('auth:linkedAccountsFetched', () => false);
 
 
   const requestHeaders = import.meta.server ? useRequestHeaders(['cookie']) : {};
@@ -51,8 +56,23 @@ export const useApi = () => {
     }
   }
 
+  const hasRefreshCookieOnServer = (): boolean => {
+    if (!import.meta.server) {
+      return true;
+    }
+    if (!requestHeaders.cookie) {
+      return false;
+    }
+    const parsedCookies = parse(requestHeaders.cookie as string);
+    return Boolean(refreshJwtKeyName && parsedCookies[refreshJwtKeyName as string]);
+  }
+
   const handleLogout = async () => {
     nuxtApp._refreshPromise = null;
+    auth.value = null;
+    appNavigations.value = [];
+    linkedAccounts.value = [];
+    linkedAccountsFetched.value = false;
     if (import.meta.client) {
       await navigateTo('/auth/login')
     }
@@ -142,6 +162,10 @@ export const useApi = () => {
       return (await callApi(options)) as any;
     } catch (error: any) {
       if (error.response?.status === 401) {
+        if (import.meta.server && !hasRefreshCookieOnServer()) {
+          await handleLogout();
+          return Promise.reject(error);
+        }
 
         // const currentToken = await getCurrentUserToken();
         // if (currentToken && currentToken.refreshToken) {

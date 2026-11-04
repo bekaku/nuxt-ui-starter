@@ -38,7 +38,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
         icon: 'lucide:rocket',
         title: { th: 'เริ่มต้นใช้งานหน้า admin', en: 'Getting started with admin' },
         description: {
-          th: 'เข้าสู่ระบบ สิงหาศผ่าน เมนูและการค้นหา เมนูโปรด การสลับบัญชี และการตั้งค่าส่วนตัว',
+          th: 'เข้าสู่ระบบ ลืมรหัสผ่าน เมนูและการค้นหา เมนูโปรด การสลับบัญชี และการตั้งค่าส่วนตัว',
           en: 'Sign in, navigation, search, favorites, account switching and personal settings'
         }
       },
@@ -71,7 +71,7 @@ export const MANUAL_SECTIONS: ManualSection[] = [
         icon: 'lucide:server',
         title: { th: 'คู่มือเชื่อมต่อสำหรับ VM ของวิทยาลัย', en: 'VM integration guide for colleges' },
         description: {
-          th: 'สำหรับนักพัฒนาฝั่ง VM: ยืนยันตัวตน ส่งเอกสาร ชิงก้ออาจารย์ที่ปรึกษา และเรียกแชท บทวิเคราะห์ ผลทำนายแทนผู้ใช้',
+          th: 'สำหรับนักพัฒนาฝั่ง VM: ยืนยันตัวตน ส่งเอกสาร ซิงก์อาจารย์ที่ปรึกษา และเรียกแชท บทวิเคราะห์ ผลทำนายแทนผู้ใช้',
           en: 'For VM developers: identity, documents, advisor data and per-user analysis calls'
         }
       },

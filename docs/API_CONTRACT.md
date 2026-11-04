@@ -26,6 +26,8 @@ This is reference documentation, not a global coding skill. Read it only when en
 
   - `POST /api/auth/switchAccount/{targetUserId}` and `POST /api/auth/removeLinkAccount/{targetUserId}` with no body; callers check response status, including successful empty bodies (`app/api/useAuthApi.ts`, `useAuth.ts`)
 
+  - `POST /api/auth/requestVerifyCodeToResetPwd` `{ email }` → `ResponseMessage`; `POST /api/auth/sendVerifyCodeToResetPwd` `{ email, token }` → `void`; `POST /api/auth/resetPassword` `{ email, token, newPassword }` → `ResponseMessage` (`app/pages/auth/forgot-password.vue:36,81,171`)
+
   - `GET <dynamic pageParam>` (`usePagefecth.ts:70`, `useCrudList.ts`) with query `?page,size,sort,search…` built from `SearchOperation` constants → `ApiResponse<T> | T[]` (dual-shape!)
 
   - `GET <fetchDataLink>` / `POST|PUT <endpoint>` with `body: data` / `DELETE <endpoint>[/id]` (`useCrudForm.ts:77,176,231`, `useCrudList.ts:186`)
@@ -33,6 +35,10 @@ This is reference documentation, not a global coding skill. Read it only when en
   - `GET /api/permission/findAllPermission` → `Permission[]` bare array (`app-role/[crud]/[id].vue:80`)
 
   - `GET /api/appRole/findAll` → `AppRole[]` bare array (`app-user/[crud]/[id].vue:160`)
+
+  - `POST /api/apiClient/generate/{id}` with no body → `string` via `api.raw<string>` (`api-client/[crud]/[id].vue:190`)
+
+  - `POST /api/aiDocumentMeta/ingest/{fileId}` → `IngestionResponse`; `POST /api/aiDocumentMeta/ingestDatabaseSchemas` → `void` (`ai-document-meta/[crud]/[id].vue:90`, `ai-document-meta/index.vue:170`)
 
   - `POST|DELETE /api/favoriteMenu` (`app/api/useFavoriteMenuApi.ts:7,13`)
 
@@ -42,7 +48,7 @@ This is reference documentation, not a global coding skill. Read it only when en
 
   - `GET <downloadUrl>` with `{ baseURL: cdnBase, responseType: 'stream', query: { chunkSize } }` (`useDownload.ts:140`)
 
-  - `POST /api/aiChat/stream` `{ message, conversationId, filterNames }` with `{ responseType: 'stream', headers: { Accept: 'text/event-stream' }, signal }` (`useAiChat.ts:216`)
+  - `POST /api/aiChat/stream` `{ message, conversationId, filterNames }` with `{ responseType: 'stream', headers: { Accept: 'text/event-stream' }, signal }` (`useAiChat.ts:216`); `GET /api/aiChat/history` (`layouts/ai.vue:16`, `ai-chats/recent.vue:19`); `GET api/aiChat/messages/{conversationId}?page&sort=id,desc&size` (note: no leading `/` in `useAiChat.ts:61,131`) → `ApiResponse<AiChatMessage>`; `PUT /api/aiChat/{id}` with `AiChat` body and `DELETE /api/aiChat/{id}` (`useAiChat.ts:391,407`)
 
   - `POST /api/auth/refreshToken` via `api.raw` in `pages/test/index.vue:13` is a DEBUG page — MUST NOT copy into production code.
 

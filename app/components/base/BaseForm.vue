@@ -228,6 +228,8 @@ const autoFields = computed(() => {
         componentType = "slider";
       } else if (specifiedType === "file") {
         componentType = "file";
+      } else if (specifiedType === "markdown") {
+        componentType = "markdown";
       }
     } else {
       if (typeName === "ZodNumber" || typeName === "number") {
@@ -457,6 +459,9 @@ const onDelete = async (event: any) => {
                     v-model="state[field.name]"
                     :icon="field.icon || undefined"
                     :placeholder="field.ui?.placeholder"
+                    :progress="typeof field.ui?.progress === 'boolean' ? field.ui.progress : true"
+                    :size="field.ui?.size"
+                    :variant="field.ui?.variant as any"
                   />
                 </template>
                 <template v-if="field.componentType === 'number-step'">
@@ -682,6 +687,14 @@ const onDelete = async (event: any) => {
                     :class="[field.ui?.class || '']"
                   >
                   </LazyBaseFileUpload>
+                </template>
+                <template v-else-if="field.componentType === 'markdown'">
+                  <LazyBaseMarkdownEditor
+                    v-model="state[field.name]"
+                    :editor-id="`md-${field.name}`"
+                    :disabled="field.disable || loading"
+                    :read-only="field.ui?.readonly"
+                  />
                 </template>
               </UFormField>
             </slot>

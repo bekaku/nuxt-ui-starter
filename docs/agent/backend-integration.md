@@ -41,15 +41,24 @@
 | `POST /api/auth/linkAccount` | `LoginRequest` | `RefreshTokenResponse` (frontend type) | cookie | `app/api/useAuthApi.ts` |
 | `POST /api/auth/switchAccount/{targetUserId}` | — | status 200, body may be empty | cookie | `app/api/useAuthApi.ts` |
 | `POST /api/auth/removeLinkAccount/{targetUserId}` | — | status 200, empty body expected by caller | cookie | `app/api/useAuthApi.ts` |
+| `POST /api/auth/requestVerifyCodeToResetPwd` | `{ email }` | `ResponseMessage` | public | `auth/forgot-password.vue:36` |
+| `POST /api/auth/sendVerifyCodeToResetPwd` | `{ email, token }` | `void` | public | `auth/forgot-password.vue:81` |
+| `POST /api/auth/resetPassword` | `{ email, token, newPassword }` | `ResponseMessage` | public | `auth/forgot-password.vue:171` |
 | `GET <dynamic pageParam>` (`usePagefecth`) | `?page,size,sort,_q,_keyword` | `ApiResponse<T> \| T[]` (dual!) | cookie | `usePagefecth.ts:70` |
 | `GET <fetchDataLink>` / `POST\|PUT <endpoint>` / `DELETE <endpoint>[/id]` | `body: data` | per entity | cookie | `useCrudForm.ts`, `useCrudList.ts` |
 | `GET /api/permission/findAllPermission` | — | `Permission[]` (bare array) | cookie | `app-role/[crud]/[id].vue` |
 | `GET /api/appRole/findAll` | — | `AppRole[]` (bare array) | cookie | `app-user/[crud]/[id].vue` |
+| `POST /api/apiClient/generate/{id}` | — | `string` (`api.raw<string>`) | cookie | `api-client/[crud]/[id].vue:190` |
+| `POST /api/aiDocumentMeta/ingest/{fileId}` | — | `IngestionResponse` | cookie | `ai-document-meta/[crud]/[id].vue:90` |
+| `POST /api/aiDocumentMeta/ingestDatabaseSchemas` | — | `void` | cookie | `ai-document-meta/index.vue:170` |
 | `POST\|DELETE /api/favoriteMenu` | — | ? (`UNKNOWN`) | cookie | `app/api/useFavoriteMenuApi.ts` |
 | `POST /api/appUser/updateProfile`, `POST /api/appUser/selfUpdatePassword` | form data | ? (`UNKNOWN`) | cookie | `settings/*` |
 | `POST /api/fileManager/uploadChunkApi` + `POST /api/fileManager/mergeChunkApi` (leading `/` included — copy verbatim) | `FormData` chunks | `FileUploadChunkResponse \| FileManager \| void` | cookie | `useUpload.ts` |
 | `GET <downloadUrl>` (`baseURL: cdnBase`, `responseType: 'stream'`) | `?chunkSize` | stream | cookie | `useDownload.ts:140` |
 | `POST /api/aiChat/stream` (`Accept: text/event-stream`, `signal`) | `{ message, conversationId, filterNames }` | `ReadableStream`/SSE | cookie | `useAiChat.ts:216` |
+| `GET /api/aiChat/history` | `?page,size,sort,_q,_keyword` | `ApiResponse<AiChat> \| AiChat[]` | cookie | `layouts/ai.vue:16`, `ai-chats/recent.vue:19` |
+| `GET api/aiChat/messages/{conversationId}` (no leading `/`) | `?page,sort=id,desc,size` | `ApiResponse<AiChatMessage>` | cookie | `useAiChat.ts:61,131` |
+| `PUT /api/aiChat/{id}`, `DELETE /api/aiChat/{id}` | `AiChat` (PUT) / — (DELETE) | `void` | cookie | `useAiChat.ts:391,407` |
 
 No OpenAPI/generated client was found in this workspace. Types in `app/types/` are hand-maintained frontend expectations, not a verified backend contract.
 

@@ -28,7 +28,7 @@ Evidence labels:
 | UI | Nuxt UI `^4.11.0` + Tailwind CSS `^4.3.3` |
 | Language | Vue `^3.5.42` Composition API, `<script setup lang="ts">`, TypeScript `~6.0.3` |
 | API | External Spring Boot REST API via `useApi()` (`app/composables/useApi.ts`); `server/api/` holds Nitro mocks and the OG scraper (`meta.ts`) |
-| Validation | Zod `^4.5.4` (per-page client `UForm` validation only) |
+| Validation | Zod `^4.5.4` (per-page client `BaseForm` / `UForm` validation only) |
 | Auth | Cookie JWT (`_session_` / `_slid_`, HttpOnly), `useAuth` + global route guards + `v-rbac` (presentation only) |
 | i18n | `@nuxtjs/i18n ^10.6.0`, locales `th` (default) / `en`, `no_prefix` strategy |
 | Realtime | SSE over `POST /api/aiChat/stream` (`useAiChat.ts`, RAG test harness — not product UI) |
@@ -91,6 +91,13 @@ Evidence labels:
 - Check `app/components/base/Base*.vue` before using a raw Nuxt UI (`U*`)
   component or hand-rolled markup — if a wrapper fits, use it; fall back to a
   raw `U*` component only when no `Base*` covers the case.
+- Input forms: use `<BaseForm :zod-schema="schema" v-model="state" @on-submit="onSubmit">`
+  (`app/components/base/BaseForm.vue`) with a Zod schema and `.describe(uiConfig(...))`
+  whenever possible (both CRUD and non-CRUD screens). Use `#field-<name>` slots for
+  one-off custom fields, or add a new `ui.type` to `LabelValue['ui']['type']`
+  (`app/types/common.ts`) and `BaseForm.vue` when a reusable input type is needed;
+  fall back to raw `<UForm :schema="schema" :state="state">` only when `BaseForm`
+  cannot fit the layout.
 - Shared client state via namespaced `useState` (never Pinia, never
   `provide`/`inject` for app state). Two-way binding via `defineModel`.
 - Protected requests go through `useApi()` (silent refresh, SSR cookie forward);

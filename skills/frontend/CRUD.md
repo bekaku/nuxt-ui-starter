@@ -468,7 +468,13 @@ Emits (`:63-75`): `on-page-no-change`, `on-items-perpage-change`, `on-sort`,
 (`BaseTable.vue:400-407`), and the confirm dialog is already shown before it fires
 (`:408-429`).
 
-Slot passthrough (`:833-839`) forwards **every** parent slot into `UTable`, so
+Own slots (`BaseTable.vue:530-865`): `#header` (card header), `#table-header` (wraps
+`#table-header-start` and `#table-header-end`), `#table-header-end-prepend` /
+`#table-header-end-append` (around the built-in toolbar buttons — e.g.
+`ai-document-meta/index.vue:217`), `#search-inner-top` / `#search-inner` /
+`#search-inner-bottom`, `#search-actions-start` / `#search-actions-end`, and `#paging`.
+
+Slot passthrough (`:836-842`) forwards **every** parent slot into `UTable`, so
 `#<accessorKey>-cell`, `#<accessorKey>-header`, `#actions-cell` and `#expanded` all work
 from the page (`ai-document-meta/index.vue:225-232` overrides `#actions-cell`). Because
 the loop iterates all `$slots`, a page slot named `header` also reaches `UTable`.
@@ -502,11 +508,12 @@ JSON. Top-level keys consumed (`:273-290`): `label`, `description` (→ `UFormFi
 `children` (options for select/checkbox-group/radio-group/input-menu), `onHandle`, and the
 nested `ui` object.
 
-`ui.type` values (`:196-229`): `text` `email` `number` `search` `date` `date-range`
+`ui.type` values (`:196-233`): `text` `email` `number` `search` `date` `date-range`
 `password` `textarea` `select` `checkbox` `switch` `checkbox-group` `radio-group`
-`input-menu` `number-step` `input-tags` `input-pin` `slider` `file`. With no `ui.type` the
-type is inferred from the zod type (`:230-243`): number → number input, boolean →
-checkbox, enum → select.
+`input-menu` `number-step` `input-tags` `input-pin` `slider` `file` `markdown` (extend
+`LabelValue['ui']['type']` in `app/types/common.ts` + `BaseForm.vue` if a new reusable input
+type is needed). With no `ui.type` the type is inferred from the zod type (`:234-247`):
+number → number input, boolean → checkbox, enum → select.
 
 Other `ui.*` keys read: `required` (drives `UFormField :required`, `:374`), `placeholder`,
 `variant`, `size`, `class`, `maxlength` (renders a live counter, `:408-418`), `clearable`

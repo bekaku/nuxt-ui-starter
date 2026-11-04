@@ -36,6 +36,9 @@ export const useAuth = () => {
 
   const clearAuth = () => {
     auth.value = null
+    appNavigations.value = []
+    linkedAccounts.value = []
+    linkedAccountsFetched.value = false
   }
 
   const setAppNavigations = (items: AppNavigationMenuItem[]) => {

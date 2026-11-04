@@ -31,7 +31,8 @@ you add or change a backend call. Skip this skill for docs-only work.
 
 | You are adding… | Put it in | Copy the pattern from |
 |---|---|---|
-| A route | `app/pages/<kebab-case>/index.vue` (or `<name>.vue`) | `app/pages/settings/index.vue` (form page), `app/pages/index.vue` |
+| A route | `app/pages/<kebab-case>/index.vue` (or `<name>.vue`) | `app/pages/index.vue`, `app/pages/settings/index.vue` |
+| An input form | `<BaseForm :zod-schema="schema" v-model="state" @on-submit="onSubmit">` + `.describe(uiConfig(...))` (extend `LabelValue['ui']['type']` in `app/types/common.ts` + `BaseForm.vue` if a reusable input type is missing) | `app/pages/permission/[crud]/[id].vue`, `app/pages/example/form.vue` |
 | A reusable component | `app/components/<domain>/<Domain><Name>.vue` → used as `<DomainName>` | `app/components/base/Base*.vue`, `user/UserCard.vue` |
 | A browser-only component | `<Name>.client.vue` (optionally a `<Name>.server.vue` placeholder) | `app/components/chart/ChartArea.client.vue` + `.server.vue` |
 | Stateful or reusable logic | `app/composables/use<Name>.ts` exporting `export const use<Name> = () => {…}` | `useLang.ts`, `useAppChat.ts` |
@@ -73,8 +74,13 @@ login screens; `ai`, `chat`, `feed`, `empty` exist in `app/layouts/`).
 3. Data: call the backend with `useApi()` directly (no `app/api/` file needed), or reuse an existing `app/api/` helper. Use
    `await useAsyncData('<unique-key>', () => api<T>('/api/...'))` when the data should load during SSR;
    otherwise load in an action handler and keep `loading` / error state locally.
-4. Forms: `<UForm :schema="schema" :state="state" @submit="onSubmit">` with a zod schema; messages
-   via `t('error.…')` (see `app/pages/settings/index.vue`). Both `:schema` and `:state` are required.
+4. Forms: use `<BaseForm :zod-schema="schema" v-model="state" @on-submit="onSubmit">` with a zod
+   schema whose fields use `.describe(uiConfig({ label: t('…'), ui: { type: 'text' | 'select' | …, required: true } }))`
+   whenever possible (see `app/pages/permission/[crud]/[id].vue` and `app/pages/example/form.vue`;
+   pass `:show-back="false"` and `by-pass-permission` on standalone non-CRUD forms, use `#field-<name>`
+   for a one-off custom control, or add a new `ui.type` in `app/types/common.ts` + `BaseForm.vue` if
+   needed). Fall back to raw `<UForm :schema="schema" :state="state" @submit="onSubmit">` only when
+   `BaseForm` cannot fit the layout (both `:schema` and `:state` are required).
 
 Every authenticated route is protected by `01.auth.global.ts` automatically. To make a page public,
 its route name must be in `AuthNoFilterPage` (`app/libs/constants.ts`) — ask before adding one.
@@ -152,6 +158,10 @@ usually needs no new component.
 
 - SFC order: `<script setup lang="ts">` then `<template>`. No Options API. Generic components use `generic="T"`.
 - Components: check `app/components/base/Base*.vue` first — if a wrapper fits, use it before any raw `U*` component.
+- Input forms: prefer `<BaseForm :zod-schema="schema" v-model="state" @on-submit="onSubmit">` with a zod
+  schema and `.describe(uiConfig(...))` over hand-rolled `<UForm>` + `<UFormField>`. If a reusable input
+  type is missing, add it to `LabelValue['ui']['type']` (`app/types/common.ts`) and `BaseForm.vue`; use
+  `#field-<name>` for one-off fields, and raw `<UForm>` only when `BaseForm` does not fit the layout.
 - Lists with paging / search / filter / sort: use `usePagefecth` (`app/composables/usePagefecth.ts`) directly
   when the screen is not an entity CRUD page (`useCrudList` wraps it for those). Do not hand-roll paging/sort state;
   keep its dual-shape handling (`ApiResponse<T>` or bare `T[]`).
@@ -181,7 +191,7 @@ usually needs no new component.
 | Symptom | Cause | Fix |
 |---|---|---|
 | `window is not defined` / hydration mismatch | Browser API during SSR | Move into `onMounted` / `import.meta.client` / `.client.vue` |
-| Raw `U*` component used where a `Base*` wrapper exists | `app/components/base/` not checked first | Check `Base*.vue` and compose with the wrapper |
+| Raw `U*` component or hand-rolled `<UForm>` used where a `Base*` wrapper fits | `app/components/base/` not checked first | Use `<BaseForm :zod-schema="schema" v-model="state">` with `uiConfig(...)` (add a new `ui.type` if needed) or the matching `Base*.vue` wrapper |
 | List page hand-rolls paging/sort/filter state | `usePagefecth` not known/used | Use `usePagefecth` (non-CRUD) or `useCrudList` + `BaseTable` (entity list) |
 | Label shows the raw key (`model.foo.name`) | Key missing in one locale or put in the wrong family file | Add to both locales under the right top-level family |
 | Page opens for everyone | `requiresPermission` missing or `[]` (empty = allow) | Set explicit codes |
