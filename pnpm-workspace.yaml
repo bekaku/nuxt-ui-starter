@@ -4,6 +4,7 @@ allowBuilds:
   core-js: true
   esbuild: false
   maplibre-gl: false
+  plyr: false
   sharp: false
   unrs-resolver: false
   vue-demi: false

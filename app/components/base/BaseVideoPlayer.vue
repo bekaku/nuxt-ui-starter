@@ -53,7 +53,7 @@ const {
 const { $plyr } = useNuxtApp();
 const Plyr = $plyr;
 const videoRef = useTemplateRef<HTMLVideoElement | null>("videoRef");
-const plyrInstance = ref<Plyr | null>(null);
+const plyrInstance = ref<InstanceType<typeof Plyr> | null>(null);
 const sourceRef = useTemplateRef<HTMLSourceElement | null>("sourceRef");
 let observer: IntersectionObserver | null = null;
 // const { downloadFile } = useFileDownload()
